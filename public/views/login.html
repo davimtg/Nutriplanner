@@ -34,7 +34,7 @@
         <input type="text" id="" class="login-input" placeholder="E-mail">
         <input type="password" id="" class="login-input" placeholder="Senha">
         <a class="login-reset-password" href="#">Esqueci minha senha</a>
-        <button class="login-submit">Entrar</button>
+        <button class="login-submit" onclick="entrar()">Entrar</button>
       </div>
       <div class="login-register">
         <p class="login-register__text">Não tem uma conta? <a href="register.html">Registre-se.</a></p>
@@ -42,6 +42,10 @@
     </div>
     
     <!-- Scripts -->
-    
+    <script>
+      function entrar() {
+        window.location.href = "cliente-dashboard.html"
+      }
+    </script>
   </body>
 </html>
