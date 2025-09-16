@@ -58,7 +58,7 @@
                     Compras
                 </div>
                 <div class="header-item" onclick="to('nutricionista.html')">
-                    nutricionista
+                    Nutricionista
                 </div>
                 <div class="header-item" onclick="to('cliente-perfil.html')">
                     Perfil
@@ -100,11 +100,11 @@
         </nav>
 
 
-  <div class="container text-center mt-5">
-    <h1 style="color: #000000; font-size: 24px; font-weight: bold; font-family: 'Poppins Medium'">Biblioteca de Receitas</h1>
+  <div class="container text-center mt-5" style="max-width: 955px;">
+    <h1 style="color: #000000; font-size: 24px; font-weight: bold; font-family: 'Poppins Medium'; margin-bottom: 10px;">Biblioteca de Receitas</h1>
     
 
-    <div class="d-flex justify-content-center mb-3" style="max-width: 500px; margin: 0 auto;">
+    <div class="d-flex justify-content-center mb-3" style="margin: 0 auto;">
   <!-- Campo de pesquisa -->
   <input class="form-control me-2" id="searchInput" type="text" placeholder="Pesquisar receita...">
 
@@ -112,8 +112,8 @@
   <a href="adicionar-receita.html" class="btn btn-success">Adicionar Receita</a>
 </div>
 
-    <div class="d-flex justify-content-center">
-      <div class="list-group" id="recipeList" style="width: 100%; max-width: 400px;">
+    <div class="d-flex justify-content-center" style="width:100%; position: relative; z-index: -1;">
+      <div class="list-group" id="recipeList" style="width: 100%;">
         <a href="receita1.html" class="list-group-item list-group-item-action d-flex align-items-center px-1">
           <img src="https://www.receiteria.com.br/wp-content/uploads/bolo-de-chocolate.jpg" 
                alt="Bolo de Chocolate" 
