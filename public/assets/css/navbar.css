@@ -1,0 +1,65 @@
+body {
+  font-family: Poppins, Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #FFFFFF; /* fundo branco limpo */
+  color: #1F2937;           /* texto base em cinza escuro */
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  display: inline-block;
+}
+
+li a {
+  text-decoration: none;
+  color: #355E3B;            /* verde mais fechado para contraste */
+  padding: 10px 15px;
+  display: block;
+  font-weight: 500;
+  border-radius: 6px;        /* leve arredondamento para o hover ficar bonito */
+  transition: all 0.3s ease; /* animação suave no hover */
+}
+
+li a:hover {
+  background: linear-gradient(to right, #B6D8A2, #D8E576); /* cores da logo */
+  color: #FFFFFF;  /* texto branco no hover */
+}
+
+nav {
+  background-color: #F5F5F5; /* cinza claro neutro */
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between; /* logo à esquerda, menu à direita */
+  align-items: center;
+  max-width: 1200px;
+  width: 90%;
+  margin: 20px auto;
+  padding: 10px 3%;
+  border-radius: 10px;
+}
+
+/* Logo na navbar */
+nav img {
+  height: 40px;
+  width: auto;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+  }
+
+  li {
+    display: block; /* itens um embaixo do outro no mobile */
+    text-align: center;
+  }
+}
