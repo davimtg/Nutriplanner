@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dashboard Nutricionista</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=search" />
+    <style>
+    /* Transição suave para os itens */
+    #Lista-Pacientes li {
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    /* Classe para esconder suavemente */
+    .hidden {
+      opacity: 0;
+      max-height: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      margin: 0;
+    }
+  </style>
+
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h1>NutriPlanner</h1>
+        </div>
+        <ul class="nav-links-desktop">
+            <li><a href="dashboard_nutricionista.html">Dashboard</a></li>
+            <li><a href="receitas.html">Receitas</a></li>
+            <li><a href="perfil.html">Perfil</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class = "container-lista">
+            <div class="header">
+                <h2>Lista de Pacientes</h2>
+                <form>
+                    <div class="search">
+                        <span class="search-icon material-symbols-outlined">search</span>
+                        <input class="search-input" id="searchInput" type="search" placeholder="Buscar paciente...">
+                    </div>
+                </form>
+            </div>   
+            <ul class="Lista" id="Lista-Pacientes">
+                <li>
+                    <div class="Paciente">
+                        <span>João Silva</span>
+                        <div class="botoes-pacientes">
+                            <button>Exportar relatório</button>
+                            <button>Chat</button>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="Paciente">
+                        <span>Maria Eduarda</span>
+                        <div class="botoes-pacientes">
+                            <button>Exportar relatório</button>
+                            <button>Chat</button>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="Paciente">
+                        <span>Cleusa Maria</span>
+                        <div class="botoes-pacientes">
+                            <button>Exportar relatório</button>
+                            <button>Chat</button>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class = "container-lista">
+            <div class="header">
+                <h2>Planos Alimentares</h2>
+                <div class="header-control-planos">
+                    <button>Criar Plano</button>
+                    <form>
+                        <div class="search">
+                            <span class="search-icon material-symbols-outlined">search</span>
+                            <input class="search-input" id="searchInput1" type="search" placeholder="Buscar plano...">
+                        </div>
+                    </form>
+                </div>
+            </div>   
+            <ul class="Lista" id="Lista-Planos">
+                <li>
+                    <div class="Plano">
+                        <span id="plano-name">PLANO A</span>
+                        <button>Visualizar</button> 
+                    </div>
+                </li>
+                <li>
+                    <div class="Plano">
+                        <span>PLANO B</span>
+                        <button>Visualizar</button> 
+                    </div>
+                </li>
+                <li>
+                    <div class="Plano">
+                        <span>BANANA C</span>
+                        <button>Visualizar</button> 
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <script>
+    // Função reutilizável para configurar um filtro de busca
+    function setupSearchFilter(inputId, listId, itemSelector) {
+        const searchInput = document.getElementById(inputId);
+        const listItems = document.querySelectorAll(`${listId} li`);
+
+        if (!searchInput) {
+            console.error(`Elemento de busca não encontrado com o ID: ${inputId}`);
+            return;
+        }
+
+        searchInput.addEventListener('input', function() {
+            const filter = searchInput.value.toLowerCase().trim();
+
+            listItems.forEach(item => {
+                const span = item.querySelector(itemSelector);
+                if (span) {
+                    const text = span.textContent.toLowerCase().trim();
+                    // .includes() é uma forma mais moderna e legível
+                    if (text.includes(filter)) {
+                        item.classList.remove('hidden');
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                }
+            });
+        });
+    }
+
+    // Configura o filtro para a lista de pacientes
+    setupSearchFilter('searchInput', '#Lista-Pacientes', '.Paciente span');
+
+    // Configura o filtro para a lista de planos alimentares
+    setupSearchFilter('searchInput1', '#Lista-Planos', '.Plano span');
+</script>
+</body>
+
+</html>
