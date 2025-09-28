@@ -1,5 +1,7 @@
 import { useState } from "react";
 import styles from "./Header.module.css";
+import iconDesktop from "../../assets/img/logotipo/icon/nutriplanner-gradient.svg";
+import icon from "../../assets/img/logotipo/solid/nutriplanner-horizontal-colorido.svg";
 
 
 export default function Header() {
@@ -16,8 +18,15 @@ export default function Header() {
   return (
     <>
       <header className={styles.header}>
-        <div className={styles["header-logo"]}>
-        </div>
+        <picture className={styles["header-logo__container"]}>
+          <source media="(min-width: 887px)" srcSet={iconDesktop} />
+          <img
+            className={styles["header-logo"]}
+            src={icon}
+            alt="Logo Nutriplanner"
+          />
+        </picture>
+
 
         <div className={styles["header-toggle-nav"]} onClick={toggle}>
           <svg

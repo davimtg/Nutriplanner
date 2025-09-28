@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Registrar.module.css";
+import icon from "../../assets/img/logotipo/icon/nutriplanner-gradient.svg";
 
 export default function Login() {
   const [userType, setUserType] = useState("cliente");
@@ -15,7 +16,7 @@ export default function Login() {
       <div className={styles["login-header"]}>
         <img
           className={styles["login-logo"]}
-          src="/assets/images/logo/logo.jpg"
+          src={icon}
           alt="Logo Nutriplanner"
         />
         <h1 className={styles["login-title"]}>Registre-se em Nutriplanner</h1>

@@ -12,12 +12,16 @@
     border-bottom: 1px solid #e9e9e9;
 }
 
-.header-logo {
+.header-logo__container {
     height: 100%;
+}
+
+.header-logo {
+    height: 90%;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left: 10px;
+    margin: 0 15px;
 }
 
 .header-logo-img {
@@ -111,6 +115,7 @@
 
 .nav-item__text {
     font-family: "Poppins Medium", Arial, Helvetica, sans-serif;
+    margin: 0;
 }
 
 

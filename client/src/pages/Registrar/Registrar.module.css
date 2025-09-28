@@ -33,6 +33,7 @@
     font-size: 15px;
     font-family: "Poppins Medium", Arial, Helvetica, sans-serif;
     color: rgb(145, 145, 145);
+    margin: 0;
 }
 
 /* Login Multi-Enter */
@@ -69,6 +70,7 @@
     font-size: 12px;
     font-family: "Poppins Bold", Arial, Helvetica, sans-serif;
     color: rgb(69, 69, 69);
+    margin: 0;
 }
 
 .login-multi__button.selected {
