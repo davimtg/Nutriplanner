@@ -39,3 +39,4 @@ maiuscula, camelCase) e crie o css (Nome.module.css). Para adicionar uma nova p�
 - Nomeie arquivos estáticos globais com kebab-case.
 - Como temos 4 Tipos (cliente, mediador, nutricionista e admin), nomeie as páginas as variaveis
 e pastas com `clienteDashboard.js`, `mediadorDashboard.js`, para entedermos para quem é cada página.
+- Para a url, o ideal é que se `url/cliente-dashboard`, `url/mediador-dashboard`.
