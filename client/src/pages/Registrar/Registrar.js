@@ -8,7 +8,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   function entrar() {
-    navigate("/cliente-dashboard");
+    navigate("/login");
   }
 
   return (
@@ -27,7 +27,7 @@ export default function Login() {
       </div>
 
       <div className={styles["login-multi"]}>
-        {["cliente", "nutricionista", "comprador"].map((type, idx, arr) => (
+        {["cliente", "nutricionista", "mediador"].map((type, idx, arr) => (
           <div
             key={type}
             className={`
