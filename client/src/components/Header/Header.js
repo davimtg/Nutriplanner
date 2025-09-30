@@ -66,7 +66,7 @@ export default function Header() {
           <div className={styles["header-item"]} onClick={() => goTo("nutricionista")}>
             Nutricionista
           </div>
-          <div className={styles["header-item"]} onClick={() => goTo("cliente-perfil")}>
+          <div className={styles["header-item"]} onClick={() => goTo("perfil")}>
             Perfil
           </div>
         </div>
