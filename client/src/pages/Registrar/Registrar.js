@@ -47,7 +47,6 @@ export default function Registrar(props) {
           </h2>
         </Col>
       </Row>
-
       <Row className="justify-content-center mb-4">
         <ButtonGroup>
           {[

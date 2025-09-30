@@ -5,6 +5,7 @@ import Login from "./pages/Login/Login";
 import Registrar from "./pages/Registrar/Registrar";
 import DashboardNutricionista from "./pages/DashboardNutricionista/DashboardNutricionista";
 import Perfil from "./pages/Perfil/Perfil";
+import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
 
 function AppContext() {
   const location = useLocation();
@@ -82,9 +83,13 @@ function AppContext() {
           element={<Perfil userData={userData} setUserData={setUserData} />}
         />
         <Route
-          path="/dashboardNutricionista"
+          path="/nutricionista-dashboard"
           element={<DashboardNutricionista planos={planos} pacientes={pacientes} />}
         />
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/registrar" element={<Registrar />} />
+        <Route path="/cliente-dashboard" element={<ClienteDashboard />} />
       </Routes>
     </>
   );
