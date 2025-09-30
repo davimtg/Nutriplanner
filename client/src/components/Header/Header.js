@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./Header.module.css";
 import iconDesktop from "../../assets/img/logotipo/icon/nutriplanner-gradient.svg";
 import icon from "../../assets/img/logotipo/solid/nutriplanner-horizontal-colorido.svg";
@@ -6,6 +7,7 @@ import icon from "../../assets/img/logotipo/solid/nutriplanner-horizontal-colori
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   function toggle() {
     setMenuOpen(!menuOpen);
@@ -24,6 +26,7 @@ export default function Header() {
             className={styles["header-logo"]}
             src={icon}
             alt="Logo Nutriplanner"
+            onClick={() => navigate("/")}
           />
         </picture>
 
