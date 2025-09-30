@@ -1,6 +1,6 @@
 html, body {
-    width: 100dvw;
-    height: 100dvh;
+    min-width: 100dvw;
+    min-height: 100dvh;
 }
 
 :root {
