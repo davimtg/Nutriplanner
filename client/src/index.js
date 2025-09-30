@@ -5,7 +5,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import "./assets/css/fonts.css";
 import "./assets/css/common.css";
 
-
 const root = ReactDOM.createRoot(document.querySelector('body'));
 root.render(
   <React.StrictMode>

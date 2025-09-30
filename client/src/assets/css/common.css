@@ -2,3 +2,14 @@ html, body {
     width: 100dvw;
     height: 100dvh;
 }
+
+:root {
+  --cor-principal: #B6D8A2;
+  --cor-secundaria: #D8E576;
+  --cor-apoio-1: #355E3B;
+  --cor-apoio-2: #FFD966;
+  --cor-neutro-1: #F5F5F5;
+  --cor-neutro-2: #666666;
+  --cor-texto: #222222;
+  --cor-foco-outline: #b6d8a252;
+}
