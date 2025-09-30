@@ -7,6 +7,7 @@ import DashboardNutricionista from "./pages/DashboardNutricionista/DashboardNutr
 import Perfil from "./pages/Perfil/Perfil";
 import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
 import Compras from "./pages/Compras/Compras";
+import Chat from "./components/Chat/Chat"
 
 function AppContext() {
   const location = useLocation();
@@ -59,6 +60,7 @@ function AppContext() {
 
   return (
     <>
+      {showHeader && <Chat userData={userData} setUserData={setUserData}/>}
       {showHeader && <Header />}
 
       <Routes>
