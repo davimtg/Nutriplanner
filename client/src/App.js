@@ -6,6 +6,7 @@ import Registrar from "./pages/Registrar/Registrar";
 import DashboardNutricionista from "./pages/DashboardNutricionista/DashboardNutricionista";
 import Perfil from "./pages/Perfil/Perfil";
 import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
+import Compras from "./pages/Compras/Compras";
 
 function AppContext() {
   const location = useLocation();
@@ -90,6 +91,7 @@ function AppContext() {
         <Route path="/login" element={<Login />} />
         <Route path="/registrar" element={<Registrar />} />
         <Route path="/cliente-dashboard" element={<ClienteDashboard />} />
+        <Route path="/compras" element={<Compras />} />
       </Routes>
     </>
   );
