@@ -12,14 +12,32 @@
 	justify-content: center;
 	box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 	font-size: 28px;
-	background-color: #0d6efd;
-	color: #fff;
+	background-color: #b6d8a2b6;
+	color: var(--cor-neutro-1);
 	border: none;
 	padding: 0;
+}
+.floatingBtn:hover{
+	background-color: #a6d48b;
 }
 
 .floatingIcon {
 	width: 32px;
 	height: 32px;
 	object-fit: contain;
+}
+
+.chatCard {
+	color: var(--cor-apoio2);
+	transition: transform 0.8s ease, color 0.8s;
+}
+
+.chatCard:hover {
+	transform: translateY(-3px) translateX(-3px);
+	transition: background-color 0.4s ease;
+	color: var(--cor-neutro-1);
+}
+
+.chatOffcanvas{
+	background-color:var(--cor-neutro-1)
 }
