@@ -1,3 +1,28 @@
 {
-
+  "pedidos": [
+    {
+      "id": "1",
+      "cliente": "João da Silva",
+      "telefone": "(21) 99999-9999",
+      "endereco": "Rua A, 123 - Rio de Janeiro",
+      "itens": [
+        "Arroz",
+        "Feijão",
+        "Frango"
+      ],
+      "status": "Concluído"
+    },
+    {
+      "id": "2",
+      "cliente": "Maria Oliveira",
+      "telefone": "(11) 98888-8888",
+      "endereco": "Av. Central, 456 - São Paulo",
+      "itens": [
+        "Leite",
+        "Ovos",
+        "Pão Integral"
+      ],
+      "status": "Pendente"
+    }
+  ]
 }

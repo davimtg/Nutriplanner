@@ -9,6 +9,8 @@ import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
 import Compras from "./pages/Compras/Compras";
 import Chat from "./components/Chat/Chat"
 import Receitas from './pages/Receitas/Receitas';
+import MediadorDashboard from "./pages/MediadorDashboard/MediadorDashboard";
+import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedidoDetalhes";
 
 function AppContext() {
   const location = useLocation();
@@ -96,6 +98,8 @@ function AppContext() {
         <Route path="/cliente-dashboard" element={<ClienteDashboard />} />
         <Route path="/compras" element={<Compras />} />
         <Route path="/receitas" element={<Receitas />} />
+        <Route path="/mediador-dashboard" element={<MediadorDashboard />} />
+        <Route path="/mediador-pedido-detalhes" element={<MediadorPedidoDetalhes />} />
       </Routes>
     </>
   );
