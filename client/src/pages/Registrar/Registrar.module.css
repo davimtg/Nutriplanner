@@ -49,7 +49,7 @@
     width: 100%;
     height: 40px;
     border: 1px solid rgb(150, 150, 150);
-    background-color: rgb(150, 150, 150);
+    background-color: white;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -74,11 +74,11 @@
 }
 
 .login-multi__button.selected {
-    background-color: white;
+    background-color: #75a371;
 }
 
 .login-multi__button.selected .login-multi__button-text {
-    color: #c5e208;
+    color: white;
 }
 
 /* Login Form */

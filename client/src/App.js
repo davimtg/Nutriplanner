@@ -8,6 +8,7 @@ import Perfil from "./pages/Perfil/Perfil";
 import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
 import Compras from "./pages/Compras/Compras";
 import Chat from "./components/Chat/Chat"
+import Receitas from './pages/Receitas/Receitas';
 
 function AppContext() {
   const location = useLocation();
@@ -94,6 +95,7 @@ function AppContext() {
         <Route path="/registrar" element={<Registrar />} />
         <Route path="/cliente-dashboard" element={<ClienteDashboard />} />
         <Route path="/compras" element={<Compras />} />
+        <Route path="/receitas" element={<Receitas />} />
       </Routes>
     </>
   );
