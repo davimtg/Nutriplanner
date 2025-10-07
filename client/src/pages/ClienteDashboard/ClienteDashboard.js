@@ -1,96 +1,101 @@
-import React from "react";
-import styles from "./ClienteDashboard.module.css";
+import React, { useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-export default function ClienteDashboard() {
+export default function PaginaHoje() {
+  const [diaSelecionado, setDiaSelecionado] = useState("Segunda");
+
+  const dias = [
+    "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"
+  ];
+
+  const caloriasRestantes = 1400;
+  const caloriasConsumidas = 0;
+
+  const secoes = [
+    { nome: "Café da Manhã", cor: "warning" },
+    { nome: "Almoço", cor: "info" },
+    { nome: "Jantar", cor: "danger" },
+    { nome: "Lanches/Outros", cor: "secondary" },
+  ];
+
   return (
-    <main className={styles.main}>
-      {/* 2) Gráfico de Água (barras CSS) */}
-      <section className={styles["chart-card"]} aria-labelledby="titulo-agua">
-        <h2 id="titulo-agua">Gráfico de Consumo de Água</h2>
-        <div
-          className={styles.bars}
-          role="img"
-          aria-label="Consumo de água semanal em ml — gráfico estático"
-        >
-          <div className={styles.bar}>
-            <div className={styles.track}>
-              <span className={styles.fill} style={{ height: "87%" }}></span>
-            </div>
-            <b>2000 ml</b>
-          </div>
-          <div className={styles.bar}>
-            <div className={styles.track}>
-              <span className={styles.fill} style={{ height: "78.3%" }}></span>
-            </div>
-            <b>1800 ml</b>
-          </div>
-          <div className={styles.bar}>
-            <div className={styles.track}>
-              <span className={styles.fill} style={{ height: "95.7%" }}></span>
-            </div>
-            <b>2200 ml</b>
-          </div>
-          <div className={styles.bar}>
-            <div className={styles.track}>
-              <span className={styles.fill} style={{ height: "91.3%" }}></span>
-            </div>
-            <b>2100 ml</b>
-          </div>
-          <div className={styles.bar}>
-            <div className={styles.track}>
-              <span className={styles.fill} style={{ height: "82.6%" }}></span>
-            </div>
-            <b>1900 ml</b>
-          </div>
-          <div className={styles.bar}>
-            <div className={styles.track}>
-              <span className={styles.fill} style={{ height: "100%" }}></span>
-            </div>
-            <b>2300 ml</b>
-          </div>
-          <div className={styles.bar}>
-            <div className={styles.track}>
-              <span className={styles.fill} style={{ height: "87%" }}></span>
-            </div>
-            <b>2000 ml</b>
-          </div>
-        </div>
-      </section>
+    <div className="min-vh-100 bg-light text-dark p-4">
+      <div className="container">
 
-      {/* 3) Gráfico de Proteínas (donut via CSS conic-gradient) */}
-      <section className={styles["chart-card"]} aria-labelledby="titulo-prot">
-        <h2 id="titulo-prot">Gráfico de Macros</h2>
-        <div className={styles["donut-wrap"]}>
-          <div
-            className={styles.donut}
-            role="img"
-            aria-label="Distribuição de proteínas — Proteínas, Carboidratos, Gorduras"
-          ></div>
-          <div className={styles.legend} aria-hidden="false">
-            <div className={styles.item}>
-              <span
-                className={styles.swatch}
-                style={{ background: "#f94144" }}
-              ></span>{" "}
-              Proteínas — 35%
+        <h3 className="text-success fw-bold mb-4 text-center">
+          Registro de Hoje
+        </h3>
+
+        {/* Seleção de dia (nova navbar) */}
+        <div className="d-flex flex-wrap justify-content-center mb-4">
+          {dias.map((dia, i) => (
+            <button
+              key={i}
+              onClick={() => setDiaSelecionado(dia)}
+              className={`btn m-1 fw-semibold ${
+                diaSelecionado === dia
+                  ? "btn-success"
+                  : "btn-outline-success"
+              }`}
+            >
+              {dia}
+            </button>
+          ))}
+        </div>
+
+        {/* Resumo calórico */}
+        <div className="bg-white border rounded-4 p-4 mb-4 shadow-sm">
+          <h5 className="text-center text-success mb-3 fw-bold">
+            Resumo Calórico
+          </h5>
+          <div className="d-flex justify-content-between px-3">
+            <div>
+              <small className="text-muted">Calorias Restantes</small>
+              <h4 className="text-success fw-bold">{caloriasRestantes}</h4>
             </div>
-            <div className={styles.item}>
-              <span
-                className={styles.swatch}
-                style={{ background: "#f8961e" }}
-              ></span>{" "}
-              Carboidratos — 50%
-            </div>
-            <div className={styles.item}>
-              <span
-                className={styles.swatch}
-                style={{ background: "#577590" }}
-              ></span>{" "}
-              Gorduras — 15%
+            <div className="text-end">
+              <small className="text-muted">Calorias Consumidas</small>
+              <h4 className="text-danger fw-bold">{caloriasConsumidas}</h4>
             </div>
           </div>
+          <div className="progress mt-3" style={{ height: "10px", borderRadius: "5px" }}>
+            <div
+              className="progress-bar bg-success"
+              style={{
+                width: `${(caloriasConsumidas / (caloriasRestantes + caloriasConsumidas)) * 100}%`,
+                transition: "width 0.3s ease",
+              }}
+            />
+          </div>
         </div>
-      </section>
-    </main>
+
+        {/* Refeições */}
+        {secoes.map((s, i) => (
+          <div
+            key={i}
+            className={`d-flex justify-content-between align-items-center bg-${s.cor}-subtle border-start border-4 border-${s.cor} p-3 mb-3 rounded-3 shadow-sm`}
+          >
+            <h6 className="m-0 fw-semibold">{s.nome}</h6>
+            <button
+              className={`btn btn-outline-${s.cor} btn-sm rounded-circle`}
+              style={{ width: 35, height: 35, fontWeight: "bold" }}
+            >
+              +
+            </button>
+          </div>
+        ))}
+
+        {/* Personalizar refeições */}
+        <div className="bg-white border rounded-4 p-3 mt-4 shadow-sm text-center">
+          <p className="mb-1 fw-semibold text-secondary">
+            Personalizar Refeições
+          </p>
+          <small className="text-muted">
+            Monitore mais do que as refeições principais
+          </small>
+        </div>
+
+      </div>
+    </div>
   );
 }

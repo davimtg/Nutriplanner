@@ -11,6 +11,8 @@ import Chat from "./components/Chat/Chat"
 import Biblioteca from './pages/Biblioteca/Biblioteca';
 import MediadorDashboard from "./pages/MediadorDashboard/MediadorDashboard";
 import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedidoDetalhes";
+import Relatorio from "./pages/Relatorio/Relatorio"
+import Planejamento from "./pages/Planejamento/Planejamento"
 
 function AppContext() {
   const location = useLocation();
@@ -113,6 +115,8 @@ function AppContext() {
         <Route path="/biblioteca" element={<Biblioteca />} />
         <Route path="/mediador-dashboard" element={<MediadorDashboard />} />
         <Route path="/mediador-pedido-detalhes" element={<MediadorPedidoDetalhes />} />
+        <Route path="/relatorio" element={<Relatorio />} />
+        <Route path="/planejamento" element={<Planejamento />} />
       </Routes>
     </>
   );

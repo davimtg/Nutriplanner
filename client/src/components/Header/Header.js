@@ -13,7 +13,7 @@ export default function Header({ tipo }) {
   }
 
   function goTo(page) {
-    window.location.href = page;
+    navigate(page)
   }
 
   const menus = {
@@ -25,16 +25,11 @@ export default function Header({ tipo }) {
       { label: "Perfil", page: "perfil" },
     ],
     nutricionista: [
-      { label: "Dashboard", page: "nutricionista-dashboard" },
-      { label: "Pacientes", page: "pacientes" },
-      { label: "Planos", page: "planos" },
-      { label: "Relatórios", page: "relatorios" },
+      { label: "Home", page: "nutricionista-dashboard" },
       { label: "Perfil", page: "perfil" },
     ],
     mediador: [
-      { label: "Dashboard", page: "mediador-dashboard" },
-      { label: "Pedidos", page: "pedidos" },
-      { label: "Relatórios", page: "relatorios" },
+      { label: "Pedidos", page: "mediador-dashboard" },
       { label: "Perfil", page: "perfil" },
     ],
     admin: [
