@@ -8,7 +8,7 @@ import Perfil from "./pages/Perfil/Perfil";
 import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
 import Compras from "./pages/Compras/Compras";
 import Chat from "./components/Chat/Chat"
-import Receitas from './pages/Receitas/Receitas';
+import Biblioteca from './pages/Biblioteca/Biblioteca';
 import MediadorDashboard from "./pages/MediadorDashboard/MediadorDashboard";
 import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedidoDetalhes";
 
@@ -58,13 +58,26 @@ function AppContext() {
     { id: 5, nome: 'Reeducação Alimentar', objetivo: 'Saúde geral' },
   ]);
 
-  const hideHeaderRoutes = ["/", "/login", "/registrar"];
-  const showHeader = !hideHeaderRoutes.includes(location.pathname);
+  const hideRoutes = ["/", "/login", "/registrar"];
+  const showLoggedComponents = !hideRoutes.includes(location.pathname);
+
+  const clienteRotas = ["/cliente-dashboard", "/compras", "/biblioteca", "/perfil"];
+  const nutricionistaRotas = ["/nutricionista-dashboard", "/perfil"];
+  const mediadorRotas = ["/mediador-dashboard", "/mediador-pedido-detalhes"];
+
+  let tipo = "cliente";
+  if (clienteRotas.includes(location.pathname)) {
+    tipo = "cliente";
+  } else if (nutricionistaRotas.includes(location.pathname)) {
+    tipo = "nutricionista";
+  } else if (mediadorRotas.includes(location.pathname)) {
+    tipo = "mediador";
+  }
 
   return (
     <>
-      {showHeader && <Chat userData={userData} setUserData={setUserData}/>}
-      {showHeader && <Header />}
+      {showLoggedComponents && <Chat userData={userData} setUserData={setUserData}/>}
+      {showLoggedComponents && <Header tipo={tipo}/>}
 
       <Routes>
         <Route
@@ -97,7 +110,7 @@ function AppContext() {
         <Route path="/registrar" element={<Registrar />} />
         <Route path="/cliente-dashboard" element={<ClienteDashboard />} />
         <Route path="/compras" element={<Compras />} />
-        <Route path="/receitas" element={<Receitas />} />
+        <Route path="/biblioteca" element={<Biblioteca />} />
         <Route path="/mediador-dashboard" element={<MediadorDashboard />} />
         <Route path="/mediador-pedido-detalhes" element={<MediadorPedidoDetalhes />} />
       </Routes>
