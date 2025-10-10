@@ -1,0 +1,30 @@
+.card {
+  border: 1px solid #ddd;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.card__title {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.card__text {
+  margin: 4px 0;
+}
+
+.card__button {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 8px 14px;
+  background-color: #0077ff;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.card__button:hover {
+  background-color: #005fcc;
+}

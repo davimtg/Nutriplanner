@@ -1,0 +1,330 @@
+{
+  "usuarios": [
+    {
+      "id": 0,
+      "nome": "Admin",
+      "telefone": "",
+      "endereco": "",
+      "tipo": {
+        "id": 0,
+        "name": "admin"
+      }
+    },
+    {
+      "id": 1,
+      "nome": "João da Silva",
+      "telefone": "(21) 99999-9999",
+      "endereco": "Av. Central, 456 - São Paulo",
+      "tipo": {
+        "id": 1,
+        "name": "cliente"
+      }
+    },
+    {
+      "id": 2,
+      "nome": "Marcus Vinicius",
+      "telefone": "(21) 91203-1021",
+      "endereco": "Av. Camarista Méier, 1012 - Rio de Janeiro",
+      "tipo": {
+        "id": 1,
+        "name": "cliente"
+      }
+    },
+    {
+      "id": 3,
+      "nome": "Nathália Barbosa",
+      "telefone": "(22) 98888-8888",
+      "endereco": "Rua A, 123 - Rio de Janeiro",
+      "tipo": {
+        "id": 2,
+        "name": "nutricionista"
+      }
+    },
+    {
+      "id": 4,
+      "nome": "Ricardo Assunção",
+      "telefone": "(22) 92288-2288",
+      "endereco": "Rua V, 321 - Rio de Janeiro",
+      "tipo": {
+        "id": 3,
+        "name": "mediador"
+      }
+    }
+  ],
+  "pedidos": [
+    {
+      "id": 0,
+      "user-id": 1,
+      "itens": ["Arroz", "Feijão", "Frango"],
+      "status": "Concluído"
+    },
+    {
+      "id": 1,
+      "user-id": 2,
+      "itens": ["Leite", "Ovos", "Pão Integral"],
+      "status": "Pendente"
+    }
+  ],
+"planos": [
+    {
+      "id": 101,
+      "nome": "Dieta Mediterrânea Clássica",
+      "objetivo": "Saúde Cardiovascular e Longevidade",
+      "calorias_diarias_aprox": 1900,
+      "detalhamento": {
+        "segunda": {
+          "cafe_da_manha": { "descricao": "Iogurte grego com nozes e mel.", "calorias": 380 },
+          "almoco": { "descricao": "Salada de grão de bico com atum, tomate e pepino.", "calorias": 550 },
+          "jantar": { "descricao": "Salmão grelhado com brócolis e azeite.", "calorias": 600 }
+        },
+        "terca": {
+          "cafe_da_manha": { "descricao": "Aveia com frutas vermelhas.", "calorias": 350 },
+          "almoco": { "descricao": "Sopa de lentilhas com pão integral.", "calorias": 500 },
+          "jantar": { "descricao": "Frango assado com batata doce e alecrim.", "calorias": 650 }
+        },
+        "quarta": {
+          "cafe_da_manha": { "descricao": "Pão integral com abacate e ovo.", "calorias": 400 },
+          "almoco": { "descricao": "Sobras do frango assado de terça.", "calorias": 650 },
+          "jantar": { "descricao": "Macarrão integral com molho de tomate fresco e manjericão.", "calorias": 550 }
+        },
+        "quinta": {
+          "cafe_da_manha": { "descricao": "Smoothie de espinafre, banana e leite de amêndoas.", "calorias": 300 },
+          "almoco": { "descricao": "Quinoa com legumes salteados e tofu.", "calorias": 500 },
+          "jantar": { "descricao": "Sardinhas em azeite com salada verde.", "calorias": 450 }
+        },
+        "sexta": {
+          "cafe_da_manha": { "descricao": "Ovos mexidos com tomate e cogumelos.", "calorias": 350 },
+          "almoco": { "descricao": "Salada caprese com pão integral.", "calorias": 450 },
+          "jantar": { "descricao": "Pizza caseira com massa integral, vegetais e queijo feta.", "calorias": 700 }
+        },
+        "sabado": {
+          "cafe_da_manha": { "descricao": "Panquecas de aveia com frutas.", "calorias": 400 },
+          "almoco": { "descricao": "Refeição livre, com moderação.", "calorias": 800 },
+          "jantar": { "descricao": "Espetinhos de frango e vegetais na grelha.", "calorias": 550 }
+        },
+        "domingo": {
+          "cafe_da_manha": { "descricao": "Frutas frescas com queijo cottage.", "calorias": 300 },
+          "almoco": { "descricao": "Paella de frutos do mar (ou versão vegetariana).", "calorias": 700 },
+          "jantar": { "descricao": "Sopa leve de legumes.", "calorias": 350 }
+        }
+      }
+    },
+    {
+      "id": 102,
+      "nome": "Hipercalórico para Ganho de Massa",
+      "objetivo": "Hipertrofia Muscular",
+      "calorias_diarias_aprox": 3200,
+      "detalhamento": {
+        "segunda": {
+          "cafe_da_manha": { "descricao": "Shake de whey, banana, aveia e pasta de amendoim.", "calorias": 600 },
+          "almoco": { "descricao": "200g de frango grelhado, arroz integral e feijão.", "calorias": 800 },
+          "lanche_da_tarde": { "descricao": "Iogurte integral com castanhas e mel.", "calorias": 450 },
+          "jantar": { "descricao": "200g de carne vermelha magra com purê de batata.", "calorias": 900 }
+        },
+        "terca": {
+          "cafe_da_manha": { "descricao": "Omelete com 4 ovos, queijo e presunto.", "calorias": 550 },
+          "almoco": { "descricao": "Sobras da carne de segunda.", "calorias": 900 },
+          "lanche_da_tarde": { "descricao": "Mix de castanhas e frutas secas.", "calorias": 400 },
+          "jantar": { "descricao": "Tilápia assada com arroz e brócolis.", "calorias": 750 }
+        },
+        "quarta": {
+          "cafe_da_manha": { "descricao": "Iogurte integral com granola e frutas.", "calorias": 500 },
+          "almoco": { "descricao": "Macarrão com 200g de almôndegas de patinho.", "calorias": 850 },
+          "lanche_da_tarde": { "descricao": "Vitamina de abacate com leite e whey.", "calorias": 500 },
+          "jantar": { "descricao": "Salmão grelhado com quinoa.", "calorias": 800 }
+        },
+        "quinta": {
+          "cafe_da_manha": { "descricao": "Pão integral com ovos e abacate.", "calorias": 550 },
+          "almoco": { "descricao": "Sobras do macarrão de quarta.", "calorias": 850 },
+          "lanche_da_tarde": { "descricao": "Sanduíche de pão integral com frango desfiado.", "calorias": 450 },
+          "jantar": { "descricao": "Bife de frango (200g) com batata doce assada.", "calorias": 750 }
+        },
+        "sexta": {
+          "cafe_da_manha": { "descricao": "Shake de proteína com aveia e frutas.", "calorias": 500 },
+          "almoco": { "descricao": "Strogonoff de frango com arroz e batata palha.", "calorias": 800 },
+          "lanche_da_tarde": { "descricao": "Banana com pasta de amendoim.", "calorias": 400 },
+          "jantar": { "descricao": "Hambúrguer caseiro duplo (250g) com pão e queijo.", "calorias": 1000 }
+        },
+        "sabado": {
+          "cafe_da_manha": { "descricao": "Panquecas de banana com mel e nozes.", "calorias": 600 },
+          "almoco": { "descricao": "Feijoada completa.", "calorias": 1200 },
+          "lanche_da_tarde": { "descricao": "Açaí com frutas e granola.", "calorias": 500 },
+          "jantar": { "descricao": "Refeição livre.", "calorias": 900 }
+        },
+        "domingo": {
+          "cafe_da_manha": { "descricao": "Ovos mexidos com bacon e pão.", "calorias": 650 },
+          "almoco": { "descricao": "Churrasco com carnes, pão de alho e farofa.", "calorias": 1300 },
+          "lanche_da_tarde": { "descricao": "Frutas.", "calorias": 200 },
+          "jantar": { "descricao": "Sopa de legumes com frango desfiado.", "calorias": 500 }
+        }
+      }
+    },
+    {
+      "id": 103,
+      "nome": "Low Carb Focado em Energia",
+      "objetivo": "Perda de Peso e Controle Glicêmico",
+      "calorias_diarias_aprox": 1600,
+      "detalhamento": {
+        "segunda": {
+          "cafe_da_manha": { "descricao": "Ovos mexidos com espinafre e bacon.", "calorias": 400 },
+          "almoco": { "descricao": "Salada de frango desfiado com abacate e folhas.", "calorias": 550 },
+          "jantar": { "descricao": "Bife de contrafilé com couve-flor gratinada.", "calorias": 650 }
+        },
+        "terca": {
+          "cafe_da_manha": { "descricao": "Iogurte natural sem açúcar com castanhas.", "calorias": 350 },
+          "almoco": { "descricao": "Sobras do bife de segunda.", "calorias": 650 },
+          "jantar": { "descricao": "Salmão ao forno com aspargos na manteiga.", "calorias": 600 }
+        },
+        "quarta": {
+          "cafe_da_manha": { "descricao": "Smoothie de abacate com whey e leite de coco.", "calorias": 450 },
+          "almoco": { "descricao": "Almôndegas de carne com abobrinha espiralizada.", "calorias": 500 },
+          "jantar": { "descricao": "Sopa de abóbora com frango e sementes.", "calorias": 450 }
+        },
+        "quinta": {
+          "cafe_da_manha": { "descricao": "Queijo coalho grelhado com tomate e orégano.", "calorias": 300 },
+          "almoco": { "descricao": "Sobras das almôndegas de quarta.", "calorias": 500 },
+          "jantar": { "descricao": "Frango assado com salada de repolho.", "calorias": 550 }
+        },
+        "sexta": {
+          "cafe_da_manha": { "descricao": "Ovos fritos na manteiga com linguiça.", "calorias": 450 },
+          "almoco": { "descricao": "Salada de atum com maionese caseira e aipo.", "calorias": 500 },
+          "jantar": { "descricao": "Pizza com base de couve-flor e queijo.", "calorias": 600 }
+        },
+        "sabado": {
+          "cafe_da_manha": { "descricao": "Café com óleo de coco e canela (bulletproof).", "calorias": 250 },
+          "almoco": { "descricao": "Churrasco de carnes e linguiça com salada.", "calorias": 900 },
+          "jantar": { "descricao": "Ovos mexidos ou queijos e frios.", "calorias": 400 }
+        },
+        "domingo": {
+          "cafe_da_manha": { "descricao": "Omelete de queijo e presunto.", "calorias": 400 },
+          "almoco": { "descricao": "Frango de padaria com salada de maionese (low carb).", "calorias": 700 },
+          "jantar": { "descricao": "Caldo verde (sem batata, com couve e linguiça).", "calorias": 450 }
+        }
+      }
+    },
+    {
+      "id": 104,
+      "nome": "Plant-Based (Vegano) Nutritivo",
+      "objetivo": "Alimentação sem produtos de origem animal",
+      "calorias_diarias_aprox": 1800,
+      "detalhamento": {
+        "segunda": {
+          "cafe_da_manha": { "descricao": "Tofu mexido com cúrcuma e pão integral.", "calorias": 400 },
+          "almoco": { "descricao": "Curry de grão de bico com arroz integral.", "calorias": 600 },
+          "jantar": { "descricao": "Sopa de lentilha vermelha.", "calorias": 450 }
+        },
+        "terca": {
+          "cafe_da_manha": { "descricao": "Vitamina de banana, leite de soja e chia.", "calorias": 350 },
+          "almoco": { "descricao": "Sobras do curry de segunda.", "calorias": 600 },
+          "jantar": { "descricao": "Hambúrguer de feijão preto com salada.", "calorias": 550 }
+        },
+        "quarta": {
+          "cafe_da_manha": { "descricao": "Mingau de aveia com pasta de amendoim.", "calorias": 450 },
+          "almoco": { "descricao": "Macarrão de abobrinha ao pesto de castanhas.", "calorias": 500 },
+          "jantar": { "descricao": "Tacos de lentilha com guacamole.", "calorias": 600 }
+        },
+        "quinta": {
+          "cafe_da_manha": { "descricao": "Pão integral com homus e tomate.", "calorias": 300 },
+          "almoco": { "descricao": "Sobras dos tacos de quarta.", "calorias": 600 },
+          "jantar": { "descricao": "Escondidinho de batata doce com recheio de cogumelos.", "calorias": 550 }
+        },
+        "sexta": {
+          "cafe_da_manha": { "descricao": "Iogurte de soja com frutas e granola.", "calorias": 350 },
+          "almoco": { "descricao": "Salada de quinoa com manga e pimentão.", "calorias": 500 },
+          "jantar": { "descricao": "Moqueca de banana-da-terra com arroz.", "calorias": 650 }
+        },
+        "sabado": {
+          "cafe_da_manha": { "descricao": "Panqueca de grão de bico (socca) com abacate.", "calorias": 400 },
+          "almoco": { "descricao": "Feijoada vegana.", "calorias": 800 },
+          "jantar": { "descricao": "Refeição livre.", "calorias": 600 }
+        },
+        "domingo": {
+          "cafe_da_manha": { "descricao": "Frutas picadas com granola e melado.", "calorias": 350 },
+          "almoco": { "descricao": "Lasanha de berinjela com queijo de castanha.", "calorias": 700 },
+          "jantar": { "descricao": "Salada reforçada com tofu grelhado.", "calorias": 450 }
+        }
+      }
+    },
+    {
+      "id": 105,
+      "nome": "Dieta para Refluxo e Gastrite",
+      "objetivo": "Conforto Gástrico e Redução da Acidez",
+      "calorias_diarias_aprox": 1500,
+      "detalhamento": {
+        "segunda": {
+          "cafe_da_manha": { "descricao": "Mamão com aveia.", "calorias": 200 },
+          "almoco": { "descricao": "Frango grelhado com arroz branco e cenoura cozida.", "calorias": 500 },
+          "jantar": { "descricao": "Sopa de mandioquinha.", "calorias": 350 }
+        },
+        "terca": {
+          "cafe_da_manha": { "descricao": "Banana amassada com linhaça.", "calorias": 250 },
+          "almoco": { "descricao": "Peixe branco cozido com purê de batata.", "calorias": 450 },
+          "jantar": { "descricao": "Canja de galinha leve.", "calorias": 400 }
+        },
+        "quarta": {
+          "cafe_da_manha": { "descricao": "Maçã cozida com canela.", "calorias": 150 },
+          "almoco": { "descricao": "Carne moída refogada com chuchu e arroz.", "calorias": 500 },
+          "jantar": { "descricao": "Mingau de aveia.", "calorias": 300 }
+        },
+        "quinta": {
+          "cafe_da_manha": { "descricao": "Pão de forma sem casca com ricota.", "calorias": 250 },
+          "almoco": { "descricao": "Sobras da carne moída de quarta.", "calorias": 500 },
+          "jantar": { "descricao": "Sopa de legumes batida.", "calorias": 300 }
+        },
+        "sexta": {
+          "cafe_da_manha": { "descricao": "Melão picado.", "calorias": 150 },
+          "almoco": { "descricao": "Omelete de claras com espinafre refogado.", "calorias": 350 },
+          "jantar": { "descricao": "Purê de abóbora com frango desfiado.", "calorias": 450 }
+        },
+        "sabado": {
+          "cafe_da_manha": { "descricao": "Iogurte natural desnatado.", "calorias": 150 },
+          "almoco": { "descricao": "Filé de frango com batata doce cozida.", "calorias": 500 },
+          "jantar": { "descricao": "Caldo de feijão (só o caldo).", "calorias": 250 }
+        },
+        "domingo": {
+          "cafe_da_manha": { "descricao": "Pera cozida.", "calorias": 150 },
+          "almoco": { "descricao": "Arroz com frango desfiado e legumes cozidos.", "calorias": 550 },
+          "jantar": { "descricao": "Sopa leve de cenoura.", "calorias": 300 }
+        }
+      }
+    }
+  ],
+  "pacientes": [
+    {
+      "id": 1,
+      "nome": "Carlos Pereira",
+      "objetivo": "Perder 10kg e melhorar a disposição",
+      "planoId": 103
+    },
+    {
+      "id": 2,
+      "nome": "Ana Souza",
+      "objetivo": "Ganho de massa muscular (hipertrofia)",
+      "planoId": 102
+    },
+    {
+      "id": 3,
+      "nome": "Mariana Costa",
+      "objetivo": "Reeducação alimentar e controle do colesterol",
+      "planoId": 101
+    },
+    {
+      "id": 4,
+      "nome": "Lucas Ferreira",
+      "objetivo": "Melhorar performance em corrida de rua",
+      "planoId": null
+    },
+    {
+      "id": 5,
+      "nome": "Beatriz Lima",
+      "objetivo": "Alimentação balanceada para gestante",
+      "planoId": null
+    },
+    {
+      "id": 6,
+      "nome": "Roberto Almeida",
+      "objetivo": "Controle de gastrite e refluxo",
+      "planoId": 105
+    }
+  ]
+}
