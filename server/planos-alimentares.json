@@ -7,39 +7,127 @@
       "calorias_diarias_aprox": 1900,
       "detalhamento": {
         "segunda": {
-          "cafe_da_manha": { "descricao": "Iogurte grego com nozes e mel.", "calorias": 380 },
-          "almoco": { "descricao": "Salada de grão de bico com atum, tomate e pepino.", "calorias": 550 },
-          "jantar": { "descricao": "Salmão grelhado com brócolis e azeite.", "calorias": 600 }
+          "cafe_da_manha": { 
+            "descricao": "Sobrecoxa de frango com arroz branco e cominho",
+            "itens": [
+              { "alimento-id": 0, "name": "Arroz Branco (Cozido)", "quantidade": "100 g" },
+              { "alimento-id": 2, "name": "Cominho", "quantidade": "15 g" },
+              { "alimento-id": 8, "name": "Carne da Sobrecoxa de Frango (Assado, Cozido)", "quantidade": "120 g" }
+            ],
+            "calorias": 380 
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
         },
         "terca": {
-          "cafe_da_manha": { "descricao": "Aveia com frutas vermelhas.", "calorias": 350 },
-          "almoco": { "descricao": "Sopa de lentilhas com pão integral.", "calorias": 500 },
-          "jantar": { "descricao": "Frango assado com batata doce e alecrim.", "calorias": 650 }
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
         },
         "quarta": {
-          "cafe_da_manha": { "descricao": "Pão integral com abacate e ovo.", "calorias": 400 },
-          "almoco": { "descricao": "Sobras do frango assado de terça.", "calorias": 650 },
-          "jantar": { "descricao": "Macarrão integral com molho de tomate fresco e manjericão.", "calorias": 550 }
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
         },
         "quinta": {
-          "cafe_da_manha": { "descricao": "Smoothie de espinafre, banana e leite de amêndoas.", "calorias": 300 },
-          "almoco": { "descricao": "Quinoa com legumes salteados e tofu.", "calorias": 500 },
-          "jantar": { "descricao": "Sardinhas em azeite com salada verde.", "calorias": 450 }
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
         },
         "sexta": {
-          "cafe_da_manha": { "descricao": "Ovos mexidos com tomate e cogumelos.", "calorias": 350 },
-          "almoco": { "descricao": "Salada caprese com pão integral.", "calorias": 450 },
-          "jantar": { "descricao": "Pizza caseira com massa integral, vegetais e queijo feta.", "calorias": 700 }
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
         },
         "sabado": {
-          "cafe_da_manha": { "descricao": "Panquecas de aveia com frutas.", "calorias": 400 },
-          "almoco": { "descricao": "Refeição livre, com moderação.", "calorias": 800 },
-          "jantar": { "descricao": "Espetinhos de frango e vegetais na grelha.", "calorias": 550 }
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
         },
         "domingo": {
-          "cafe_da_manha": { "descricao": "Frutas frescas com queijo cottage.", "calorias": 300 },
-          "almoco": { "descricao": "Paella de frutos do mar (ou versão vegetariana).", "calorias": 700 },
-          "jantar": { "descricao": "Sopa leve de legumes.", "calorias": 350 }
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
         }
       }
     }
