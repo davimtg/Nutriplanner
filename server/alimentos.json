@@ -1,0 +1,174 @@
+{
+  "alimentos": [
+    {
+      "id": 0,
+      "nome": "Arroz Branco (Cozido)",
+      "porção": "100 g",
+      "calorias": "129",
+      "gordura": "0.23",
+      "carboidrato": "28.18",
+      "proteina": "2.50",
+      "outrasPorções": [
+        {
+          "id": 0,
+          "name": "1 xícara, cozido",
+          "calories": "203"
+        },
+        {
+          "id": 1,
+          "name": "1 colher de sopa",
+          "calories": "32"
+        },
+        {
+          "id": 2,
+          "name": "1 porção",
+          "calories": "135"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "nome": "Açúcar",
+      "porção": "1 colher de chá",
+      "calorias": "16",
+      "gordura": "0.00",
+      "carboidrato": "4.20",
+      "proteina": "0.00",
+      "outrasPorções": [
+        {
+          "id": 0,
+          "name": "1 porção",
+          "calories": "31"
+        },
+        {
+          "id": 1,
+          "name": "1 xícara",
+          "calories": "774"
+        },
+        {
+          "id": 2,
+          "name": "100 g",
+          "calories": "387"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "nome": "Cominho",
+      "porção": "1 colher de chá",
+      "calorias": "8",
+      "gordura": "0.47",
+      "carboidrato": "0.93",
+      "proteina": "0.37",
+      "outrasPorções": [
+        {
+          "id": 0,
+          "name": "1 colher de sopa",
+          "calories": "22"
+        },
+        {
+          "id": 1,
+          "name": "100 g",
+          "calories": "375"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "nome": "Arroz Parboilizado Cozido",
+      "porção": "100 g",
+      "calorias": "123",
+      "gordura": "0.37",
+      "carboidrato": "26.05",
+      "proteina": "2.91",
+      "outrasPorções": []
+    },
+    {
+      "id": 4,
+      "nome": "Iogurte Natural (Leite Integral)",
+      "porção": "100 g",
+      "calorias": "61",
+      "gordura": "3.25",
+      "carboidrato": "4.66",
+      "proteina": "3.47",
+      "outrasPorções": [
+        {
+          "id": 0,
+          "name": "1 xícara",
+          "calories": "149"
+        },
+        {
+          "id": 1,
+          "name": "1 recipiente (225 g)",
+          "calories": "138"
+        },
+        {
+          "id": 2,
+          "name": "1/2 recipiente (112 g)",
+          "calories": "69"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "nome": "Manteiga Light (com Sal)",
+      "porção": "100 g",
+      "calorias": "499",
+      "gordura": "55.1",
+      "carboidrato": "0.0",
+      "proteina": "3.3",
+      "outrasPorções": []
+    },
+    {
+      "id": 6,
+      "nome": "Queijo Parmesão (Ralado)",
+      "porção": "1 colher de sopa",
+      "calorias": "22",
+      "gordura": "1.43",
+      "carboidrato": "0.20",
+      "proteina": "1.92",
+      "outrasPorções": []
+    },
+    {
+      "id": 7,
+      "nome": "Cardamomo",
+      "porção": "100 g",
+      "calorias": "311",
+      "gordura": "6.7",
+      "carboidrato": "68.47",
+      "proteina": "10.76",
+      "outrasPorções": []
+    },
+    {
+      "id": 8,
+      "nome": "Carne da Sobrecoxa de Frango (Assado, Cozido)",
+      "porção": "100 g",
+      "calorias": "209",
+      "gordura": "10.88",
+      "carboidrato": "0.0",
+      "proteina": "25.94",
+      "outrasPorções": []
+    },
+    {
+      "id": 9,
+      "nome": "Manteiga",
+      "porção": "100 g",
+      "calorias": "717",
+      "gordura": "81.11",
+      "carboidrato": "0.06",
+      "proteina": "0.85",
+      "outrasPorções": [
+        {
+          "id": 0,
+          "name": "1 colher de sopa",
+          "calories": "102"
+        },
+        {
+          "id": 1,
+          "name": "1 pedaço",
+          "calories": "36"
+        }
+      ]
+    }
+  ]
+}
