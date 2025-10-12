@@ -19,7 +19,7 @@ function juntarJSONs() {
     }
   }
 
-  fs.writeFileSync("db.json", JSON.stringify(dbFinal, null, 2));
+  fs.writeFileSync("db.json", JSON.stringify(dbFinal, null, 0));
 }
 
 juntarJSONs();
