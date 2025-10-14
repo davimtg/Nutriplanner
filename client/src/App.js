@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Header from "./components/Header/Header";
 import Login from "./pages/Login/Login";
 import Registrar from "./pages/Registrar/Registrar";
@@ -13,6 +14,25 @@ import MediadorDashboard from "./pages/MediadorDashboard/MediadorDashboard";
 import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedidoDetalhes";
 import Relatorio from "./pages/Relatorio/Relatorio"
 import Planejamento from "./pages/Planejamento/Planejamento"
+
+function DashboardRouter({ planos, setPlanos }) {
+  const userType = useSelector((state) => state.user.userType);
+
+  if (!userType) return <Navigate to="/" />;
+
+  switch (userType.id) {
+    case 0:
+      return null;
+    case 1:
+      return <ClienteDashboard />;
+    case 2:
+      return <DashboardNutricionista planos={planos} setPlanos={setPlanos} />;
+    case 3:
+      return <MediadorDashboard />;
+    default:
+      return <Navigate to="/" />;
+  }
+}
 
 function AppContext() {
   const location = useLocation();
@@ -31,27 +51,6 @@ function AppContext() {
     complemento: "P1 - 101",
   });
 
-  const [loginData, setLoginData] = useState({
-    email: "",
-    password: "",
-    userType: "",
-  });
-
-  const [RegistrarData, setRegistrarData] = useState({
-    userType: "",
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  const [pacientes, setPacientes] = useState([
-    { id: 1, nome: 'João da Silva', objetivo: 'Perda de peso' },
-    { id: 2, nome: 'Maria Oliveira', objetivo: 'Controle de diabetes' },
-    { id: 3, nome: 'Carlos Pereira', objetivo: 'Ganho de massa muscular' },
-    { id: 4, nome: 'Ana Souza', objetivo: 'Reeducação alimentar' },
-  ]);
-
   const [planos, setPlanos] = useState([
     { id: 1, nome: 'Hipertrofia Muscular', objetivo: 'Ganho de massa' },
     { id: 2, nome: 'Dieta Mediterrânea', objetivo: 'Saúde e longevidade' },
@@ -62,61 +61,29 @@ function AppContext() {
 
   const hideRoutes = ["/", "/login", "/registrar"];
   const showLoggedComponents = !hideRoutes.includes(location.pathname);
-
-  const clienteRotas = ["/cliente-dashboard", "/compras", "/biblioteca", "/perfil"];
-  const nutricionistaRotas = ["/nutricionista-dashboard", "/perfil"];
-  const mediadorRotas = ["/mediador-dashboard", "/mediador-pedido-detalhes"];
-
-  let tipo = "cliente";
-  if (clienteRotas.includes(location.pathname)) {
-    tipo = "cliente";
-  } else if (nutricionistaRotas.includes(location.pathname)) {
-    tipo = "nutricionista";
-  } else if (mediadorRotas.includes(location.pathname)) {
-    tipo = "mediador";
-  }
+  const userType = useSelector((state) => state.user.userType);
 
   return (
     <>
+      {showLoggedComponents && <Header tipo={userType.name}/>}
       {showLoggedComponents && <Chat userData={userData} setUserData={setUserData}/>}
-      {showLoggedComponents && <Header tipo={tipo}/>}
 
       <Routes>
-        <Route
-          path="/"
-          element={<Login loginData={loginData} setLoginData={setLoginData} />}
-        />
-        <Route
-          path="/login"
-          element={<Login loginData={loginData} setLoginData={setLoginData} />}
-        />
-        <Route
-          path="/registrar"
-          element={
-            <Registrar
-              RegistrarData={RegistrarData}
-              setRegistrarData={setRegistrarData}
-            />
-          }
-        />
-        <Route
-          path="/perfil"
-          element={<Perfil userData={userData} setUserData={setUserData} />}
-        />
-        <Route
-          path="/nutricionista-dashboard"
-          element={<DashboardNutricionista planos={planos} pacientes={pacientes} />}
-        />
+        {/* Páginas para Não-Logados */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/registrar" element={<Registrar />} />
-        <Route path="/cliente-dashboard" element={<ClienteDashboard />} />
+        <Route path="/registrar" element={<Registrar />}/>
+
+        {/* Páginas para Logados */}
+        <Route path="/dashboard" element={<DashboardRouter planos={planos} setPlanos={setPlanos} />} />
+
         <Route path="/compras" element={<Compras />} />
         <Route path="/biblioteca" element={<Biblioteca />} />
-        <Route path="/mediador-dashboard" element={<MediadorDashboard />} />
         <Route path="/mediador-pedido-detalhes" element={<MediadorPedidoDetalhes />} />
         <Route path="/relatorio" element={<Relatorio />} />
         <Route path="/planejamento" element={<Planejamento />} />
+
+        <Route path="/perfil" element={<Perfil userData={userData} setUserData={setUserData} />} />
       </Routes>
     </>
   );

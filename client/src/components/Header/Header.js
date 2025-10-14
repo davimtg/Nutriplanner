@@ -18,18 +18,18 @@ export default function Header({ tipo }) {
 
   const menus = {
     cliente: [
-      { label: "Dashboard", page: "cliente-dashboard" },
+      { label: "Dashboard", page: "dashboard" },
       { label: "Biblioteca", page: "biblioteca" },
       { label: "Planejamento", page: "planejamento" },
       { label: "Relatório", page: "relatorio" },
       { label: "Perfil", page: "perfil" },
     ],
     nutricionista: [
-      { label: "Home", page: "nutricionista-dashboard" },
+      { label: "Home", page: "dashboard" },
       { label: "Perfil", page: "perfil" },
     ],
     mediador: [
-      { label: "Pedidos", page: "mediador-dashboard" },
+      { label: "Pedidos", page: "dashboard" },
       { label: "Perfil", page: "perfil" },
     ],
     admin: [
