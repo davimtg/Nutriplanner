@@ -1,0 +1,93 @@
+/* Mantendo o mesmo design do login */
+
+.login {
+    width: calc(100% - 40px);
+    max-width: 500px;
+    background-color: white;
+    padding: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Login Header */
+.login-header {
+    display: flex;
+    flex-direction: column;
+}
+
+.login-logo {
+    width: 20vw;
+    max-width: 10vh;
+}
+
+.login-title {
+    font-size: 21px;
+    font-family: "Poppins Medium", Arial, Helvetica, sans-serif;
+    margin: 20px 0 10px 0;
+}
+
+.login-subtitle {
+    font-size: 15px;
+    font-family: "Poppins Medium", Arial, Helvetica, sans-serif;
+    color: rgb(145, 145, 145);
+    margin: 0;
+}
+
+/* Form */
+.login-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 40px;
+}
+
+.login-input {
+    width: 100%;
+    height: 38px;
+    margin-bottom: 5px;
+    font-size: 15px;
+    padding: 0 10px;
+}
+
+.login-input:focus {
+    outline: none;
+}
+
+.login-submit {
+    width: 100%;
+    height: 50px;
+    background: linear-gradient(to bottom, #b6d8a2, #477f4f);
+    color: white;
+    font-family: "Poppins Bold", Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    margin-top: 15px;
+    border: none;
+}
+
+.login-submit:hover {
+    cursor: pointer;
+    background: linear-gradient(to bottom, #93af83, #2f5435);
+}
+
+/* Register link */
+.login-register {
+    margin-top: 60px;
+}
+
+.login-register__text {
+    text-align: center;
+    font-size: 14px;
+    font-family: "Poppins Medium", Arial, Helvetica, sans-serif;
+}
+
+.login-register__text a {
+    text-decoration: underline;
+    color: black;
+}
+
+.login-register__text a:hover {
+    color: green;
+    cursor: pointer;
+}

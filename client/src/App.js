@@ -16,6 +16,7 @@ import MediadorDashboard from "./pages/MediadorDashboard/MediadorDashboard";
 import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedidoDetalhes";
 import Relatorio from "./pages/Relatorio/Relatorio"
 import Planejamento from "./pages/Planejamento/Planejamento"
+import EsqeuciMinhaSenha from "./pages/EsqueciMinhaSenha/EsqueciMinhaSenha"
 
 function DashboardRouter() {
   const userType = useSelector((state) => state.user.userType);
@@ -49,7 +50,7 @@ function AppContext() {
 
   // Aqui é um código para quando a pessoa não estiver logada,
   // Não aparecer o header, nem o chat
-  const rotasNaoLogadas = ["/", "/login", "/registrar"];
+  const rotasNaoLogadas = ["/", "/login", "/registrar", "/esqueci-minha-senha"];
   const mostrarComponentesQuandoLogados = !rotasNaoLogadas.includes(location.pathname);
   const userType = useSelector((state) => state.user.userType);
 
@@ -74,6 +75,7 @@ function AppContext() {
         <Route path="/perfil" element={<Perfil userData={userData} setUserData={setUserData} />} />
         <Route path="/planos" element={<Planos/>}/>
         <Route path="/planos/:id" element={<PlanoDetalhes/>}/>
+        <Route path="/esqueci-minha-senha" element={<EsqeuciMinhaSenha/>}/>
       </Routes>
     </>
   );
