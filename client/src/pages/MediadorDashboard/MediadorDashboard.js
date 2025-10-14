@@ -7,6 +7,7 @@ import { fetchPedidos } from '../../redux/pedidosSlice';
 const filtros = [
   { label: 'Todos', value: 'todos' },
   { label: 'Pendentes', value: 'pendente' },
+  { label: 'Em Execução', value: 'em execucao' },
   { label: 'Concluídos', value: 'concluido' },
 ];
 
@@ -21,24 +22,37 @@ const MediadorDashboard = () => {
     }
   }, [status, dispatch]);
 
-  // Estatísticas dinâmicas normalizadas
+  // Função para normalizar strings (remove acentos e deixa minúsculo)
   const normalize = (str) =>
     str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
 
-  const pendentes = pedidos.filter((pedido) => normalize(pedido.status) === 'pendente').length;
-  const concluidos = pedidos.filter((pedido) => normalize(pedido.status) === 'concluido').length;
+  // Contagens dinâmicas por status
+  const pendentes = pedidos.filter(
+    (pedido) => normalize(pedido.status.name) === 'pendente'
+  ).length;
+
+  const emExecucao = pedidos.filter(
+    (pedido) => normalize(pedido.status.name) === 'em execucao'
+  ).length;
+
+  const concluidos = pedidos.filter(
+    (pedido) => normalize(pedido.status.name) === 'concluido'
+  ).length;
+
   const total = pedidos.length;
 
   const stats = [
     { label: 'Pedidos Pendentes', value: pendentes },
+    { label: 'Em Execução', value: emExecucao },
     { label: 'Pedidos Concluídos', value: concluidos },
     { label: 'Pedidos Totais', value: total },
   ];
 
+  // Filtro aplicado dinamicamente
   const pedidosFiltrados =
     filtro === 'todos'
       ? pedidos
-      : pedidos.filter((pedido) => normalize(pedido.status) === filtro);
+      : pedidos.filter((pedido) => normalize(pedido.status.name) === filtro);
 
   return (
     <div className={styles.dashboard}>
@@ -64,7 +78,9 @@ const MediadorDashboard = () => {
           {filtros.map((f) => (
             <button
               key={f.value}
-              className={`${styles['filter-btn']} ${filtro === f.value ? styles['active'] : ''}`}
+              className={`${styles['filter-btn']} ${
+                filtro === f.value ? styles['active'] : ''
+              }`}
               onClick={() => setFiltro(f.value)}
             >
               {f.label}
@@ -78,15 +94,18 @@ const MediadorDashboard = () => {
         {status === 'loading' && (
           <div className={styles['loading']}>Carregando pedidos...</div>
         )}
+
         {status === 'failed' && (
           <div className={styles['failed']}>Erro: {error}</div>
         )}
-        {status === 'succeeded' && pedidosFiltrados.length === 0 && (
+
+        {(status === 'succeeded' && (!pedidos || pedidos.length === 0)) && (
           <div className={styles['no-pedidos']}>
-            <p>Nenhum pedido encontrado para este filtro.</p>
+            <p>Nenhum pedido encontrado.</p>
           </div>
         )}
-        {status === 'succeeded' &&
+
+        {status === 'succeeded' && pedidosFiltrados.length > 0 &&
           pedidosFiltrados.map((pedido) => (
             <PedidoCard key={pedido.id} pedido={pedido} />
           ))}

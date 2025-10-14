@@ -28,3 +28,23 @@
 .card__button:hover {
   background-color: #005fcc;
 }
+
+.btn-detalhes {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 16px;
+  background-color: #127035; /* verde moderno */
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 3px 8px rgba(34, 197, 94, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-detalhes:hover {
+  background-color: #127035;
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(34, 197, 94, 0.4);
+}

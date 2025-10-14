@@ -6,7 +6,11 @@ export const fetchPedidos = createAsyncThunk(
   async () => {
     const response = await fetch('http://localhost:3001/pedidos');
     const data = await response.json();
-    return data;
+
+    // 🔧 Garante compatibilidade com ambos formatos possíveis
+    const lista = data?.pedidos?.['lista-de-pedidos'] || data?.['lista-de-pedidos'] || [];
+
+    return lista;
   }
 );
 
@@ -17,7 +21,9 @@ export const concluirPedido = createAsyncThunk(
     const response = await fetch(`http://localhost:3001/pedidos/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'Concluído' })
+      body: JSON.stringify({
+        status: { id: 2, name: 'Concluído' }
+      })
     });
     const data = await response.json();
     return data;
