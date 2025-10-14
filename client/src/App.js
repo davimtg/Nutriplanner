@@ -17,6 +17,7 @@ import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedid
 import Relatorio from "./pages/Relatorio/Relatorio"
 import Planejamento from "./pages/Planejamento/Planejamento"
 import EsqeuciMinhaSenha from "./pages/EsqueciMinhaSenha/EsqueciMinhaSenha"
+import CriarEditarPlano from './pages/CriarEditarPlano/CriarEditarPlano';
 
 function DashboardRouter() {
   const userType = useSelector((state) => state.user.userType);
@@ -74,7 +75,8 @@ function AppContext() {
         <Route path="/planejamento" element={<Planejamento />} />
         <Route path="/perfil" element={<Perfil userData={userData} setUserData={setUserData} />} />
         <Route path="/planos" element={<Planos/>}/>
-        <Route path="/planos/:id" element={<PlanoDetalhes/>}/>
+        <Route path="/planos/criar" element={<CriarEditarPlano />}/>
+        <Route path="/planos/:id" element={<CriarEditarPlano/>}/>
         <Route path="/esqueci-minha-senha" element={<EsqeuciMinhaSenha/>}/>
       </Routes>
     </>
