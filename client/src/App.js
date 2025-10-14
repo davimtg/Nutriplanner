@@ -4,8 +4,10 @@ import { useSelector } from "react-redux";
 import Header from "./components/Header/Header";
 import Login from "./pages/Login/Login";
 import Registrar from "./pages/Registrar/Registrar";
-import DashboardNutricionista from "./pages/DashboardNutricionista/DashboardNutricionista";
 import Perfil from "./pages/Perfil/Perfil";
+import Pacientes from "./pages/Pacientes/Pacientes"
+import Planos from "./pages/Planos/Planos"
+import PlanoDetalhes from "./pages/PlanoDetalhes/PlanoDetalhes"
 import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
 import Compras from "./pages/Compras/Compras";
 import Chat from "./components/Chat/Chat"
@@ -76,14 +78,15 @@ function AppContext() {
 
         {/* Páginas para Logados */}
         <Route path="/dashboard" element={<DashboardRouter planos={planos} setPlanos={setPlanos} />} />
-
         <Route path="/compras" element={<Compras />} />
         <Route path="/biblioteca" element={<Biblioteca />} />
         <Route path="/mediador-pedido-detalhes" element={<MediadorPedidoDetalhes />} />
         <Route path="/relatorio" element={<Relatorio />} />
         <Route path="/planejamento" element={<Planejamento />} />
-
         <Route path="/perfil" element={<Perfil userData={userData} setUserData={setUserData} />} />
+        <Route path="/planos" element={<Planos/>}/>
+        <Route path="/planos/:id" element={<PlanoDetalhes/>}/>
+        <Route path="/pacientes" element={<Pacientes/>}/>
       </Routes>
     </>
   );

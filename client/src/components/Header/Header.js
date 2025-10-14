@@ -25,7 +25,8 @@ export default function Header({ tipo }) {
       { label: "Perfil", page: "perfil" },
     ],
     nutricionista: [
-      { label: "Home", page: "dashboard" },
+      { label: "Pacientes", page: "dashboard" },
+      { label: "Planos", page: "planos" },
       { label: "Perfil", page: "perfil" },
     ],
     mediador: [

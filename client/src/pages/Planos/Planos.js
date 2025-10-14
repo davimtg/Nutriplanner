@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect} from "react";
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Row,
@@ -7,12 +8,27 @@ import {
   Button,
   ListGroup,
   Alert,
+  Spinner,
 } from "react-bootstrap";
-import styles from "./ListaPlanos.module.css";
+import styles from "./Planos.module.css";
 
-function ListaPlanos({ planos }) {
+function Planos() {
+  const navigate = useNavigate();
+  const [planos, setPlanos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [termoBusca, setTermoBusca] = useState("");
 
+  useEffect(() => {
+    fetch("http://localhost:3001/planos")
+      .then((response) => response.json())
+      .then((data) => {
+        setPlanos(data);
+      })
+      .catch((error) => console.error("Erro ao buscar os planos:", error))
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
   const planosFiltrados = useMemo(
     () =>
       planos.filter((plano) =>
@@ -20,6 +36,15 @@ function ListaPlanos({ planos }) {
       ),
     [termoBusca, planos]
   );
+  if (loading) {
+    return (
+      <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '300px' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Carregando...</span>
+        </Spinner>
+      </Container>
+    );
+  }
 
   return (
     <Container className="bg-light border rounded-4 my-3">
@@ -57,12 +82,13 @@ function ListaPlanos({ planos }) {
                 >
                   <div>
                     <div className="fw-bold">{plano.nome}</div>
-                    {plano.objetivo}
+                    <small className="text-muted">{plano.objetivo || "Objetivo não definido"}</small>
                   </div>
                   <Button
                     variant="outline-secondary"
                     size="sm"
                     className="text-nowrap"
+                    onClick={() => navigate(`/planos/${plano.id}`)}
                   >
                     Visualizar Plano
                   </Button>
@@ -71,7 +97,10 @@ function ListaPlanos({ planos }) {
             </ListGroup>
           ) : (
             <Alert variant="info" className="text-center">
-              Nenhum plano alimentar encontrado com o termo "{termoBusca}".
+              {termoBusca
+                ? `Nenhum plano alimentar encontrado com o termo "${termoBusca}".`
+                : "Nenhum plano alimentar cadastrado."
+              }
             </Alert>
           )}
         </Col>
@@ -80,4 +109,4 @@ function ListaPlanos({ planos }) {
   );
 }
 
-export default ListaPlanos;
+export default Planos;
