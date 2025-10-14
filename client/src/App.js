@@ -17,22 +17,16 @@ import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedid
 import Relatorio from "./pages/Relatorio/Relatorio"
 import Planejamento from "./pages/Planejamento/Planejamento"
 
-function DashboardRouter({ planos, setPlanos }) {
+function DashboardRouter() {
   const userType = useSelector((state) => state.user.userType);
-
   if (!userType) return <Navigate to="/" />;
 
   switch (userType.id) {
-    case 0:
-      return null;
-    case 1:
-      return <ClienteDashboard />;
-    case 2:
-      return <DashboardNutricionista planos={planos} setPlanos={setPlanos} />;
-    case 3:
-      return <MediadorDashboard />;
-    default:
-      return <Navigate to="/" />;
+    case 0: return null;
+    case 1: return <ClienteDashboard />;
+    case 2: return <Pacientes />;
+    case 3: return <MediadorDashboard />;
+    default: return <Navigate to="/" />;
   }
 }
 
@@ -53,22 +47,16 @@ function AppContext() {
     complemento: "P1 - 101",
   });
 
-  const [planos, setPlanos] = useState([
-    { id: 1, nome: 'Hipertrofia Muscular', objetivo: 'Ganho de massa' },
-    { id: 2, nome: 'Dieta Mediterrânea', objetivo: 'Saúde e longevidade' },
-    { id: 3, nome: 'Low Carb Equilibrado', objetivo: 'Perda de peso' },
-    { id: 4, nome: 'Dieta Vegana para Atletas', objetivo: 'Performance' },
-    { id: 5, nome: 'Reeducação Alimentar', objetivo: 'Saúde geral' },
-  ]);
-
-  const hideRoutes = ["/", "/login", "/registrar"];
-  const showLoggedComponents = !hideRoutes.includes(location.pathname);
+  // Aqui é um código para quando a pessoa não estiver logada,
+  // Não aparecer o header, nem o chat
+  const rotasNaoLogadas = ["/", "/login", "/registrar"];
+  const mostrarComponentesQuandoLogados = !rotasNaoLogadas.includes(location.pathname);
   const userType = useSelector((state) => state.user.userType);
 
   return (
     <>
-      {showLoggedComponents && <Header tipo={userType.name}/>}
-      {showLoggedComponents && <Chat userData={userData} setUserData={setUserData}/>}
+      {mostrarComponentesQuandoLogados && <Header tipo={userType.name}/>}
+      {mostrarComponentesQuandoLogados && <Chat />}
 
       <Routes>
         {/* Páginas para Não-Logados */}
@@ -77,7 +65,7 @@ function AppContext() {
         <Route path="/registrar" element={<Registrar />}/>
 
         {/* Páginas para Logados */}
-        <Route path="/dashboard" element={<DashboardRouter planos={planos} setPlanos={setPlanos} />} />
+        <Route path="/dashboard" element={<DashboardRouter />} />
         <Route path="/compras" element={<Compras />} />
         <Route path="/biblioteca" element={<Biblioteca />} />
         <Route path="/mediador-pedido-detalhes" element={<MediadorPedidoDetalhes />} />
@@ -86,7 +74,6 @@ function AppContext() {
         <Route path="/perfil" element={<Perfil userData={userData} setUserData={setUserData} />} />
         <Route path="/planos" element={<Planos/>}/>
         <Route path="/planos/:id" element={<PlanoDetalhes/>}/>
-        <Route path="/pacientes" element={<Pacientes/>}/>
       </Routes>
     </>
   );
