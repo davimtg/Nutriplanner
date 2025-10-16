@@ -52,12 +52,11 @@ export default function CriarEditarPlano() {
   useEffect(() => {
     const fetchDadosIniciais = async () => {
       try {
-        // Fazendo as requisições para alimentos primeiro, e depois para o plano
         const [alimentosRes, planoRes] = await Promise.all([
           fetch("http://localhost:3001/alimentos"),
           isEditing
             ? fetch(`http://localhost:3001/planos-alimentares/${id}`)
-            : Promise.resolve(null), // Não carrega o plano caso não esteja editando
+            : Promise.resolve(null),
         ]);
 
         if (!alimentosRes.ok) {
@@ -65,7 +64,7 @@ export default function CriarEditarPlano() {
         }
 
         const alimentosData = await alimentosRes.json();
-        setTodosAlimentos(alimentosData.alimentos || alimentosData); // Ajusta a estrutura conforme os dados
+        setTodosAlimentos(alimentosData.alimentos || alimentosData);
 
         if (isEditing) {
           if (!planoRes.ok) {
@@ -99,7 +98,7 @@ export default function CriarEditarPlano() {
 
   const alimentosMap = useMemo(() => {
     const map = new Map();
-    todosAlimentos.forEach((alimento) => map.set(alimento.id, alimento));
+    todosAlimentos.forEach((alimento) => map.set(String(alimento.id), alimento));
     return map;
   }, [todosAlimentos]);
 
@@ -253,7 +252,7 @@ export default function CriarEditarPlano() {
           </div>
           {refeicoesDoDiaAtivo.map(([refeicao, itens]) => {
             const caloriasTotaisRefeicao = itens.reduce((total, item) => {
-              const alimentoInfo = alimentosMap.get(item.id);
+              const alimentoInfo = alimentosMap.get(String(item.id));
               if (!alimentoInfo) return total;
               const proporcao = item.gramas / 100;
               return total + (alimentoInfo.calorias || 0) * proporcao;
@@ -273,7 +272,7 @@ export default function CriarEditarPlano() {
                 ) : (
                   <ul className="list-unstyled mb-0">
                     {itens.map((item, index) => {
-                      const alimentoInfo = alimentosMap.get(item.id);
+                      const alimentoInfo = alimentosMap.get(String(item.id));
                       if (!alimentoInfo) {
                         return (
                           <li key={index} className="text-danger">
