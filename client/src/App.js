@@ -7,7 +7,6 @@ import Registrar from "./pages/Registrar/Registrar";
 import Perfil from "./pages/Perfil/Perfil";
 import Pacientes from "./pages/Pacientes/Pacientes"
 import Planos from "./pages/Planos/Planos"
-import PlanoDetalhes from "./pages/PlanoDetalhes/PlanoDetalhes"
 import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
 import Compras from "./pages/Compras/Compras";
 import Chat from "./components/Chat/Chat"
