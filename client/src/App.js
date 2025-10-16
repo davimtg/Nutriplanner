@@ -1,12 +1,35 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Header from "./components/Header/Header";
 import Login from "./pages/Login/Login";
 import Registrar from "./pages/Registrar/Registrar";
-import DashboardNutricionista from "./pages/DashboardNutricionista/DashboardNutricionista";
 import Perfil from "./pages/Perfil/Perfil";
+import Pacientes from "./pages/Pacientes/Pacientes"
+import Planos from "./pages/Planos/Planos"
+import PlanoDetalhes from "./pages/PlanoDetalhes/PlanoDetalhes"
 import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
+import Compras from "./pages/Compras/Compras";
 import Chat from "./components/Chat/Chat"
+import Biblioteca from './pages/Biblioteca/Biblioteca';
+import MediadorDashboard from "./pages/MediadorDashboard/MediadorDashboard";
+import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedidoDetalhes";
+import Relatorio from "./pages/Relatorio/Relatorio"
+import Planejamento from "./pages/Planejamento/Planejamento"
+import EsqeuciMinhaSenha from "./pages/EsqueciMinhaSenha/EsqueciMinhaSenha"
+
+function DashboardRouter() {
+  const userType = useSelector((state) => state.user.userType);
+  if (!userType) return <Navigate to="/" />;
+
+  switch (userType.id) {
+    case 0: return null;
+    case 1: return <ClienteDashboard />;
+    case 2: return <Pacientes />;
+    case 3: return <MediadorDashboard />;
+    default: return <Navigate to="/" />;
+  }
+}
 
 function AppContext() {
   const location = useLocation();
@@ -25,73 +48,34 @@ function AppContext() {
     complemento: "P1 - 101",
   });
 
-  const [loginData, setLoginData] = useState({
-    email: "",
-    password: "",
-    userType: "",
-  });
-
-  const [RegistrarData, setRegistrarData] = useState({
-    userType: "",
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  const [pacientes, setPacientes] = useState([
-    { id: 1, nome: 'João da Silva', objetivo: 'Perda de peso' },
-    { id: 2, nome: 'Maria Oliveira', objetivo: 'Controle de diabetes' },
-    { id: 3, nome: 'Carlos Pereira', objetivo: 'Ganho de massa muscular' },
-    { id: 4, nome: 'Ana Souza', objetivo: 'Reeducação alimentar' },
-  ]);
-
-  const [planos, setPlanos] = useState([
-    { id: 1, nome: 'Hipertrofia Muscular', objetivo: 'Ganho de massa' },
-    { id: 2, nome: 'Dieta Mediterrânea', objetivo: 'Saúde e longevidade' },
-    { id: 3, nome: 'Low Carb Equilibrado', objetivo: 'Perda de peso' },
-    { id: 4, nome: 'Dieta Vegana para Atletas', objetivo: 'Performance' },
-    { id: 5, nome: 'Reeducação Alimentar', objetivo: 'Saúde geral' },
-  ]);
-
-  const hideHeaderRoutes = ["/", "/login", "/registrar"];
-  const showHeader = !hideHeaderRoutes.includes(location.pathname);
+  // Aqui é um código para quando a pessoa não estiver logada,
+  // Não aparecer o header, nem o chat
+  const rotasNaoLogadas = ["/", "/login", "/registrar", "/esqueci-minha-senha"];
+  const mostrarComponentesQuandoLogados = !rotasNaoLogadas.includes(location.pathname);
+  const userType = useSelector((state) => state.user.userType);
 
   return (
     <>
-      {showHeader && <Chat userData={userData} setUserData={setUserData}/>}
-      {showHeader && <Header />}
+      {mostrarComponentesQuandoLogados && <Header tipo={userType.name}/>}
+      {mostrarComponentesQuandoLogados && <Chat />}
 
       <Routes>
-        <Route
-          path="/"
-          element={<Login loginData={loginData} setLoginData={setLoginData} />}
-        />
-        <Route
-          path="/login"
-          element={<Login loginData={loginData} setLoginData={setLoginData} />}
-        />
-        <Route
-          path="/registrar"
-          element={
-            <Registrar
-              RegistrarData={RegistrarData}
-              setRegistrarData={setRegistrarData}
-            />
-          }
-        />
-        <Route
-          path="/perfil"
-          element={<Perfil userData={userData} setUserData={setUserData} />}
-        />
-        <Route
-          path="/nutricionista-dashboard"
-          element={<DashboardNutricionista planos={planos} pacientes={pacientes} />}
-        />
+        {/* Páginas para Não-Logados */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/registrar" element={<Registrar />} />
-        <Route path="/cliente-dashboard" element={<ClienteDashboard />} />
+        <Route path="/registrar" element={<Registrar />}/>
+
+        {/* Páginas para Logados */}
+        <Route path="/dashboard" element={<DashboardRouter />} />
+        <Route path="/compras" element={<Compras />} />
+        <Route path="/biblioteca" element={<Biblioteca />} />
+        <Route path="/mediador-pedido-detalhes" element={<MediadorPedidoDetalhes />} />
+        <Route path="/relatorio" element={<Relatorio />} />
+        <Route path="/planejamento" element={<Planejamento />} />
+        <Route path="/perfil" element={<Perfil userData={userData} setUserData={setUserData} />} />
+        <Route path="/planos" element={<Planos/>}/>
+        <Route path="/planos/:id" element={<PlanoDetalhes/>}/>
+        <Route path="/esqueci-minha-senha" element={<EsqeuciMinhaSenha/>}/>
       </Routes>
     </>
   );

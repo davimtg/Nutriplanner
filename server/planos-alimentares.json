@@ -1,0 +1,266 @@
+{
+    "planos-alimentares": [
+    {
+      "id": 0,
+      "nome": "Dieta Mediterrânea Clássica",
+      "objetivo": "Saúde Cardiovascular e Longevidade",
+      "calorias_diarias_aprox": 1900,
+      "detalhamento": {
+        "segunda": {
+          "cafe_da_manha": { 
+            "descricao": "Sobrecoxa de frango com arroz branco e cominho",
+            "itens": [
+              { "alimento-id": 0, "name": "Arroz Branco (Cozido)", "quantidade": "100 g" },
+              { "alimento-id": 2, "name": "Cominho", "quantidade": "15 g" },
+              { "alimento-id": 8, "name": "Carne da Sobrecoxa de Frango (Assado, Cozido)", "quantidade": "120 g" }
+            ],
+            "calorias": 380 
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        },
+        "terca": {
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        },
+        "quarta": {
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        },
+        "quinta": {
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        },
+        "sexta": {
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        },
+        "sabado": {
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        },
+        "domingo": {
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        }
+      }
+    },
+    {
+      "id": 0,
+      "nome": "Dieta Mediterrânea Clássica",
+      "objetivo": "Saúde Cardiovascular e Longevidade",
+      "calorias_diarias_aprox": 1900,
+      "detalhamento": {
+        "segunda": {
+          "cafe_da_manha": { 
+            "descricao": "Sobrecoxa de frango com arroz branco e cominho",
+            "itens": [
+              { "alimento-id": 0, "name": "Arroz Branco (Cozido)", "quantidade": "100 g" },
+              { "alimento-id": 2, "name": "Cominho", "quantidade": "15 g" },
+              { "alimento-id": 8, "name": "Carne da Sobrecoxa de Frango (Assado, Cozido)", "quantidade": "120 g" }
+            ],
+            "calorias": 380 
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        },
+        "terca": {
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        },
+        "quarta": {
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        },
+        "quinta": {
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        },
+        "sexta": {
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        },
+        "sabado": {
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        },
+        "domingo": {
+          "cafe_da_manha": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "almoco": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          },
+          "jantar": {
+            "descricao": null,
+            "itens": [ ],
+            "calorias": null
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,5 +1,5 @@
-/* Login */
-/* ===================== */
+/* Mantendo o mesmo design do login */
+
 .login {
     width: calc(100% - 40px);
     max-width: 500px;
@@ -12,7 +12,6 @@
 }
 
 /* Login Header */
-/* ===================== */
 .login-header {
     display: flex;
     flex-direction: column;
@@ -36,57 +35,12 @@
     margin: 0;
 }
 
-/* Login Multi-Enter */
-/* ===================== */
-.login-multi {
-    width: 100%;
-    margin: 40px 0 20px 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-}
-
-.login-multi__button {
-    width: 100%;
-    height: 40px;
-    border: 1px solid rgb(150, 150, 150);
-    background-color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-}
-
-.login-multi__button.start {
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
-}
-
-.login-multi__button.end {
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-}
-
-.login-multi__button-text {
-    font-size: 12px;
-    font-family: "Poppins Bold", Arial, Helvetica, sans-serif;
-    color: rgb(69, 69, 69);
-    margin: 0;
-}
-
-.login-multi__button.selected {
-    background-color: #75a371;
-}
-
-.login-multi__button.selected .login-multi__button-text {
-    color: white;
-}
-
-/* Login Form */
-/* ===================== */
+/* Form */
 .login-form {
     width: 100%;
     display: flex;
     flex-direction: column;
+    margin-top: 40px;
 }
 
 .login-input {
@@ -94,6 +48,7 @@
     height: 38px;
     margin-bottom: 5px;
     font-size: 15px;
+    padding: 0 10px;
 }
 
 .login-input:focus {
@@ -116,22 +71,9 @@
     background: linear-gradient(to bottom, #93af83, #2f5435);
 }
 
-.login-reset-password {
-    text-align: center;
-    color: black;
-    margin: 10px 0 20px 0;
-    font-size: 14px;
-    font-family: "Poppins Medium", Arial, Helvetica, sans-serif;
-}
-
-.login-reset-password:hover {
-    color: green;
-}
-
-/* Login Register */
-/* ===================== */
+/* Register link */
 .login-register {
-    margin-top: 165px;
+    margin-top: 60px;
 }
 
 .login-register__text {

@@ -4,6 +4,7 @@ node_modules/
 # Build output
 dist/
 build/
+server/db.json
 
 # Logs
 npm-debug.log*

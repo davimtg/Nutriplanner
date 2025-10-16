@@ -1,0 +1,72 @@
+{
+  "usuarios": {
+    "tipo-code": [
+      { "id": 0, "name": "admin" },
+      { "id": 1, "name": "cliente" },
+      { "id": 2, "name": "nutricionista" },
+      { "id": 3, "name": "mediador" }
+    ],
+    "lista-de-usuarios": [
+      { 
+        "id": 0,
+        "nome": "Admin",
+        "telefone": "",
+        "endereco": "",
+        "tipo": {
+          "id": 0,
+          "name": "admin"
+        },
+        "objetivo": null,
+        "planoId": null
+      },
+      { 
+        "id": 1,
+        "nome": "João da Silva",
+        "telefone": "(21) 99999-9999",
+        "endereco": "Av. Central, 456 - São Paulo",
+        "tipo": {
+          "id": 1,
+          "name": "cliente"
+        },
+        "objetivo": null,
+        "planoId": null
+      },
+      { 
+        "id": 2,
+        "nome": "Marcus Vinicius",
+        "telefone": "(21) 91203-1021",
+        "endereco": "Av. Camarista Méier, 1012 - Rio de Janeiro",
+        "tipo": {
+          "id": 1,
+          "name": "cliente"
+        },
+        "objetivo": null,
+        "planoId": null
+      },
+      {
+        "id": 3,
+        "nome": "Nathália Barbosa",
+        "telefone": "(22) 98888-8888",
+        "endereco": "Rua A, 123 - Rio de Janeiro",
+        "tipo": {
+          "id": 2,
+          "name": "nutricionista"
+        },
+        "objetivo": null,
+        "planoId": null
+      },
+      {
+        "id": 4,
+        "nome": "Ricardo Assunção",
+        "telefone": "(22) 92288-2288",
+        "endereco": "Rua V, 321 - Rio de Janeiro",
+        "tipo": {
+          "id": 3,
+          "name": "mediador"
+        },
+        "objetivo": null,
+        "planoId": null
+      }
+    ]
+  }
+}
