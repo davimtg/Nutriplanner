@@ -10,7 +10,6 @@ import {
   Alert,
   Spinner,
 } from "react-bootstrap";
-import styles from "./Planos.module.css";
 
 function Planos() {
   const navigate = useNavigate();
@@ -74,8 +73,9 @@ function Planos() {
         </Col>
         <Col xs={12} md={6} className="d-flex align-items-center justify-content-between justify-content-md-end">
           <Button
-            className={`${styles.btnCorPrincipal} me-2 text-nowrap`}
+            className="me-2 text-nowrap"
             onClick={() => navigate("/planos/criar")}
+            variant= "success"
           >
             Criar Plano
           </Button>

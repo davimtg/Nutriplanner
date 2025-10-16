@@ -28,6 +28,18 @@ const planoInicialVazio = {
   },
 };
 
+// Objeto para mapear os nomes internos para os nomes de exibição com acentuação
+const diasDaSemanaLabels = {
+  segunda: "Segunda",
+  terca: "Terça",
+  quarta: "Quarta",
+  quinta: "Quinta",
+  sexta: "Sexta",
+  sabado: "Sábado",
+  domingo: "Domingo",
+};
+
+
 export default function CriarEditarPlano() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -101,6 +113,30 @@ export default function CriarEditarPlano() {
     todosAlimentos.forEach((alimento) => map.set(String(alimento.id), alimento));
     return map;
   }, [todosAlimentos]);
+  
+  const totaisDoDiaAtivo = useMemo(() => {
+    const totais = { calorias: 0, proteina: 0, gordura: 0, carboidrato: 0 };
+    if (!plano?.detalhamento || !plano.detalhamento[diaAtivo] || alimentosMap.size === 0) {
+      return totais;
+    }
+
+    const refeicoesDoDia = plano.detalhamento[diaAtivo];
+    for (const refeicaoKey in refeicoesDoDia) {
+      const itensDaRefeicao = refeicoesDoDia[refeicaoKey];
+      for (const item of itensDaRefeicao) {
+        const alimentoInfo = alimentosMap.get(String(item.id));
+        if (alimentoInfo) {
+          const proporcao = item.gramas / 100;
+          totais.calorias += (alimentoInfo.calorias || 0) * proporcao;
+          totais.proteina += (alimentoInfo.proteina || 0) * proporcao;
+          totais.gordura += (alimentoInfo.gordura || 0) * proporcao;
+          totais.carboidrato += (alimentoInfo.carboidrato || 0) * proporcao;
+        }
+      }
+    }
+    return totais;
+  }, [plano, diaAtivo, alimentosMap]);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -238,6 +274,7 @@ export default function CriarEditarPlano() {
               </Col>
             </Form.Group>
           </div>
+
           <div className="d-flex flex-wrap justify-content-center mb-4">
             {diasDaSemana.map((dia) => (
               <Button
@@ -246,10 +283,33 @@ export default function CriarEditarPlano() {
                 variant={diaAtivo === dia ? "success" : "outline-success"}
                 className="m-1 fw-semibold"
               >
-                {dia.charAt(0).toUpperCase() + dia.slice(1)}
+                {diasDaSemanaLabels[dia] || dia.charAt(0).toUpperCase() + dia.slice(1)}
               </Button>
             ))}
           </div>
+
+          <div className="bg-white p-3 rounded-3 shadow-sm mb-4">
+              <h5 className="text-success fw-bold text-center mb-3">Resumo Nutricional do Dia</h5>
+              <div className="d-flex justify-content-around text-center">
+                  <div>
+                      <div className="fw-bold">{totaisDoDiaAtivo.calorias.toFixed(0)}</div>
+                      <small className="text-muted">Kcal</small>
+                  </div>
+                  <div>
+                      <div className="fw-bold">{totaisDoDiaAtivo.proteina.toFixed(1)}g</div>
+                      <small className="text-muted">Proteínas</small>
+                  </div>
+                  <div>
+                      <div className="fw-bold">{totaisDoDiaAtivo.gordura.toFixed(1)}g</div>
+                      <small className="text-muted">Gorduras</small>
+                  </div>
+                  <div>
+                      <div className="fw-bold">{totaisDoDiaAtivo.carboidrato.toFixed(1)}g</div>
+                      <small className="text-muted">Carboidratos</small>
+                  </div>
+              </div>
+          </div>
+
           {refeicoesDoDiaAtivo.map(([refeicao, itens]) => {
             const caloriasTotaisRefeicao = itens.reduce((total, item) => {
               const alimentoInfo = alimentosMap.get(String(item.id));
@@ -352,7 +412,7 @@ export default function CriarEditarPlano() {
                 ) : isEditing ? (
                   "Salvar Alterações"
                 ) : (
-                  "Criar Plano Completo"
+                  "Salvar Plano"
                 )}
               </Button>
             </Col>
@@ -363,7 +423,7 @@ export default function CriarEditarPlano() {
             <Modal.Title>
               Adicionar Alimento em{" "}
               {modalContext.dia
-                ? `${nomesRefeicoes[modalContext.refeicao]} de ${modalContext.dia.charAt(0).toUpperCase() + modalContext.dia.slice(1)}`
+                ? `${nomesRefeicoes[modalContext.refeicao]} de ${diasDaSemanaLabels[modalContext.dia]}`
                 : ""}
             </Modal.Title>
           </Modal.Header>

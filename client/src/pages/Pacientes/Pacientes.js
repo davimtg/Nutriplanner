@@ -11,7 +11,6 @@ import {
   Modal,
 } from "react-bootstrap";
 
-// --- Componente do Modal (agora no mesmo arquivo) ---
 function VincularPlanoModal({ show, handleClose, paciente, onSave }) {
   const [planos, setPlanos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,6 +58,10 @@ function VincularPlanoModal({ show, handleClose, paciente, onSave }) {
     }
   };
 
+  const handleDesvincular = () => {
+    onSave(paciente.id, null); // Passa null para desvincular o plano
+  };
+
   return (
     <Modal show={show} onHide={handleClose} centered size="lg">
       <Modal.Header closeButton>
@@ -100,6 +103,11 @@ function VincularPlanoModal({ show, handleClose, paciente, onSave }) {
         )}
       </Modal.Body>
       <Modal.Footer>
+        {paciente.planoId && (
+          <Button variant="danger" onClick={handleDesvincular} className="me-auto">
+            Desvincular
+          </Button>
+        )}
         <Button variant="secondary" onClick={handleClose}>
           Cancelar
         </Button>
@@ -268,7 +276,7 @@ function Pacientes() {
                           </small>
                         )}
                         <small className="d-block text-muted">
-                          Plano Atual: {nomeDoPlano}
+                          Planejamento Atual: {nomeDoPlano}
                         </small>
                       </div>
                       <div className="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -280,7 +288,7 @@ function Pacientes() {
                           variant="success"
                           onClick={() => handleOpenModal(paciente)}
                         >
-                          Vincular Plano
+                          Plano Alimentar
                         </Button>
                         <Button size="sm" variant="success">
                           Chat
@@ -312,4 +320,3 @@ function Pacientes() {
 }
 
 export default Pacientes;
-
