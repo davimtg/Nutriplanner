@@ -1,72 +1,213 @@
 {
-  "usuarios": {
-    "tipo-code": [
-      { "id": 0, "name": "admin" },
-      { "id": 1, "name": "cliente" },
-      { "id": 2, "name": "nutricionista" },
-      { "id": 3, "name": "mediador" }
-    ],
-    "lista-de-usuarios": [
-      { 
+  "usuarios": [
+      {
         "id": 0,
         "nome": "Admin",
         "telefone": "",
-        "endereco": "",
+        "email": "admin@gmail.com",
+        "endereco": {
+          "CEP": "",
+          "Estado": "",
+          "Cidade": "",
+          "Rua": "",
+          "numero": "",
+          "Complemento": ""
+        },
         "tipo": {
           "id": 0,
           "name": "admin"
         },
         "objetivo": null,
-        "planoId": null
+        "planoId": null,
+        "contatosRecentes": [],
+        "contatos": [],
+        "idade": null,
+        "sexo": null,
+        "altura": null,
+        "peso": null
       },
-      { 
+      {
         "id": 1,
         "nome": "João da Silva",
         "telefone": "(21) 99999-9999",
-        "endereco": "Av. Central, 456 - São Paulo",
+        "email": "joao.da.silva@gmail.com",
+        "endereco": {
+          "CEP": "04567-000",
+          "Estado": "SP",
+          "Cidade": "São Paulo",
+          "Rua": "Av. Central",
+          "numero": "456",
+          "Complemento": ""
+        },
         "tipo": {
           "id": 1,
-          "name": "cliente"
+          "name": "Cliente"
         },
         "objetivo": null,
-        "planoId": null
+        "planoId": null,
+        "contatosRecentes": [3, 2],
+        "contatos": [2, 3],
+        "idade": 34,
+        "sexo": "masculino",
+        "altura": 175,
+        "peso": 78
       },
-      { 
+      {
         "id": 2,
         "nome": "Marcus Vinicius",
         "telefone": "(21) 91203-1021",
-        "endereco": "Av. Camarista Méier, 1012 - Rio de Janeiro",
+        "email": "marcus.vinicius@gmail.com",
+        "endereco": {
+          "CEP": "20750-000",
+          "Estado": "RJ",
+          "Cidade": "Rio de Janeiro",
+          "Rua": "Av. Camarista Méier",
+          "numero": "1012",
+          "Complemento": "Apto 202"
+        },
         "tipo": {
           "id": 1,
-          "name": "cliente"
+          "name": "Cliente"
         },
         "objetivo": null,
-        "planoId": null
+        "planoId": null,
+        "contatosRecentes": [3, 1],
+        "contatos": [1, 3],
+        "idade": 29,
+        "sexo": "masculino",
+        "altura": 180,
+        "peso": 85
       },
       {
         "id": 3,
         "nome": "Nathália Barbosa",
         "telefone": "(22) 98888-8888",
-        "endereco": "Rua A, 123 - Rio de Janeiro",
+        "email": "nathalia.barbosa@gmail.com",
+        "endereco": {
+          "CEP": "20000-000",
+          "Estado": "RJ",
+          "Cidade": "Rio de Janeiro",
+          "Rua": "Rua A",
+          "numero": "123",
+          "Complemento": "Sala 5"
+        },
         "tipo": {
           "id": 2,
-          "name": "nutricionista"
+          "name": "Nutricionista"
         },
         "objetivo": null,
-        "planoId": null
+        "planoId": null,
+        "contatosRecentes": [1, 2, 4],
+        "contatos": [1, 2, 4],
+        "idade": 41,
+        "sexo": "feminino",
+        "altura": 165,
+        "peso": 62
       },
       {
         "id": 4,
         "nome": "Ricardo Assunção",
         "telefone": "(22) 92288-2288",
-        "endereco": "Rua V, 321 - Rio de Janeiro",
+        "email": "ricardo.assuncao@gmail.com",
+        "endereco": {
+          "CEP": "20200-000",
+          "Estado": "RJ",
+          "Cidade": "Rio de Janeiro",
+          "Rua": "Rua V",
+          "numero": "321",
+          "Complemento": ""
+        },
         "tipo": {
           "id": 3,
-          "name": "mediador"
+          "name": "Mediador"
         },
         "objetivo": null,
-        "planoId": null
+        "planoId": null,
+        "contatosRecentes": [3],
+        "contatos": [3],
+        "idade": 37,
+        "sexo": "masculino",
+        "altura": 172,
+        "peso": 80
+      },
+      {
+        "id": 5,
+        "nome": "Mariana Costa",
+        "telefone": "(11) 98877-6655",
+        "email": "mariana.costa@gmail.com",
+        "endereco": {
+          "CEP": "01311-000",
+          "Estado": "SP",
+          "Cidade": "São Paulo",
+          "Rua": "Rua Oscar Freire",
+          "numero": "1200",
+          "Complemento": "Apto 45"
+        },
+        "tipo": {
+          "id": 1,
+          "name": "Cliente"
+        },
+        "objetivo": null,
+        "planoId": null,
+        "contatosRecentes": [3],
+        "contatos": [3, 1],
+        "idade": 27,
+        "sexo": "feminino",
+        "altura": 162,
+        "peso": 64
+      },
+      {
+        "id": 6,
+        "nome": "Lucas Pereira",
+        "telefone": "(31) 97766-5544",
+        "email": "lucas.pereira@gmail.com",
+        "endereco": {
+          "CEP": "30190-000",
+          "Estado": "MG",
+          "Cidade": "Belo Horizonte",
+          "Rua": "Av. Afonso Pena",
+          "numero": "1500",
+          "Complemento": "Sala 12"
+        },
+        "tipo": {
+          "id": 1,
+          "name": "Cliente"
+        },
+        "objetivo": null,
+        "planoId": null,
+        "contatosRecentes": [3, 5],
+        "contatos": [3, 5],
+        "idade": 31,
+        "sexo": "masculino",
+        "altura": 178,
+        "peso": 82
+      },
+      {
+        "id": 7,
+        "nome": "Beatriz Almeida",
+        "telefone": "(41) 99655-4433",
+        "email": "beatriz.almeida@gmail.com",
+        "endereco": {
+          "CEP": "80020-310",
+          "Estado": "PR",
+          "Cidade": "Curitiba",
+          "Rua": "Rua das Flores",
+          "numero": "210",
+          "Complemento": ""
+        },
+        "tipo": {
+          "id": 1,
+          "name": "Cliente"
+        },
+        "objetivo": null,
+        "planoId": null,
+        "contatosRecentes": [3, 1],
+        "contatos": [1, 3],
+        "idade": 24,
+        "sexo": "feminino",
+        "altura": 168,
+        "peso": 59
       }
     ]
   }
-}
+
