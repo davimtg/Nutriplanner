@@ -17,6 +17,8 @@ import Relatorio from "./pages/Relatorio/Relatorio"
 import Planejamento from "./pages/Planejamento/Planejamento"
 import EsqeuciMinhaSenha from "./pages/EsqueciMinhaSenha/EsqueciMinhaSenha"
 import CriarEditarPlano from './pages/CriarEditarPlano/CriarEditarPlano';
+import Alimentos from "./pages/Alimentos/Alimentos";
+import Receitas from './pages/Receitas/Receitas';
 
 function DashboardRouter() {
   const userType = useSelector((state) => state.user.userType);
@@ -77,6 +79,8 @@ function AppContext() {
         <Route path="/planos/criar" element={<CriarEditarPlano />}/>
         <Route path="/planos/:id" element={<CriarEditarPlano/>}/>
         <Route path="/esqueci-minha-senha" element={<EsqeuciMinhaSenha/>}/>
+        <Route path="/alimento/:id" element={<Alimentos />} />
+        <Route path="/receita/:id" element={<Receitas />} />
       </Routes>
     </>
   );
