@@ -7,7 +7,6 @@ import Registrar from "./pages/Registrar/Registrar";
 import Perfil from "./pages/Perfil/Perfil";
 import Pacientes from "./pages/Pacientes/Pacientes"
 import Planos from "./pages/Planos/Planos"
-import PlanoDetalhes from "./pages/PlanoDetalhes/PlanoDetalhes"
 import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
 import Compras from "./pages/Compras/Compras";
 import Chat from "./components/Chat/Chat"
@@ -17,6 +16,9 @@ import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedid
 import Relatorio from "./pages/Relatorio/Relatorio"
 import Planejamento from "./pages/Planejamento/Planejamento"
 import EsqeuciMinhaSenha from "./pages/EsqueciMinhaSenha/EsqueciMinhaSenha"
+import CriarEditarPlano from './pages/CriarEditarPlano/CriarEditarPlano';
+import Alimentos from "./pages/Alimentos/Alimentos";
+import Receitas from './pages/Receitas/Receitas';
 
 function DashboardRouter() {
   const userType = useSelector((state) => state.user.userType);
@@ -74,8 +76,11 @@ function AppContext() {
         <Route path="/planejamento" element={<Planejamento />} />
         <Route path="/perfil" element={<Perfil userData={userData} setUserData={setUserData} />} />
         <Route path="/planos" element={<Planos/>}/>
-        <Route path="/planos/:id" element={<PlanoDetalhes/>}/>
+        <Route path="/planos/criar" element={<CriarEditarPlano />}/>
+        <Route path="/planos/:id" element={<CriarEditarPlano/>}/>
         <Route path="/esqueci-minha-senha" element={<EsqeuciMinhaSenha/>}/>
+        <Route path="/alimento/:id" element={<Alimentos />} />
+        <Route path="/receita/:id" element={<Receitas />} />
       </Routes>
     </>
   );
