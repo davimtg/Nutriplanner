@@ -1,98 +1,109 @@
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-export default function BuscaAlimentos() {
-  const [query, setQuery] = useState("")
-  const [alimentos, setAlimentos] = useState([])
-  const [receitas, setReceitas] = useState([])
+const Biblioteca = () => {
+  const [query, setQuery] = useState("");
+  const [alimentos, setAlimentos] = useState([]);
+  const [receitas, setReceitas] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!query.trim()) {
-      setAlimentos([])
-      setReceitas([])
-      return
+    if (!query) {
+      setAlimentos([]);
+      setReceitas([]);
+      return;
     }
 
-    const alimentosMock = [
-      "Arroz integral",
-      "Feijão preto",
-      "Frango grelhado",
-      "Maçã verde",
-      "Banana prata",
-      "Ovo cozido",
-    ].filter(a => a.toLowerCase().includes(query.toLowerCase()))
+    const controller = new AbortController();
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [alimentosRes, receitasRes] = await Promise.all([
+          fetch(`http://localhost:3001/alimentos?nome_like=${query}&_limit=10`, {
+            signal: controller.signal,
+          }).then((res) => res.json()),
+          fetch(`http://localhost:3001/receitas?nome_like=${query}&_limit=18`, {
+            signal: controller.signal,
+          }).then((res) => res.json()),
+        ]);
 
-    const receitasMock = [
-      { nome: "Omelete fit", ingredientes: ["ovo", "tomate", "espinafre"] },
-      { nome: "Salada tropical", ingredientes: ["maçã", "banana", "mamão"] },
-      { nome: "Frango com batata-doce", ingredientes: ["frango", "batata-doce", "alho"] },
-      { nome: "Arroz com feijão", ingredientes: ["arroz", "feijão", "azeite"] },
-    ].filter(r =>
-      r.ingredientes.some(i => i.toLowerCase().includes(query.toLowerCase()))
-    )
+        setAlimentos(alimentosRes);
+        setReceitas(receitasRes);
+      } catch (err) {
+        if (err.name !== "AbortError") console.error("Erro ao buscar dados:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setAlimentos(alimentosMock)
-    setReceitas(receitasMock)
-  }, [query])
+    const debounce = setTimeout(fetchData, 500);
+    return () => {
+      clearTimeout(debounce);
+      controller.abort();
+    };
+  }, [query]);
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-md-8">
-          <div className="card shadow-sm rounded-4 p-4">
-            <h1 className="text-center text-success mb-4">Busca de Alimentos</h1>
+    <div className="container my-5">
+      <h1 className="mb-4">Buscador de Alimentos e Receitas</h1>
 
-            <input
-              type="text"
-              className="form-control form-control-lg mb-4"
-              placeholder="Digite um alimento..."
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-            />
+      <input
+        type="text"
+        className="form-control mb-4"
+        placeholder="Digite algo..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
 
-            {alimentos.length > 0 && (
-              <div className="mb-5">
-                <h4 className="text-success mb-3">Alimentos encontrados:</h4>
-                <div className="list-group">
-                  {alimentos.map((a, i) => (
-                    <div
-                      key={i}
-                      className="list-group-item list-group-item-action rounded-3 mb-2 shadow-sm"
-                    >
-                      {a}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+      {loading && <p>Carregando...</p>}
 
-            {receitas.length > 0 && (
-              <div>
-                <h4 className="text-success mb-3">Receitas sugeridas:</h4>
-                <div className="row g-3">
-                  {receitas.map((r, i) => (
-                    <div key={i} className="col-md-6">
-                      <div className="card h-100 border-success shadow-sm rounded-4">
-                        <div className="card-body">
-                          <h5 className="card-title text-success">{r.nome}</h5>
-                          <p className="card-text text-muted mb-0">
-                            Ingredientes: {r.ingredientes.join(", ")}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {!query && (
-              <p className="text-center text-muted mt-4">
-                Comece digitando o nome de um alimento...
-              </p>
-            )}
+      {alimentos.length > 0 && (
+        <div className="mb-5">
+          <h3>Alimentos</h3>
+          <div className="list-group">
+            {alimentos.map((a) => (
+              <Link
+                to={`/alimento/${a.id}`}
+                key={a.id}
+                className="list-group-item list-group-item-action"
+              >
+                <h5>{a.nome}</h5>
+                <p>
+                  Calorias: {a.calorias} kcal | Carbs: {a.carboidrato} g | Gordura: {a.gordura} g | Proteína: {a.proteina} g
+                </p>
+              </Link>
+            ))}
           </div>
         </div>
-      </div>
+      )}
+
+      {receitas.length > 0 && (
+        <div>
+          <h3>Receitas</h3>
+          <div className="row">
+            {receitas.map((r) => (
+              <div key={r.id} className="col-md-4 mb-4">
+                <Link to={`/receita/${r.id}`} className="text-decoration-none">
+                  <div className="card h-100">
+                    <img
+                      src={require(`../../assets/img/receitas/${r.img}`)}
+                      className="card-img-top"
+                      alt={r.nome}
+                    />
+                    <div className="card-body">
+                      <h5 className="card-title">{r.nome}</h5>
+                      <p className="card-text">{r.sumario}</p>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
-  )
-}
+  );
+};
+
+export default Biblioteca;
