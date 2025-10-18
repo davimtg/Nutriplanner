@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button, Form } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -9,20 +9,33 @@ const Biblioteca = () => {
   const [alimentos, setAlimentos] = useState([]);
   const [receitas, setReceitas] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
 
+  // Modal de favoritas
+  const [showFavoritas, setShowFavoritas] = useState(false);
   const favoritosIds = useSelector((state) => state.favoritos.receitas);
-
   const [favoritas, setFavoritas] = useState([]);
 
-  // Buscar receitas favoritas quando abrir o modal
+  // Modal de criar receita
+  const [showCriar, setShowCriar] = useState(false);
+  const [novaReceita, setNovaReceita] = useState({
+    nome: "",
+    img: "",
+    tipo: "",
+    porcao: "",
+    sumario: "",
+    ingredientes: [""],
+    tempo: { preparacao: "", cozimento: "" },
+    passos: [""],
+    nutricional: { calorias: 0, carboidrato: 0, gordura: 0, proteina: 0 },
+  });
+
+  // Buscar receitas favoritas
   useEffect(() => {
     const fetchFavoritas = async () => {
       if (favoritosIds.length === 0) {
         setFavoritas([]);
         return;
       }
-
       try {
         const res = await fetch(`http://localhost:3001/receitas?id=${favoritosIds.join("&id=")}`);
         const data = await res.json();
@@ -31,19 +44,16 @@ const Biblioteca = () => {
         console.error("Erro ao buscar receitas favoritas:", err);
       }
     };
+    if (showFavoritas) fetchFavoritas();
+  }, [showFavoritas, favoritosIds]);
 
-    if (showModal) {
-      fetchFavoritas();
-    }
-  }, [showModal, favoritosIds]);
-
+  // Buscar alimentos e receitas
   useEffect(() => {
     if (!query) {
       setAlimentos([]);
       setReceitas([]);
       return;
     }
-
     const controller = new AbortController();
     const fetchData = async () => {
       setLoading(true);
@@ -56,7 +66,6 @@ const Biblioteca = () => {
             signal: controller.signal,
           }).then((res) => res.json()),
         ]);
-
         setAlimentos(alimentosRes);
         setReceitas(receitasRes);
       } catch (err) {
@@ -65,13 +74,79 @@ const Biblioteca = () => {
         setLoading(false);
       }
     };
-
     const debounce = setTimeout(fetchData, 500);
     return () => {
       clearTimeout(debounce);
       controller.abort();
     };
   }, [query]);
+
+  // Adicionar ingrediente ou passo
+  const addItem = (type) => {
+    setNovaReceita((prev) => ({
+      ...prev,
+      [type]: [...prev[type], ""],
+    }));
+  };
+
+  // Atualizar campo da receita
+  const handleChange = (field, value) => {
+    setNovaReceita((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleIngredienteChange = (idx, value) => {
+    const newIngredientes = [...novaReceita.ingredientes];
+    newIngredientes[idx] = value;
+    setNovaReceita((prev) => ({ ...prev, ingredientes: newIngredientes }));
+  };
+
+  const handlePassoChange = (idx, value) => {
+    const newPassos = [...novaReceita.passos];
+    newPassos[idx] = value;
+    setNovaReceita((prev) => ({ ...prev, passos: newPassos }));
+  };
+
+  const handleTempoChange = (field, value) => {
+    setNovaReceita((prev) => ({
+      ...prev,
+      tempo: { ...prev.tempo, [field]: value },
+    }));
+  };
+
+  const handleNutricionalChange = (field, value) => {
+    setNovaReceita((prev) => ({
+      ...prev,
+      nutricional: { ...prev.nutricional, [field]: Number(value) },
+    }));
+  };
+
+  const submitReceita = async () => {
+    try {
+      await fetch("http://localhost:3001/receitas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(novaReceita),
+      });
+      setShowCriar(false);
+      alert("Receita criada com sucesso!");
+      setNovaReceita({
+        nome: "",
+        img: "",
+        tipo: "",
+        porcao: "",
+        sumario: "",
+        ingredientes: [""],
+        tempo: { preparacao: "", cozimento: "" },
+        passos: [""],
+        nutricional: { calorias: 0, carboidrato: 0, gordura: 0, proteina: 0 },
+      });
+    } catch (err) {
+      console.error("Erro ao criar receita:", err);
+    }
+  };
 
   return (
     <div className="container my-5">
@@ -85,8 +160,8 @@ const Biblioteca = () => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <Button variant="primary" onClick={() => setShowModal(true)}>
-          Receitas Favoritas
+        <Button variant="primary" onClick={() => setShowFavoritas(true)}>
+          Minhas Favoritas
         </Button>
       </div>
 
@@ -138,7 +213,7 @@ const Biblioteca = () => {
       )}
 
       {/* Modal de Favoritas */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+      <Modal show={showFavoritas} onHide={() => setShowFavoritas(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Minhas Receitas Favoritas</Modal.Title>
         </Modal.Header>
@@ -148,8 +223,8 @@ const Biblioteca = () => {
           ) : (
             <div className="row">
               {favoritas.map((r) => (
-                <div key={r.id} className="col-md-4 text-center">
-                  <Link to={`/receita/${r.id}`} onClick={() => setShowModal(false)}>
+                <div key={r.id} className="col-md-4 mb-4 text-center">
+                  <Link to={`/receita/${r.id}`} onClick={() => setShowFavoritas(false)}>
                     <img
                       src={require(`../../assets/img/receitas/${r.img}`)}
                       alt={r.nome}
@@ -164,11 +239,213 @@ const Biblioteca = () => {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <Button variant="secondary" onClick={() => setShowFavoritas(false)}>
             Fechar
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* Botão criar receita */}
+      <div className="mt-4 text-center">
+        <Button variant="success" onClick={() => setShowCriar(true)}>
+          Criar Receita
+        </Button>
+      </div>
+
+      {/* Modal criar receita */}
+{/* Modal criar receita */}
+<Modal show={showCriar} onHide={() => setShowCriar(false)} size="lg">
+  <Modal.Header closeButton>
+    <Modal.Title>Criar Nova Receita</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <Form>
+      {/* Nome */}
+      <Form.Group className="mb-2">
+        <Form.Label>Nome</Form.Label>
+        <Form.Control
+          type="text"
+          value={novaReceita.nome}
+          onChange={(e) => handleChange("nome", e.target.value)}
+          required
+        />
+      </Form.Group>
+
+      {/* Imagem */}
+      <Form.Group className="mb-2">
+        <Form.Label>Imagem (apenas JPG)</Form.Label>
+        <Form.Control
+          type="file"
+          accept=".jpg"
+          onChange={(e) => handleChange("img", e.target.files[0]?.name || "")}
+          required
+        />
+      </Form.Group>
+
+      {/* Tipo */}
+      <Form.Group className="mb-2">
+        <Form.Label>Tipo</Form.Label>
+        <Form.Select
+          value={novaReceita.tipo}
+          onChange={(e) => handleChange("tipo", e.target.value)}
+          required
+        >
+          <option value="">Selecione...</option>
+          <option value="Café da manhã">Café da manhã</option>
+          <option value="Café da tarde">Café da tarde</option>
+          <option value="Prato Principal">Prato Principal</option>
+          <option value="Sobremesa">Sobremesa</option>
+        </Form.Select>
+      </Form.Group>
+
+      {/* Porção */}
+      <Form.Group className="mb-2">
+        <Form.Label>Porção (número de pessoas)</Form.Label>
+        <Form.Control
+          type="number"
+          value={novaReceita.porcao}
+          onChange={(e) => handleChange("porcao", e.target.value)}
+          min={1}
+          required
+        />
+      </Form.Group>
+
+      {/* Sumário */}
+      <Form.Group className="mb-2">
+        <Form.Label>Sumário</Form.Label>
+        <Form.Control
+          type="text"
+          value={novaReceita.sumario}
+          onChange={(e) => handleChange("sumario", e.target.value)}
+          required
+        />
+      </Form.Group>
+
+      {/* Ingredientes */}
+      <Form.Group className="mb-2">
+        <Form.Label>Ingredientes</Form.Label>
+        {novaReceita.ingredientes.map((i, idx) => (
+          <div key={idx} className="d-flex gap-2 mb-1">
+            <Form.Control
+              type="text"
+              value={i}
+              onChange={(e) => handleIngredienteChange(idx, e.target.value)}
+              required
+            />
+            <Button
+              variant="danger"
+              onClick={() => {
+                const newIngredientes = [...novaReceita.ingredientes];
+                newIngredientes.splice(idx, 1);
+                setNovaReceita((prev) => ({ ...prev, ingredientes: newIngredientes }));
+              }}
+            >
+              &times;
+            </Button>
+          </div>
+        ))}
+        <Button variant="link" onClick={() => addItem("ingredientes")}>
+          + Adicionar Ingrediente
+        </Button>
+      </Form.Group>
+
+      {/* Passos */}
+      <Form.Group className="mb-2">
+        <Form.Label>Passos</Form.Label>
+        {novaReceita.passos.map((p, idx) => (
+          <div key={idx} className="d-flex gap-2 mb-1">
+            <Form.Control
+              type="text"
+              value={p}
+              onChange={(e) => handlePassoChange(idx, e.target.value)}
+              required
+            />
+            <Button
+              variant="danger"
+              onClick={() => {
+                const newPassos = [...novaReceita.passos];
+                newPassos.splice(idx, 1);
+                setNovaReceita((prev) => ({ ...prev, passos: newPassos }));
+              }}
+            >
+              &times;
+            </Button>
+          </div>
+        ))}
+        <Button variant="link" onClick={() => addItem("passos")}>
+          + Adicionar Passo
+        </Button>
+      </Form.Group>
+
+      {/* Tempo */}
+      <Form.Group className="mb-2">
+        <Form.Label>Tempo de Preparo</Form.Label>
+        <Form.Control
+          type="text"
+          value={novaReceita.tempo.preparacao}
+          onChange={(e) => handleTempoChange("preparacao", e.target.value)}
+          placeholder="Ex: 35 min"
+          required
+          className="mb-1"
+        />
+        <Form.Label>Tempo de Cozimento</Form.Label>
+        <Form.Control
+          type="text"
+          value={novaReceita.tempo.cozimento}
+          onChange={(e) => handleTempoChange("cozimento", e.target.value)}
+          placeholder="Ex: 50 min"
+          required
+        />
+      </Form.Group>
+
+      {/* Nutricional */}
+      <Form.Group className="mb-2">
+        <Form.Label>Informações Nutricionais (por 100g) <br></br></Form.Label>
+        <Form.Label className="d-block">Calorias (kcal)</Form.Label>
+        <Form.Control
+          type="number"
+          value={novaReceita.nutricional.calorias}
+          onChange={(e) => handleNutricionalChange("calorias", e.target.value)}
+          required
+          className="mb-1"
+        />
+        <Form.Label>Carboidrato (g)</Form.Label>
+        <Form.Control
+          type="number"
+          value={novaReceita.nutricional.carboidrato}
+          onChange={(e) => handleNutricionalChange("carboidrato", e.target.value)}
+          required
+          className="mb-1"
+        />
+        <Form.Label>Gordura (g)</Form.Label>
+        <Form.Control
+          type="number"
+          value={novaReceita.nutricional.gordura}
+          onChange={(e) => handleNutricionalChange("gordura", e.target.value)}
+          required
+          className="mb-1"
+        />
+        <Form.Label>Proteína (g)</Form.Label>
+        <Form.Control
+          type="number"
+          value={novaReceita.nutricional.proteina}
+          onChange={(e) => handleNutricionalChange("proteina", e.target.value)}
+          required
+        />
+      </Form.Group>
+    </Form>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setShowCriar(false)}>
+      Cancelar
+    </Button>
+    <Button variant="success" onClick={submitReceita}>
+      Criar Receita
+    </Button>
+  </Modal.Footer>
+</Modal>
+
+
     </div>
   );
 };
