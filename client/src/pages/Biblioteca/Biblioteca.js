@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Modal, Button } from "react-bootstrap";
+import { useSelector } from "react-redux";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Biblioteca = () => {
@@ -7,6 +9,33 @@ const Biblioteca = () => {
   const [alimentos, setAlimentos] = useState([]);
   const [receitas, setReceitas] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+
+  const favoritosIds = useSelector((state) => state.favoritos.receitas);
+
+  const [favoritas, setFavoritas] = useState([]);
+
+  // Buscar receitas favoritas quando abrir o modal
+  useEffect(() => {
+    const fetchFavoritas = async () => {
+      if (favoritosIds.length === 0) {
+        setFavoritas([]);
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:3001/receitas?id=${favoritosIds.join("&id=")}`);
+        const data = await res.json();
+        setFavoritas(data);
+      } catch (err) {
+        console.error("Erro ao buscar receitas favoritas:", err);
+      }
+    };
+
+    if (showModal) {
+      fetchFavoritas();
+    }
+  }, [showModal, favoritosIds]);
 
   useEffect(() => {
     if (!query) {
@@ -48,13 +77,18 @@ const Biblioteca = () => {
     <div className="container my-5">
       <h1 className="mb-4">Buscador de Alimentos e Receitas</h1>
 
-      <input
-        type="text"
-        className="form-control mb-4"
-        placeholder="Digite algo..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
+      <div className="d-flex mb-3 gap-2">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Digite algo..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <Button variant="primary" onClick={() => setShowModal(true)}>
+          Receitas Favoritas
+        </Button>
+      </div>
 
       {loading && <p>Carregando...</p>}
 
@@ -102,6 +136,39 @@ const Biblioteca = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Favoritas */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Minhas Receitas Favoritas</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {favoritas.length === 0 ? (
+            <p>Nenhuma receita favorita ainda.</p>
+          ) : (
+            <div className="row">
+              {favoritas.map((r) => (
+                <div key={r.id} className="col-md-4 text-center">
+                  <Link to={`/receita/${r.id}`} onClick={() => setShowModal(false)}>
+                    <img
+                      src={require(`../../assets/img/receitas/${r.img}`)}
+                      alt={r.nome}
+                      className="img-fluid rounded mb-2"
+                      style={{ maxHeight: "150px", objectFit: "cover" }}
+                    />
+                    <h6>{r.nome}</h6>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Fechar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

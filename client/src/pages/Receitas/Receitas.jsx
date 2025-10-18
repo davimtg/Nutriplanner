@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, Button, ProgressBar } from "react-bootstrap";
+import { useSelector, useDispatch } from "react-redux";
+import { toggleFavorito } from "../../redux/favoritosSlice";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function Receitas() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const favoritos = useSelector((state) => state.favoritos.receitas);
+  const isFavorito = favoritos.includes(Number(id));
+
   const [receita, setReceita] = useState(null);
   const [gramas, setGramas] = useState(100);
 
@@ -23,7 +30,8 @@ export default function Receitas() {
     fetchReceita();
   }, [id]);
 
-  if (!receita) return <div className="text-center mt-5">Carregando receita...</div>;
+  if (!receita)
+    return <div className="text-center mt-5">Carregando receita...</div>;
 
   const { nome, img, tipo, porcao, sumario, ingredientes, tempo, passos, nutricional } = receita;
 
@@ -39,28 +47,37 @@ export default function Receitas() {
   return (
     <div className="container my-5">
       <Button variant="secondary" className="mb-4" onClick={() => navigate(-1)}>
-        ← Voltar
+        Voltar
       </Button>
 
       <Card className="shadow-lg">
         <div className="row g-0">
           <div
-            className="col-md-5 d-flex justify-content-center align-items-center round"
+            className="col-md-5 d-flex justify-content-center align-items-center"
             style={{ overflow: "hidden" }}
-            >
+          >
             <img
-                src={require(`../../assets/img/receitas/${img}`)}
-                alt={nome}
-                style={{
+              src={require(`../../assets/img/receitas/${img}`)}
+              alt={nome}
+              style={{
                 maxHeight: "100%",
                 maxWidth: "100%",
                 objectFit: "cover",
-                }}
+              }}
             />
           </div>
           <div className="col-md-7">
             <Card.Body className="p-4">
-              <Card.Title className="h3 fw-bold">{nome}</Card.Title>
+              <div className="d-flex justify-content-between align-items-start">
+                <Card.Title className="h3 fw-bold">{nome}</Card.Title>
+                <Button
+                  variant={isFavorito ? "danger" : "outline-danger"}
+                  onClick={() => dispatch(toggleFavorito(Number(id)))}
+                >
+                  {isFavorito ? "❤️ Favorito" : "♡ Favoritar"}
+                </Button>
+              </div>
+
               <Card.Subtitle className="mb-2 text-muted">{tipo}</Card.Subtitle>
               <Card.Text className="mt-3">{sumario}</Card.Text>
 
@@ -93,13 +110,28 @@ export default function Receitas() {
                 <ProgressBar now={macros.calorias} max={500} label={`${macros.calorias}`} />
 
                 <p className="mb-1 mt-2">Carboidratos: {macros.carboidrato} g</p>
-                <ProgressBar variant="info" now={macros.carboidrato} max={100} label={`${macros.carboidrato}`} />
+                <ProgressBar
+                  variant="info"
+                  now={macros.carboidrato}
+                  max={100}
+                  label={`${macros.carboidrato}`}
+                />
 
                 <p className="mb-1 mt-2">Gordura: {macros.gordura} g</p>
-                <ProgressBar variant="warning" now={macros.gordura} max={50} label={`${macros.gordura}`} />
+                <ProgressBar
+                  variant="warning"
+                  now={macros.gordura}
+                  max={50}
+                  label={`${macros.gordura}`}
+                />
 
                 <p className="mb-1 mt-2">Proteína: {macros.proteina} g</p>
-                <ProgressBar variant="success" now={macros.proteina} max={50} label={`${macros.proteina}`} />
+                <ProgressBar
+                  variant="success"
+                  now={macros.proteina}
+                  max={50}
+                  label={`${macros.proteina}`}
+                />
               </div>
             </Card.Body>
           </div>
