@@ -22,20 +22,17 @@ const MediadorDashboard = () => {
     }
   }, [status, dispatch]);
 
-    const normalize = (str) =>
-    str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
-
   const pendentes = pedidos.filter(
-    (pedido) => normalize(pedido.status.name) === 'pendente'
-  ).length;
+  (pedido) => normalize(pedido.status.name) === 'pendente'
+).length;
 
-  const emExecucao = pedidos.filter(
-    (pedido) => normalize(pedido.status.name) === 'em execucao'
-  ).length;
+const emExecucao = pedidos.filter(
+  (pedido) => normalize(pedido.status.name) === 'em execucao'
+).length;
 
-  const concluidos = pedidos.filter(
-    (pedido) => normalize(pedido.status.name) === 'concluido'
-  ).length;
+const concluidos = pedidos.filter(
+  (pedido) => normalize(pedido.status.name) === 'concluido'
+).length;
 
   const total = pedidos.length;
 

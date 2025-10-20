@@ -66,7 +66,7 @@ useEffect(() => {
   </button>
 )}
 
-<Link to="/dashboard" className={styles.details__back}>
+<Link to="/mediador-dashboard" className={styles.details__back}>
   Voltar para Dashboard
 </Link>
 

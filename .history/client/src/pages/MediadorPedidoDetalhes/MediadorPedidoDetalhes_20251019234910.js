@@ -16,9 +16,10 @@ useEffect(() => {
     .then(data => {
       console.log("Dados recebidos:", data);
 
-    const lista = Array.isArray(data) ? data : data["lista-de-pedidos"] || [];
+      // Acessa direto o array
+      const lista = data["lista-de-pedidos"] || [];
 
-    const pedidoEncontrado = lista.find(p => String(p.id) === String(id));
+      const pedidoEncontrado = lista.find(p => String(p.id) === String(id));
 
       console.log("Pedido encontrado:", pedidoEncontrado);
       setPedido(pedidoEncontrado);
@@ -51,9 +52,9 @@ useEffect(() => {
       <p><strong>Status:</strong> {pedido.status?.name}</p>
 
      <h3 className={styles.details__subtitle}>Itens:</h3>
-      <ul className={styles.details__list}>
-        {pedido.itens.map((item, index) => (
-        <li key={index} className={styles.details__item}>
+<ul className={styles.details__list}>
+  {pedido.itens.map((item, index) => (
+    <li key={index} className={styles.details__item}>
       <span>{item.name}</span>
       <span>{item.quantidade} ({item.marca})</span>
     </li>
@@ -66,7 +67,7 @@ useEffect(() => {
   </button>
 )}
 
-<Link to="/dashboard" className={styles.details__back}>
+<Link to="/mediador-dashboard" className={styles.details__back}>
   Voltar para Dashboard
 </Link>
 
