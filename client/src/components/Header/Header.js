@@ -22,7 +22,9 @@ export default function Header({ tipo }) {
       { label: "Biblioteca", page: "biblioteca" },
       { label: "Planejamento", page: "planejamento" },
       { label: "Relatório", page: "relatorio" },
-      { label: "Perfil", page: "perfil" },
+      { label: "Lista de Compras", page: "ListaCompras" },
+      { label: "Perfil", page: "perfil" }
+      
     ],
     nutricionista: [
       { label: "Pacientes", page: "dashboard" },

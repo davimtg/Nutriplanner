@@ -1,0 +1,28 @@
+{
+  "usuario": {
+    "nome": "Maria Santos",
+    "idade": 29,
+    "metas": {
+      "calorias": 2000,
+      "proteinas": 120,
+      "carboidratos": 220,
+      "gorduras": 65
+    }
+  },
+  "semanal": [
+    { "dia": "Dom", "caloriasConsumidas": 2100, "proteinas": 110, "carboidratos": 250, "gorduras": 70 },
+    { "dia": "Seg", "caloriasConsumidas": 1850, "proteinas": 95,  "carboidratos": 220, "gorduras": 65 },
+    { "dia": "Ter", "caloriasConsumidas": 1950, "proteinas": 100, "carboidratos": 230, "gorduras": 68 },
+    { "dia": "Qua", "caloriasConsumidas": 2050, "proteinas": 105, "carboidratos": 240, "gorduras": 72 },
+    { "dia": "Qui", "caloriasConsumidas": 1700, "proteinas": 90,  "carboidratos": 210, "gorduras": 60 },
+    { "dia": "Sex", "caloriasConsumidas": 2200, "proteinas": 115, "carboidratos": 260, "gorduras": 75 },
+    { "dia": "Sáb", "caloriasConsumidas": 2300, "proteinas": 120, "carboidratos": 280, "gorduras": 80 }
+  ],
+  "mensal": [
+    { "dia": 1, "consumidas": 1950 }, { "dia": 2, "consumidas": 2100 },
+    { "dia": 3, "consumidas": 1850 }, { "dia": 4, "consumidas": 2050 },
+    { "dia": 5, "consumidas": 1900 }, { "dia": 6, "consumidas": 2250 },
+    { "dia": 7, "consumidas": 2300 }, { "dia": 8, "consumidas": 1980 },
+    { "dia": 9, "consumidas": 2020 }, { "dia": 10, "consumidas": 1800 }
+  ]
+}
