@@ -19,6 +19,7 @@ import EsqeuciMinhaSenha from "./pages/EsqueciMinhaSenha/EsqueciMinhaSenha"
 import CriarEditarPlano from './pages/CriarEditarPlano/CriarEditarPlano';
 import Alimentos from "./pages/Alimentos/Alimentos";
 import Receitas from './pages/Receitas/Receitas';
+import ListaCompras from './pages/ListaCompras/ListaCompras';
 
 function DashboardRouter() {
   const userType = useSelector((state) => state.user.userType);
@@ -81,6 +82,7 @@ function AppContext() {
         <Route path="/esqueci-minha-senha" element={<EsqeuciMinhaSenha/>}/>
         <Route path="/alimento/:id" element={<Alimentos />} />
         <Route path="/receita/:id" element={<Receitas />} />
+        <Route path="/ListaCompras" element={<ListaCompras />} />
       </Routes>
     </>
   );
