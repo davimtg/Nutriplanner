@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { setUserType } from "../../redux/userSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { setUserType, setCurrentUser } from "../../redux/userSlice";
 import styles from "./Login.module.css";
 import icon from "../../assets/img/logotipo/icon/nutriplanner-gradient.svg";
 
@@ -17,10 +17,29 @@ export default function Login() {
   const [selectedType, setSelectedType] = useState(userTypes[1]);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [email, setEmail] = useState("");
+  const usuarios = useSelector((state) => state.user.usuarios);
 
   function entrar() {
-    dispatch(setUserType(selectedType)); // salva no Redux
-    navigate(`/dashboard`);
+    fetch("http://localhost:3001/usuarios") // busca todos os usuários
+      .then((res) => res.json())
+      .then((usuarios) => {
+        const usuario = usuarios.find(
+          (u) => u.email?.toLowerCase() === email.toLowerCase()
+        );
+        if (!usuario) {
+          alert("Usuário não encontrado");
+          return;
+        }
+        dispatch(setUserType(usuario.tipo));     // salva tipo no Redux
+        dispatch(setCurrentUser(usuario));       // salva usuário completo
+        console.log(usuario.email)
+        navigate("/dashboard");                  // redireciona
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar usuários:", err);
+        alert("Erro ao conectar com o servidor");
+      });
   }
 
   return (
@@ -59,7 +78,7 @@ export default function Login() {
       </div>
 
       <div className={styles["login-form"]}>
-        <input type="text" className={styles["login-input"]} placeholder="E-mail" />
+        <input type="text" className={styles["login-input"]} placeholder="E-mail" onChange={(e) => setEmail(e.target.value)} />
         <input type="password" className={styles["login-input"]} placeholder="Senha" />
         <a className={styles["login-reset-password"]} href="/esqueci-minha-senha">
           Esqueci minha senha
