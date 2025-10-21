@@ -7,11 +7,11 @@ export const fetchPedidos = createAsyncThunk(
     const response = await fetch('http://localhost:3001/pedidos');
     const data = await response.json();
 
-  const lista = Array.isArray(data)
-    ? data
-    : data?.pedidos?.['lista-de-pedidos'] || data?.['lista-de-pedidos'] || [];
+   const lista = Array.isArray(data)
+  ? data
+  : data?.pedidos?.['lista-de-pedidos'] || data?.['lista-de-pedidos'] || [];
 
-  return lista;
+return lista;
 
   }
 );

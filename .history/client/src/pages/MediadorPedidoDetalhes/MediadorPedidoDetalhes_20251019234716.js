@@ -16,9 +16,10 @@ useEffect(() => {
     .then(data => {
       console.log("Dados recebidos:", data);
 
-    const lista = Array.isArray(data) ? data : data["lista-de-pedidos"] || [];
+      // Acessa direto o array
+      const lista = data["lista-de-pedidos"] || [];
 
-    const pedidoEncontrado = lista.find(p => String(p.id) === String(id));
+      const pedidoEncontrado = lista.find(p => String(p.id) === String(id));
 
       console.log("Pedido encontrado:", pedidoEncontrado);
       setPedido(pedidoEncontrado);
@@ -50,26 +51,24 @@ useEffect(() => {
       <p><strong>Endereço:</strong> {pedido.endereco}</p>
       <p><strong>Status:</strong> {pedido.status?.name}</p>
 
-     <h3 className={styles.details__subtitle}>Itens:</h3>
-      <ul className={styles.details__list}>
-        {pedido.itens.map((item, index) => (
-        <li key={index} className={styles.details__item}>
-      <span>{item.name}</span>
-      <span>{item.quantidade} ({item.marca})</span>
+      <h3 className={styles.details__subtitle}>Itens:</h3>
+     <ul className={styles.details__list}>
+  {pedido.itens.map((item, index) => (
+    <li key={index} className={styles.details__item}>
+      {item.name} - {item.quantidade} ({item.marca})
     </li>
   ))}
 </ul>
 
-{pedido.status === "Pendente" && (
-  <button onClick={handleConcluir} className={styles.details__button}>
-    Concluir Pedido
-  </button>
-)}
+      {pedido.status === "Pendente" && (
+        <button onClick={handleConcluir} className={styles.details__button}>
+          Concluir Pedido
+        </button>
+      )}
 
-<Link to="/dashboard" className={styles.details__back}>
-  Voltar para Dashboard
-</Link>
-
+      <Link to="/dashboard" className={styles.details__back}>
+        Voltar para Dashboard
+      </Link>
     </div>
   );
 };

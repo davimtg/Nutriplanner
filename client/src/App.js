@@ -77,7 +77,7 @@ function AppContext() {
         {/* Páginas para Logados */}
         <Route path="/dashboard" element={<DashboardRouter />} />
         <Route path="/biblioteca" element={<Biblioteca />} />
-        <Route path="/mediador-pedido-detalhes" element={<MediadorPedidoDetalhes />} />
+        <Route path="/mediador-pedido/:id" element={<MediadorPedidoDetalhes />} />
         <Route path="/relatorio" element={<Relatorio />} />
         <Route path="/planejamento" element={<Planejamento />} />
         <Route path="/perfil" element={<Perfil userData={userData} setUserData={setUserData} />} />
