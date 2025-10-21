@@ -1,25 +1,31 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+
 import Header from "./components/Header/Header";
+import Chat from "./components/Chat/Chat"
+
 import Login from "./pages/Login/Login";
 import Registrar from "./pages/Registrar/Registrar";
-import Perfil from "./pages/Perfil/Perfil";
-import Pacientes from "./pages/Pacientes/Pacientes"
-import Planos from "./pages/Planos/Planos"
-import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
-import Compras from "./pages/Compras/Compras";
-import Chat from "./components/Chat/Chat"
-import Biblioteca from './pages/Biblioteca/Biblioteca';
-import MediadorDashboard from "./pages/MediadorDashboard/MediadorDashboard";
-import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedidoDetalhes";
-import Relatorio from "./pages/Relatorio/Relatorio"
-import Planejamento from "./pages/Planejamento/Planejamento"
 import EsqeuciMinhaSenha from "./pages/EsqueciMinhaSenha/EsqueciMinhaSenha"
-import CriarEditarPlano from './pages/CriarEditarPlano/CriarEditarPlano';
+import Perfil from "./pages/Perfil/Perfil";
 import Alimentos from "./pages/Alimentos/Alimentos";
 import Receitas from './pages/Receitas/Receitas';
+
+import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
+import Biblioteca from './pages/Biblioteca/Biblioteca';
+import Relatorio from "./pages/Relatorio/Relatorio"
 import ListaCompras from './pages/ListaCompras/ListaCompras';
+
+import Pacientes from "./pages/Pacientes/Pacientes"
+import Planos from "./pages/Planos/Planos"
+import Planejamento from "./pages/Planejamento/Planejamento"
+import CriarEditarPlano from './pages/CriarEditarPlano/CriarEditarPlano';
+
+import MediadorDashboard from "./pages/MediadorDashboard/MediadorDashboard";
+import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedidoDetalhes";
+
+
 
 function DashboardRouter() {
   const userType = useSelector((state) => state.user.userType);
@@ -70,7 +76,6 @@ function AppContext() {
 
         {/* Páginas para Logados */}
         <Route path="/dashboard" element={<DashboardRouter />} />
-        <Route path="/compras" element={<Compras />} />
         <Route path="/biblioteca" element={<Biblioteca />} />
         <Route path="/mediador-pedido-detalhes" element={<MediadorPedidoDetalhes />} />
         <Route path="/relatorio" element={<Relatorio />} />

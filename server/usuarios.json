@@ -12,60 +12,90 @@
         "nome": "Admin",
         "telefone": "",
         "endereco": "",
+        "email": "admin@admin.com",
+        "senha": "12345678",
         "tipo": {
           "id": 0,
           "name": "admin"
         },
         "objetivo": null,
-        "planoId": null
+        "planoId": null,
+        "idade": null,
+        "sexo": null,
+        "altura": null,
+        "peso": null
       },
       { 
         "id": 1,
         "nome": "João da Silva",
         "telefone": "(21) 99999-9999",
         "endereco": "Av. Central, 456 - São Paulo",
+        "email": "joao.da.silva@gmail.com",
+        "senha": "12345678",
         "tipo": {
           "id": 1,
           "name": "cliente"
         },
         "objetivo": "Alimentar-se de forma saudável e perder peso",
-        "planoId": null
+        "planoId": null,
+        "idade": null,
+        "sexo": null,
+        "altura": null,
+        "peso": null
       },
       { 
         "id": 2,
         "nome": "Marcus Vinicius",
         "telefone": "(21) 91203-1021",
         "endereco": "Av. Camarista Méier, 1012 - Rio de Janeiro",
+        "email": "marcus.vinicius@gmail.com",
+        "senha": "12345678",
         "tipo": {
           "id": 1,
           "name": "cliente"
         },
         "objetivo": null,
-        "planoId": null
+        "planoId": null,
+        "idade": null,
+        "sexo": null,
+        "altura": null,
+        "peso": null
       },
       {
         "id": 3,
         "nome": "Nathália Barbosa",
         "telefone": "(22) 98888-8888",
         "endereco": "Rua A, 123 - Rio de Janeiro",
+        "email": "nathalia.barbosa@gmail.com",
+        "senha": "12345678",
         "tipo": {
           "id": 2,
           "name": "nutricionista"
         },
         "objetivo": null,
-        "planoId": null
+        "planoId": null,
+        "idade": null,
+        "sexo": null,
+        "altura": null,
+        "peso": null
       },
       {
         "id": 4,
         "nome": "Ricardo Assunção",
         "telefone": "(22) 92288-2288",
         "endereco": "Rua V, 321 - Rio de Janeiro",
+        "email": "ricardo.assuncao@gmail.com",
+        "senha": "12345678",
         "tipo": {
           "id": 3,
           "name": "mediador"
         },
         "objetivo": null,
-        "planoId": null
+        "planoId": null,
+        "idade": null,
+        "sexo": null,
+        "altura": null,
+        "peso": null
       }
     ]
   }

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ListaCompras.module.css';
-import Header from '../../components/Header/Header';
 
 const planoDeDietas = {
   receitas: [
@@ -132,7 +131,6 @@ export default function ListaCompras() {
 
   return (
     <>
-      <Header />
       <div className={styles.container}>
         <h1 className={styles.title}>Lista de Compras</h1>
 
