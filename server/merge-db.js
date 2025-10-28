@@ -6,7 +6,8 @@ function juntarJSONs() {
     "pedidos.json",
     "planos-alimentares.json",
     "receitas.json",
-    "usuarios.json"
+    "usuarios.json",
+    "mensagens.json"
   ];
 
   const dbFinal = {};

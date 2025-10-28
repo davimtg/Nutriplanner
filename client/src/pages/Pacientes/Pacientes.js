@@ -10,6 +10,8 @@ import {
   Spinner,
   Modal,
 } from "react-bootstrap";
+import { useDispatch } from 'react-redux';
+import { abrirChat } from '../../redux/chatSlice';
 
 function VincularPlanoModal({ show, handleClose, paciente, onSave }) {
   const [planos, setPlanos] = useState([]);
@@ -129,6 +131,7 @@ function Pacientes() {
   const [termoBusca, setTermoBusca] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [pacienteSelecionado, setPacienteSelecionado] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     // Busca pacientes e planos simultaneamente
@@ -142,20 +145,20 @@ function Pacientes() {
         return res.json();
       })
     ])
-    .then(([usuariosData, planosData]) => {
-      const clientes = usuariosData["lista-de-usuarios"].filter(
-        (usuario) => usuario.tipo.name === "cliente"
-      );
-      setPacientes(clientes);
-      setPlanos(planosData);
-    })
-    .catch((error) => {
-      console.error("Erro ao buscar dados:", error);
-      setError("Não foi possível carregar os dados. Verifique o json-server.");
-    })
-    .finally(() => {
-      setLoading(false);
-    });
+      .then(([usuariosData, planosData]) => {
+        const clientes = usuariosData["lista-de-usuarios"].filter(
+          (usuario) => usuario.tipo.name === "cliente"
+        );
+        setPacientes(clientes);
+        setPlanos(planosData);
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar dados:", error);
+        setError("Não foi possível carregar os dados. Verifique o json-server.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   // Cria um mapa de ID do plano para o nome do plano para busca rápida
@@ -181,6 +184,10 @@ function Pacientes() {
     setPacienteSelecionado(null);
   };
 
+  const handleAbrirChat = (paciente) => {
+    dispatch(abrirChat(paciente));
+  };
+
   const handleSalvarPlano = (pacienteId, planoId) => {
     const pacientesAtualizados = pacientes.map(p => {
       if (p.id === pacienteId) {
@@ -189,7 +196,7 @@ function Pacientes() {
       return p;
     });
     setPacientes(pacientesAtualizados);
-    
+
     console.log(`Simulando PATCH para o paciente ${pacienteId}:`, { planoId: planoId });
     // AQUI VOCÊ FARIA A CHAMADA REAL PARA A API (PATCH/PUT)
     // fetch(`http://localhost:3001/usuarios/lista-de-usuarios/${pacienteId}`, {
@@ -197,7 +204,7 @@ function Pacientes() {
     //   headers: { 'Content-Type': 'application/json' },
     //   body: JSON.stringify({ planoId: planoId })
     // }).then(res => res.json()).then(data => console.log('Paciente atualizado:', data));
-    
+
     handleCloseModal();
   };
 
@@ -290,7 +297,11 @@ function Pacientes() {
                         >
                           Plano Alimentar
                         </Button>
-                        <Button size="sm" variant="success">
+                        <Button
+                          size="sm"
+                          variant="success"
+                          onClick={() => handleAbrirChat(paciente)}
+                        >
                           Chat
                         </Button>
                       </div>
@@ -306,7 +317,7 @@ function Pacientes() {
           </Col>
         </Row>
       </Container>
-      
+
       {pacienteSelecionado && (
         <VincularPlanoModal
           show={showModal}
