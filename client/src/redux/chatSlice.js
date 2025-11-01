@@ -1,12 +1,20 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 export const fetchUserMessages = createAsyncThunk(
-    'mensagens/fetchUserMessages',
-    async ({ remetenteId, destinatarioId }) => {
-        const response = await fetch(`http://localhost:3001/mensagens?remetenteId=${remetenteId}&destinatarioId=${destinatarioId}`);
-        return await response.json();
-    }
+  'mensagens/fetchUserMessages',
+  async ({ remetenteId, destinatarioId }) => {
+    const [enviadasRes, recebidasRes] = await Promise.all([
+      fetch(`http://localhost:3001/mensagens?remetenteId=${remetenteId}&destinatarioId=${destinatarioId}`),
+      fetch(`http://localhost:3001/mensagens?remetenteId=${destinatarioId}&destinatarioId=${remetenteId}`)
+    ]);
+
+    const enviadas = await enviadasRes.json();
+    const recebidas = await recebidasRes.json();
+
+    return [...enviadas, ...recebidas];
+  }
 );
+
 
 export const enviarMensagem = createAsyncThunk(
     'mensagens/enviarMensagem',
@@ -28,11 +36,11 @@ export const enviarMensagem = createAsyncThunk(
 const chatSlice = createSlice({
     name: 'chat',
     initialState: {
-        lista: [],             
-        status: 'idle',        
-        error: null,           
-        targetUser: null,      
-        showChatWindow: false    
+        lista: [],
+        status: 'idle',
+        error: null,
+        targetUser: null,
+        showChatWindow: false
     },
     reducers: {
         abrirChat(state, action) {
@@ -59,8 +67,17 @@ const chatSlice = createSlice({
                 state.status = 'loading';
             })
             .addCase(fetchUserMessages.fulfilled, (state, action) => {
+                const { remetenteId, destinatarioId } = action.meta.arg;
+                const chave = `mensagens_${remetenteId}_${destinatarioId}`;
+
+                if (action.payload && action.payload.length > 0) {
+                    state.lista = action.payload;
+                    localStorage.setItem(chave, JSON.stringify(action.payload));
+                } else {
+                    const mensagensLocais = JSON.parse(localStorage.getItem(chave)) || [];
+                    state.lista = mensagensLocais;
+                }
                 state.status = 'succeeded';
-                state.lista = action.payload;
             })
             .addCase(fetchUserMessages.rejected, (state, action) => {
                 state.status = 'failed';
@@ -68,7 +85,13 @@ const chatSlice = createSlice({
             })
             .addCase(enviarMensagem.fulfilled, (state, action) => {
                 state.lista.push(action.payload);
+
+                const chave = `mensagens_${action.payload.remetenteId}_${action.payload.destinatarioId}`;
+                const mensagensSalvas = JSON.parse(localStorage.getItem(chave)) || [];
+                mensagensSalvas.push(action.payload);
+                localStorage.setItem(chave, JSON.stringify(mensagensSalvas));
             });
+
     }
 });
 

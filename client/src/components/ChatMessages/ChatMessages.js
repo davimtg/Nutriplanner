@@ -22,7 +22,7 @@ export default function ChatMessages({ currentUserId }) {
             key={index}
             className={`${styles.mensagemCard} ${msg.remetenteId === currentUserId ? styles.enviada : styles.recebida}`}
           >
-            <Card.Header className={styles.mensagemHeader}>
+            <Card.Header>
               <span className={styles.remetente}>{msg.remetenteNome}</span>
             </Card.Header>
             <Card.Body className={styles.mensagemConteudo}>

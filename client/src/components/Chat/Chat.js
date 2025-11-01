@@ -4,16 +4,16 @@ import BubbleIcon from '../../assets/img/chat-bubble-icon.png';
 import styles from './Chat.module.css';
 import ChatMessages from '../ChatMessages/ChatMessages';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUserMessages, enviarMensagem, abrirChat, alternarChat } from '../../redux/chatSlice';
+import { fetchUserMessages, enviarMensagem, abrirChat, alternarChat, limparMensagens } from '../../redux/chatSlice';
 
 export default function Chat() {
-    const [show, setShow] = useState(false);
+    const [show, setShow] = useState(false); // Usado para mostrar a aba de usuarios do chat
     const [search, setSearch] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [mensagem, setMensagem] = useState('');
     const [allUsers, setAllUsers] = useState([]);
     const targetUser = useSelector(state => state.chat.targetUser);
-    const showChatWindow = useSelector(state => state.chat.showChatWindow);
+    const showChatWindow = useSelector(state => state.chat.showChatWindow); // Usado para mostrar um chat com um usuario 
     const currentUser = useSelector(state => state.user.userData);
 
     const dispatch = useDispatch();
@@ -31,20 +31,16 @@ export default function Chat() {
         fetchUsers();
     }, []);
 
-    useEffect(() => { // Carrega todas as mensagens do servidor
-        if (targetUser && currentUser) {
-            dispatch(fetchUserMessages({
-                remetenteId: currentUser.id,
-                destinatarioId: targetUser.id
-            }));
-        }
-    }, [targetUser, dispatch, currentUser]);
-
     const handleOpenUserWindow = (user) => {
+        dispatch(limparMensagens()); // Ao abrir uma conversa, limpa as mensagens antigas para forçar a atualizar o das mensagens estado
         dispatch(abrirChat(user));
+        dispatch(fetchUserMessages({
+            remetenteId: currentUser.id,
+            destinatarioId: user.id // targetUser.id
+        }));
     };
 
-    const handleCloseChatWindow = () => {
+    const toggleChatWindow = () => {
         dispatch(alternarChat());
     };
 
@@ -76,7 +72,7 @@ export default function Chat() {
         setSearchResults(results);
     };
 
-    function RecentContactList({ onOpen }) {
+    function RecentContactList({ onOpen }) { // Renderiza lista de contatos recentes
         const contatos = currentUser?.contatosRecentes || [];
         const users = allUsers.filter(user => contatos.includes(user.id));
         return (
@@ -99,11 +95,11 @@ export default function Chat() {
     if (!currentUser) return null;
 
     return (
-        <>
+        <>      {/* Botão flutuante */}
             <button className={styles.floatingBtn} onClick={() => setShow(true)} aria-label="Abrir chat">
                 <Image className={styles.floatingIcon} src={BubbleIcon} />
             </button>
-
+                {/* Offcanvas de usuarios para conversar */}
             <Offcanvas show={show} onHide={() => setShow(false)} placement="end">
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Chat</Offcanvas.Title>
@@ -144,20 +140,20 @@ export default function Chat() {
                         <div>
                             <h6>Contatos recentes</h6>
                             <ListGroup>
-                                <RecentContactList onOpen={handleOpenUserWindow} />
+                                <RecentContactList onOpen={handleOpenUserWindow} /> {/* Função que mostra a lista de contatos recentes do usuario atual */}
                             </ListGroup>
                         </div>
                     )}
                 </Offcanvas.Body>
             </Offcanvas>
-
-            <Offcanvas className={styles.chatOffcanvas} show={showChatWindow} onHide={handleCloseChatWindow} placement="end">
+                {/* Offcanvas da conversa com um usuario */}
+            <Offcanvas className={styles.chatOffcanvas} show={showChatWindow} onHide={toggleChatWindow} placement="end">
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Chat com {targetUser?.nome}</Offcanvas.Title>
                 </Offcanvas.Header>
                 <Offcanvas.Body className={`${styles.chatOffcanvas} d-flex flex-column h-100`}>
                     <Col xs={12} className={styles.chatWindow}>
-                        <ChatMessages currentUserId={currentUser.id} />
+                        <ChatMessages currentUserId={currentUser.id} /> {/* Componente que mostra as mensagens dos usuarios */}
                     </Col>
                     <Col xs={12}>
                         <Form className={styles.chatInputArea}>

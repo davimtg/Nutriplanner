@@ -10,8 +10,8 @@ import {
   Spinner,
   Modal,
 } from "react-bootstrap";
-import { useDispatch } from 'react-redux';
-import { abrirChat } from '../../redux/chatSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { abrirChat, fetchUserMessages } from '../../redux/chatSlice';
 
 function VincularPlanoModal({ show, handleClose, paciente, onSave }) {
   const [planos, setPlanos] = useState([]);
@@ -131,6 +131,7 @@ function Pacientes() {
   const [termoBusca, setTermoBusca] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [pacienteSelecionado, setPacienteSelecionado] = useState(null);
+  const currentUser = useSelector(state => state.user.userData);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -186,6 +187,10 @@ function Pacientes() {
 
   const handleAbrirChat = (paciente) => {
     dispatch(abrirChat(paciente));
+    dispatch(fetchUserMessages({
+      remetenteId: currentUser.id,
+      destinatarioId: paciente.id
+    }))
   };
 
   const handleSalvarPlano = (pacienteId, planoId) => {
