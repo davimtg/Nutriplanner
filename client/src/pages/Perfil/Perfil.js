@@ -2,29 +2,14 @@ import profile from '../../assets/img/profilePic/testPng.png';
 import styles from './Perfil.module.css';
 import { useState } from 'react';
 import { Button, Form, Container, Row, Col, Image, Tab, Tabs, Spinner } from 'react-bootstrap';
+import { setUserData } from '../../redux/userSlice'
+import { useSelector, useDispatch } from 'react-redux';
 
-export default function Perfil(props) {
+export default function Perfil() {
   const [editando, setEditando] = useState(false);
-  const [formData, setFormData] = useState({
-    nome: props.userData.nome || "",
-    email: props.userData.email || "",
-    senha: props.userData.senha || "",
-    idade: props.userData.idade || "",
-    sexo: props.userData.sexo || "",
-    rua: props.userData.rua || "",
-    numero: props.userData.numero || "",
-    bairro: props.userData.bairro || "",
-    cidade: props.userData.cidade || "",
-    estado: props.userData.estado || "",
-    cep: props.userData.cep || "",
-    complemento: props.userData.complemento || "",
-    altura: props.userData.altura || "",
-    peso: props.userData.peso || "",
-    objetivo: props.userData.objetivo || "",
-    planoId: props.userData.planoId || "",
-    id: props.userData.id
-  });
   const [loading, setLoading] = useState(false);
+  const formData = useSelector((state) => state.user.userData);
+  const dispatch = useDispatch();
 
   const handleClick = async (e) => {
     e.preventDefault();
@@ -34,13 +19,60 @@ export default function Perfil(props) {
     setEditando((prev) => !prev);
   }
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  if (name.startsWith('endereco.')) {
+    const campo = name.split('.')[1];
+
+    if (campo === 'cep') {
+      const cepLimpo = value.replace(/[^\d]/g, ''); // remove tudo que não for número
+      if (cepLimpo.length > 8) return;
+
+      const cepFormatado = cepLimpo.length > 5
+        ? cepLimpo.slice(0, 5) + '-' + cepLimpo.slice(5)
+        : cepLimpo;
+
+      const enderecoAtualizado = {
+        ...formData.endereco,
+        [campo]: cepFormatado
+      };
+
+      dispatch(setUserData({
+        ...formData,
+        endereco: enderecoAtualizado
+      }));
+      return;
+    }
+
+    if (campo === 'estado') {
+      if (/\d/.test(value)) return;
+      if (value.length > 2) return;
+    }
+
+    if (campo === 'cidade') {
+      if (/\d/.test(value)) return;
+    }
+
+    const enderecoAtualizado = {
+      ...formData.endereco,
+      [campo]: value
+    };
+
+    dispatch(setUserData({
+      ...formData,
+      endereco: enderecoAtualizado
+    }));
+  } else {
+    dispatch(setUserData({
+      ...formData,
       [name]: value
     }));
-  };
+  }
+};
+
+
+
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -56,7 +88,7 @@ export default function Perfil(props) {
       if (!res.ok) throw new Error('Erro ao atualizar usuário');
 
       const updatedUser = await res.json();
-      props.setUserData(updatedUser);
+      dispatch(setUserData(updatedUser));
       alert('Informações atualizadas com sucesso!');
     } catch (err) {
       console.error(err);
@@ -65,7 +97,7 @@ export default function Perfil(props) {
       setLoading(false);
     }
   };
-
+  console.log(formData);
   return (
     <Container className="mt-4">
       <Row className="align-items-center mb-4">
@@ -74,10 +106,10 @@ export default function Perfil(props) {
         </Col>
         <Col xs={12} md={8} className="d-flex flex-column justify-content-center align-items-center">
           <h2 className={styles.nomeUsuario}>{formData.nome}</h2>
-          <Button 
-            variant={editando ? "success" : "primary"} 
-            onClick={handleClick} 
-            className="mt-2" 
+          <Button
+            variant={editando ? "success" : "primary"}
+            onClick={handleClick}
+            className="mt-2"
             disabled={loading}
           >
             {loading ? <Spinner animation="border" size="sm" /> : editando ? 'Salvar Configurações' : 'Alterar Configurações'}
@@ -127,35 +159,35 @@ export default function Perfil(props) {
             <Row className="mt-3">
               <Form.Group as={Col} md={6} controlId="rua">
                 <Form.Label>Rua</Form.Label>
-                <Form.Control type="text" name="rua" value={formData.rua} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="endereco.rua" value={formData.endereco.rua} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={2} controlId="numero">
                 <Form.Label>Número</Form.Label>
-                <Form.Control type="number" name="numero" value={formData.numero} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="number" name="endereco.numero" value={formData.endereco.numero} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={4} controlId="bairro">
                 <Form.Label>Bairro</Form.Label>
-                <Form.Control type="text" name="bairro" value={formData.bairro} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="endereco.bairro" value={formData.endereco.bairro} onChange={handleChange} disabled={!editando} />
               </Form.Group>
             </Row>
             <Row className="mt-3">
               <Form.Group as={Col} md={4} controlId="cidade">
                 <Form.Label>Cidade</Form.Label>
-                <Form.Control type="text" name="cidade" value={formData.cidade} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="endereco.cidade" value={formData.endereco.cidade} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={4} controlId="estado">
                 <Form.Label>Estado</Form.Label>
-                <Form.Control type="text" name="estado" value={formData.estado} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="endereco.estado" value={formData.endereco.estado} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={4} controlId="cep">
                 <Form.Label>CEP</Form.Label>
-                <Form.Control type="text" name="cep" value={formData.cep} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="endereco.cep" value={formData.endereco.cep} onChange={handleChange} disabled={!editando} />
               </Form.Group>
             </Row>
             <Row className="mt-3">
               <Form.Group as={Col} md={12} controlId="complemento">
                 <Form.Label>Complemento</Form.Label>
-                <Form.Control type="text" name="complemento" value={formData.complemento} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="endereco.complemento" value={formData.endereco.complemento} onChange={handleChange} disabled={!editando} />
               </Form.Group>
             </Row>
           </Form>

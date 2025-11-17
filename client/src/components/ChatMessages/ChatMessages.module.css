@@ -1,0 +1,49 @@
+/* chatMessagesContainer existe apenas para aumentar a especificidade */
+.chatMessagesContainer .chatMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem;
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+.chatMessagesContainer .mensagemCard {
+  border-radius: 12px;
+  max-width: 80%;
+  align-self: flex-start;
+  padding: 0.5rem;
+  box-shadow: 0 6px 12px #cf181826;
+}
+
+.chatMessagesContainer .mensagemCard.enviada {
+  background-color: #A3D8B0;
+  align-self: flex-end;
+}
+
+.chatMessagesContainer .mensagemCard.recebida {
+  background-color: #86d6e4;
+}
+
+.chatMessagesContainer .mensagemHeader {
+  font-weight: bold;
+  background-color: #a3d8b0;
+  padding: 0.25rem 0.5rem;
+}
+
+.chatMessagesContainer .remetente {
+  font-weight: bold;
+}
+
+.chatMessagesContainer .mensagemConteudo {
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.chatMessagesContainer .timestamp {
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  color: #00000059;
+  font-size: 0.75rem;
+}

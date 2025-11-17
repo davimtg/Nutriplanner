@@ -43,19 +43,6 @@ function DashboardRouter() {
 function AppContext() {
   const location = useLocation();
 
-  const [userData, setUserData] = useState({
-    nome: "teste",
-    idade: 66,
-    email: "Rodrigo@gmail.com",
-    senha: "100%seguro",
-    cep: "20271-204",
-    estado: "RJ",
-    cidade: "Rio de Janeiro",
-    bairro: "Maracanã",
-    rua: "General Canabarro",
-    numero: 485,
-    complemento: "P1 - 101",
-  });
 
   // Aqui é um código para quando a pessoa não estiver logada,
   // Não aparecer o header, nem o chat
@@ -80,7 +67,7 @@ function AppContext() {
         <Route path="/mediador-pedido/:id" element={<MediadorPedidoDetalhes />} />
         <Route path="/relatorio" element={<Relatorio />} />
         <Route path="/planejamento" element={<Planejamento />} />
-        <Route path="/perfil" element={<Perfil userData={userData} setUserData={setUserData} />} />
+        <Route path="/perfil" element={<Perfil/>} />
         <Route path="/planos" element={<Planos/>}/>
         <Route path="/planos/criar" element={<CriarEditarPlano />}/>
         <Route path="/planos/:id" element={<CriarEditarPlano/>}/>
