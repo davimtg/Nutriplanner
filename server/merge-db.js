@@ -1,4 +1,4 @@
-import fs from "fs";
+const fs = require("fs");
 
 function juntarJSONs() {
   const arquivos = [
@@ -20,7 +20,7 @@ function juntarJSONs() {
     }
   }
 
-  fs.writeFileSync("db.json", JSON.stringify(dbFinal, null, 0));
+  fs.writeFileSync("db.json", JSON.stringify(dbFinal, null, " ")); // O Terceiro argumento de JSON.stringify define como a identação ocorre no arquivo db.json, o arguemnto 0 deixava tudo em uma linha 
 }
 
 juntarJSONs();

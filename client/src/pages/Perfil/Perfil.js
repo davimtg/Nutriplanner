@@ -2,14 +2,14 @@ import profile from '../../assets/img/profilePic/testPng.png';
 import styles from './Perfil.module.css';
 import { useState } from 'react';
 import { Button, Form, Container, Row, Col, Image, Tab, Tabs, Spinner } from 'react-bootstrap';
-import { setUserData } from '../../redux/userSlice'
+import { setUserData, updateUserById } from '../../redux/userSlice'
 import { useSelector, useDispatch } from 'react-redux';
 
 export default function Perfil() {
   const [editando, setEditando] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const formData = useSelector((state) => state.user.userData);
   const dispatch = useDispatch();
+  const formData = useSelector((state) => state.user.userData);
+  const loading = useSelector((state) => state.user.loading);
 
   const handleClick = async (e) => {
     e.preventDefault();
@@ -75,27 +75,7 @@ const handleChange = (e) => {
 
 
   const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`http://localhost:3001/usuarios/lista-de-usuarios/${formData.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (!res.ok) throw new Error('Erro ao atualizar usuário');
-
-      const updatedUser = await res.json();
-      dispatch(setUserData(updatedUser));
-      alert('Informações atualizadas com sucesso!');
-    } catch (err) {
-      console.error(err);
-      alert('Falha ao atualizar usuário.');
-    } finally {
-      setLoading(false);
-    }
+    dispatch(updateUserById(formData.id));
   };
   console.log(formData);
   return (
