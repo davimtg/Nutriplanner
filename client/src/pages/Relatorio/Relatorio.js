@@ -1,225 +1,215 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { Container, Row, Col, Card, Button, Spinner, Alert } from "react-bootstrap";
 
-import dadosRelatorio from '../../data/dadosRelatorio.json';
+// Importações dos utilitários e componentes visuais
+import { processarDadosRelatorio } from "../../components/Utils/nutricao";
+import BotoesExportacao from "./BotoesExportacao";
+import { DetalhesDia, GraficoSemanal } from "./PaineisVisuais";
 
-const getTodayIndex = () => new Date().getDay();
+export default function PaginaRelatorio() {
+  // Estado dos dados
+  const [usuario, setUsuario] = useState(null);
+  const [dadosProcessados, setDadosProcessados] = useState([]);
+  const [diaSelecionado, setDiaSelecionado] = useState(null);
+  
+  // NOVOS ESTADOS NECESSÁRIOS PARA A EXPORTAÇÃO
+  const [listaAlimentos, setListaAlimentos] = useState([]);
+  const [listaPlanos, setListaPlanos] = useState([]);
 
-export default function Relatorio() {
-  const [view, setView] = useState("semanal");
-  const [usuario] = useState(dadosRelatorio.usuario);
-  const [dadosSemanais] = useState(dadosRelatorio.semanal);
-  const [dadosMensais] = useState(dadosRelatorio.mensal);
-  const [selectedDayData, setSelectedDayData] = useState(dadosSemanais[getTodayIndex()]);
+  // Estados de controle da requisição
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleExport = (format) => {
-    // Para CSV, a exportação é um resumo simples da semana.
-    if (format === 'csv') {
-      const head = ['Dia', 'Calorias Consumidas', 'Proteínas (g)', 'Carboidratos (g)', 'Gorduras (g)'];
-      const body = dadosSemanais.map(d => [d.dia, d.caloriasConsumidas, d.proteinas, d.carboidratos, d.gorduras]);
-      let csvContent = "data:text/csv;charset=utf-8," + head.join(',') + '\r\n';
-      csvContent += body.map(row => row.join(',')).join('\r\n');
-      const link = document.createElement('a');
-      link.setAttribute('href', encodeURI(csvContent));
-      link.setAttribute('download', `relatorio_semanal_${usuario.nome.replace(' ', '_')}.csv`);
-      link.click();
-      return;
-    }
+  // ID do usuário logado (Simulado)
+  const USUARIO_ID = 1;
 
-    // Geração do PDF customizado
-    const doc = new jsPDF();
-    const hoje = new Date().toLocaleDateString('pt-BR');
-    const diaSelecionado = selectedDayData;
-    const metas = usuario.metas;
+  useEffect(() => {
+    setLoading(true);
 
-    doc.setFontSize(20);
-    doc.text(`Relatório Nutricional - ${usuario.nome}`, 14, 22);
-    doc.setFontSize(11);
-    doc.setTextColor(150);
-    doc.text(`Gerado em: ${hoje}`, 14, 30);
+    // Buscamos todas as tabelas necessárias em paralelo
+    Promise.all([
+      fetch("http://localhost:3001/usuarios").then(res => {
+        if (!res.ok) throw new Error("Falha ao buscar usuários");
+        return res.json();
+      }),
+      fetch("http://localhost:3001/alimentos").then(res => {
+        if (!res.ok) throw new Error("Falha ao buscar alimentos");
+        return res.json();
+      }),
+      fetch("http://localhost:3001/diario-alimentar").then(res => {
+        if (!res.ok) throw new Error("Falha ao buscar diário alimentar");
+        return res.json();
+      }),
+      // NOVO: Buscar os planos alimentares para passar ao PDF
+      fetch("http://localhost:3001/planos-alimentares").then(res => {
+        if (!res.ok) throw new Error("Falha ao buscar planos alimentares");
+        return res.json();
+      })
+    ])
+    .then(([usuariosData, alimentosData, diarioData, planosData]) => {
+      
+      // 1. Salvar dados crus que serão usados na exportação
+      setListaAlimentos(alimentosData);
+      // Extrair o array de planos (o json-server retorna { "planos-alimentares": [...] })
+      const arrayPlanos = Array.isArray(planosData) ? planosData : (planosData["planos-alimentares"] || []);
+      setListaPlanos(arrayPlanos);
 
-    // Tabela 1: Dados do dia selecionado na tela.
-    const progresso = ((diaSelecionado.caloriasConsumidas / metas.calorias) * 100).toFixed(1);
-    const bodyMetricaDiaria = [
-      ['Meta Calórica', `${metas.calorias} kcal`],
-      ['Calorias Consumidas', `${diaSelecionado.caloriasConsumidas} kcal`],
-      ['Progresso', `${progresso}%`],
-      ['Proteínas', `${diaSelecionado.proteinas}g`],
-      ['Carboidratos', `${diaSelecionado.carboidratos}g`],
-      ['Gorduras', `${diaSelecionado.gorduras}g`],
-    ];
+      // 2. Montamos um objeto "db" simulado para o processamento interno
+      const dbMontado = {
+        usuarios: usuariosData,
+        alimentos: alimentosData,
+        diario_alimentar: diarioData
+      };
 
-    autoTable(doc, {
-      startY: 40,
-      head: [['Métrica Diária', 'Valor']],
-      body: bodyMetricaDiaria,
-      theme: 'striped',
-      headStyles: { fillColor: '#0d6efd' },
+      // 3. Encontrar usuário
+      let listaUsuarios = usuariosData;
+      if (usuariosData["lista-de-usuarios"]) {
+        listaUsuarios = usuariosData["lista-de-usuarios"];
+      }
+      
+      const userFound = Array.isArray(listaUsuarios)
+        ? listaUsuarios.find(u => u.id === USUARIO_ID)
+        : null;
+
+      if (!userFound) {
+        throw new Error("Usuário não encontrado no banco de dados.");
+      }
+
+      // 4. Definir Metas
+      const metasUsuario = {
+          calorias: 2000,
+          proteinas: 150,
+          carboidratos: 250,
+          gorduras: 70,
+          ...userFound
+      };
+      
+      setUsuario({ ...userFound, metas: metasUsuario });
+
+      // 5. Processar dados para os gráficos
+      const dados = processarDadosRelatorio(USUARIO_ID, dbMontado);
+      setDadosProcessados(dados);
+
+      if (dados.length > 0) {
+        setDiaSelecionado(dados[dados.length - 1]);
+      }
+    })
+    .catch(err => {
+      console.error("Erro ao carregar relatório:", err);
+      setError(err.message);
+    })
+    .finally(() => {
+      setLoading(false);
     });
 
-    // Tabela 2: Resumo de consumo calórico semanal.
-    const bodySemanal = dadosSemanais.map(d => [
-      d.dia,
-      `${d.caloriasConsumidas} kcal`,
-      `${metas.calorias} kcal`
-    ]);
+  }, []);
 
-    autoTable(doc, {
-      startY: doc.lastAutoTable.finalY + 10, // Posiciona abaixo da tabela anterior
-      head: [['Dia', 'Calorias Consumidas', 'Meta']],
-      body: bodySemanal,
-      theme: 'striped',
-      headStyles: { fillColor: '#198754' },
-    });
-
-    doc.save(`relatorio_${usuario.nome.replace(' ', '_')}.pdf`);
-  };
-
-  const DetalhesDoDia = ({ data, metas }) => {
-    if (!data) return null;
-    const progressoCalorias = Math.min((data.caloriasConsumidas / metas.calorias) * 100, 100);
-
-    const macros = [
-      { nome: "Proteínas",    consumidas: data.proteinas,    meta: metas.proteinas,    corBase: 'primary' },
-      { nome: "Carboidratos", consumidas: data.carboidratos, meta: metas.carboidratos, corBase: 'success' },
-      { nome: "Gorduras",     consumidas: data.gorduras,     meta: metas.gorduras,     corBase: 'info' },
-    ];
-
+  if (loading) {
     return (
-      <div className="mt-4">
-        <h4 className="text-success mb-3">Resumo de {data.dia}</h4>
-        <div className="mb-4">
-            <h6 className="fw-bold">Calorias</h6>
-            <div className="progress" style={{ height: "24px", fontSize: "0.9rem" }}>
-              <div className="progress-bar bg-success progress-bar-striped fw-bold" role="progressbar" style={{ width: `${progressoCalorias}%` }}>
-                {data.caloriasConsumidas} / {metas.calorias} kcal
-              </div>
-            </div>
-        </div>
-        <h6 className="fw-bold">Macronutrientes</h6>
-        <div className="row">
-          {macros.map(macro => {
-            const progressoMacro = Math.min((macro.consumidas / macro.meta) * 100, 100);
-            const corBarra = macro.consumidas > macro.meta ? 'bg-warning text-dark' : `bg-${macro.corBase}`;
-            return (
-              <div key={macro.nome} className="col-md-4 mb-3">
-                <div className="card border-0 shadow-sm p-3 h-100">
-                    <p className="fw-semibold mb-2">{macro.nome}</p>
-                    <div className="progress" style={{ height: "20px", fontSize: '0.8rem' }}>
-                        <div className={`progress-bar fw-bold ${corBarra}`} role="progressbar" style={{ width: `${progressoMacro}%` }}>
-                           {macro.consumidas}g / {macro.meta}g
-                        </div>
-                    </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+        <Container className="py-5 text-center d-flex flex-column align-items-center justify-content-center" style={{ minHeight: "400px" }}>
+            <Spinner animation="border" variant="success" role="status">
+                <span className="visually-hidden">Carregando...</span>
+            </Spinner>
+            <p className="mt-3 text-muted">Sincronizando com o banco de dados...</p>
+        </Container>
     );
-  };
+  }
+
+  if (error) {
+    return (
+      <Container className="py-5">
+        <Alert variant="danger">
+          <Alert.Heading>Ocorreu um erro ao carregar os dados</Alert.Heading>
+          <p>{error}</p>
+          <hr />
+          <p className="mb-0">
+            Verifique se o servidor (json-server) está rodando.<br/>
+            Tente acessar manualmente no navegador: <a href="http://localhost:3001/diario-alimentar" target="_blank" rel="noreferrer">http://localhost:3001/diario-alimentar</a>
+          </p>
+        </Alert>
+      </Container>
+    );
+  }
+
+  if (!usuario || dadosProcessados.length === 0) {
+    return (
+        <Container className="py-5 text-center">
+            <Alert variant="info">
+              Nenhum registro de alimentação encontrado para este usuário.
+            </Alert>
+        </Container>
+    );
+  }
 
   return (
-    <div className="container py-5">
-      <div className="row justify-content-center">
-        <div className="col-lg-10">
-          <div className="card shadow-sm rounded-4 p-4 p-md-5">
-            <div className="text-center mb-4">
-              <h2 className="text-success mb-1">Seu Relatório Nutricional</h2>
-              <p className="lead text-muted">{usuario.nome}, {usuario.idade} anos</p>
-            </div>
-            <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 p-3 bg-light rounded-3 mb-4 border">
-               <div className="btn-group" role="group">
-                <button type="button" className={`btn ${view === 'semanal' ? 'btn-success' : 'btn-outline-success'}`} onClick={() => setView('semanal')}>
-                  <i className="bi bi-calendar-week-fill me-2"></i>Resumo Semanal
-                </button>
-                <button type="button" className={`btn ${view === 'mensal' ? 'btn-success' : 'btn-outline-success'}`} onClick={() => setView('mensal')}>
-                  <i className="bi bi-calendar-month-fill me-2"></i>Histórico Mensal
-                </button>
+    <Container className="py-5">
+      <Row className="justify-content-center">
+        <Col lg={10}>
+          <Card className="shadow-sm rounded-4 border-0">
+            <Card.Body className="p-4 p-md-5">
+              
+              <div className="text-center mb-5">
+                <h2 className="text-success fw-bold">Seu Relatório Nutricional</h2>
+                <p className="text-muted">
+                  {usuario.nome} • Acompanhamento baseado no seu diário
+                </p>
               </div>
-              <div className="btn-group" role="group">
-                <button onClick={() => handleExport('pdf')} className="btn btn-outline-danger d-flex align-items-center gap-2">
-                  <i className="bi bi-file-earmark-pdf-fill"></i> <span className="d-none d-sm-inline">Exportar PDF</span>
-                </button>
-                <button onClick={() => handleExport('csv')} className="btn btn-outline-primary d-flex align-items-center gap-2">
-                  <i className="bi bi-filetype-csv"></i> <span className="d-none d-sm-inline">Exportar CSV</span>
-                </button>
-              </div>
-            </div>
-            
-            <div>
-              {view === 'semanal' && (
-                <>
-                  <h5 className="text-success mt-4">Selecione um dia para ver os detalhes:</h5>
-                  <div className="d-flex justify-content-center flex-wrap gap-2 my-3">
-                    {dadosSemanais.map(diaData => (
-                      <button key={diaData.dia} className={`btn btn-sm ${selectedDayData?.dia === diaData.dia ? 'btn-success' : 'btn-outline-success'}`} onClick={() => setSelectedDayData(diaData)}>
-                        {diaData.dia}
-                      </button>
-                    ))}
-                  </div>
-                  <hr/>
-                  <DetalhesDoDia data={selectedDayData} metas={usuario.metas} />
-                  <hr/>
-                  <div className="mt-5">
-                    <h5 className="text-success mb-3">Balanço Calórico da Semana</h5>
-                    <ResponsiveContainer width="100%" height={250}>
-                        <BarChart data={dadosSemanais} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="dia" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey="caloriasConsumidas" fill="#198754" name="Consumidas" />
-                            {/* O gráfico usa a meta estática do usuário para a barra de "Meta". */}
-                            <Bar dataKey={() => usuario.metas.calorias} fill="#a3d9a5" name="Meta" />
-                        </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </>
-              )}
 
-              {view === 'mensal' && (
-                <div className="mt-4">
-                  <h5 className="text-success mb-3">Consumo Calórico no Mês</h5>
-                  <div className="card border-0 bg-light p-3 rounded-3 shadow-sm">
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={dadosMensais} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="dia" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="consumidas" stroke="#198754" strokeWidth={2} name="Calorias Consumidas" />
-                        {/* O gráfico usa a meta estática do usuário para a linha de "Meta". */}
-                        <Line type="monotone" dataKey={() => usuario.metas.calorias} stroke="#a3d9a5" strokeDasharray="5 5" name="Meta de Calorias" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <div className="mt-5 text-center text-muted">
-              <small>Última atualização: {new Date().toLocaleString('pt-BR')}</small>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+              <div className="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 p-3 bg-light rounded-3 mb-4 border">
+                <span className="fw-semibold text-secondary">
+                  <i className="bi bi-calendar-check me-2"></i>
+                  {dadosProcessados.length} dias registrados
+                </span>
+                
+                {/* CORREÇÃO AQUI:
+                    Passamos as listas completas de Alimentos e Planos.
+                    Isso permite que o BotoesExportacao cruze o ID do plano do usuário
+                    com a lista de planos para achar o nome e detalhes.
+                */}
+                <BotoesExportacao
+                    dados={dadosProcessados}
+                    usuario={usuario}
+                    metas={usuario.metas}
+                    todosAlimentos={listaAlimentos}
+                    todosPlanos={listaPlanos}
+                />
+              </div>
+
+              <h6 className="text-success fw-bold">Selecione um dia:</h6>
+              <div className="d-flex flex-wrap gap-2 mb-3">
+                {dadosProcessados.map((dia) => (
+                  <Button
+                    key={dia.data}
+                    variant={diaSelecionado?.data === dia.data ? "success" : "outline-success"}
+                    size="sm"
+                    onClick={() => setDiaSelecionado(dia)}
+                  >
+                    {dia.diaFormatado}
+                  </Button>
+                ))}
+              </div>
+
+              <DetalhesDia
+                dadosDia={diaSelecionado}
+                metas={usuario.metas}
+              />
+
+              <hr className="my-5" />
+
+              <GraficoSemanal
+                dados={dadosProcessados}
+                metaCalorica={usuario.metas.calorias}
+              />
+
+              <div className="mt-4 text-center text-muted small">
+                  Dados extraídos automaticamente do seu Diário Alimentar.
+              </div>
+
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 }

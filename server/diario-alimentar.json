@@ -1,0 +1,674 @@
+{
+  "diario-alimentar": [
+    {
+      "id": 1,
+      "usuarioId": 1,
+      "data": "2025-10-28",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 3239, "gramas": 107 }
+        ],
+        "almoco": [
+          { "id": 2249, "gramas": 176 },
+          { "id": 2462, "gramas": 157 },
+          { "id": 685, "gramas": 205 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 2392, "gramas": 131 }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "usuarioId": 1,
+      "data": "2025-10-29",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 3354, "gramas": 77 },
+          { "id": 2894, "gramas": 206 },
+          { "id": 311, "gramas": 241 }
+        ],
+        "almoco": [
+          { "id": 47, "gramas": 240 },
+          { "id": 1530, "gramas": 226 },
+          { "id": 3583, "gramas": 280 },
+          { "id": 2701, "gramas": 187 }
+        ],
+        "lanches": [
+          { "id": 1938, "gramas": 261 }
+        ],
+        "jantar": [
+          { "id": 3569, "gramas": 232 },
+          { "id": 3326, "gramas": 197 }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "usuarioId": 1,
+      "data": "2025-10-30",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 2641, "gramas": 184 },
+          { "id": 3457, "gramas": 61 }
+        ],
+        "almoco": [
+          { "id": 1282, "gramas": 178 },
+          { "id": 1401, "gramas": 145 },
+          { "id": 1574, "gramas": 154 },
+          { "id": 694, "gramas": 52 }
+        ],
+        "lanches": [
+          { "id": 3105, "gramas": 277 },
+          { "id": 2688, "gramas": 290 }
+        ],
+        "jantar": [
+          { "id": 3205, "gramas": 65 },
+          { "id": 393, "gramas": 84 },
+          { "id": 1726, "gramas": 148 }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "usuarioId": 1,
+      "data": "2025-10-31",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 121, "gramas": 107 },
+          { "id": 1910, "gramas": 217 }
+        ],
+        "almoco": [
+          { "id": 652, "gramas": 208 },
+          { "id": 3256, "gramas": 104 },
+          { "id": 109, "gramas": 271 },
+          { "id": 1843, "gramas": 232 }
+        ],
+        "lanches": [
+          { "id": 979, "gramas": 298 },
+          { "id": 3394, "gramas": 188 }
+        ],
+        "jantar": [
+          { "id": 386, "gramas": 54 }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "usuarioId": 1,
+      "data": "2025-11-01",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 2995, "gramas": 167 }
+        ],
+        "almoco": [
+          { "id": 1955, "gramas": 208 },
+          { "id": 1442, "gramas": 266 },
+          { "id": 2780, "gramas": 147 },
+          { "id": 44, "gramas": 70 }
+        ],
+        "lanches": [
+          { "id": 3559, "gramas": 242 }
+        ],
+        "jantar": [
+          { "id": 1163, "gramas": 181 },
+          { "id": 1175, "gramas": 139 },
+          { "id": 2678, "gramas": 167 }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "usuarioId": 1,
+      "data": "2025-11-02",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 2545, "gramas": 199 },
+          { "id": 1958, "gramas": 158 }
+        ],
+        "almoco": [
+          { "id": 2232, "gramas": 65 },
+          { "id": 1806, "gramas": 280 },
+          { "id": 2977, "gramas": 297 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 2601, "gramas": 132 }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "usuarioId": 1,
+      "data": "2025-11-03",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 1459, "gramas": 248 },
+          { "id": 1581, "gramas": 246 },
+          { "id": 1284, "gramas": 72 }
+        ],
+        "almoco": [
+          { "id": 1406, "gramas": 160 },
+          { "id": 798, "gramas": 143 },
+          { "id": 2658, "gramas": 238 },
+          { "id": 2919, "gramas": 187 }
+        ],
+        "lanches": [
+          { "id": 1781, "gramas": 81 }
+        ],
+        "jantar": [
+          { "id": 1777, "gramas": 226 },
+          { "id": 2322, "gramas": 171 },
+          { "id": 2110, "gramas": 61 }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "usuarioId": 1,
+      "data": "2025-11-04",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 1155, "gramas": 94 },
+          { "id": 1456, "gramas": 250 }
+        ],
+        "almoco": [
+          { "id": 1960, "gramas": 200 },
+          { "id": 857, "gramas": 176 },
+          { "id": 2147, "gramas": 152 },
+          { "id": 2739, "gramas": 239 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 3354, "gramas": 133 },
+          { "id": 184, "gramas": 207 }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "usuarioId": 1,
+      "data": "2025-11-05",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 1832, "gramas": 219 },
+          { "id": 3403, "gramas": 162 }
+        ],
+        "almoco": [
+          { "id": 3418, "gramas": 213 },
+          { "id": 613, "gramas": 265 },
+          { "id": 584, "gramas": 199 }
+        ],
+        "lanches": [
+          { "id": 2748, "gramas": 98 },
+          { "id": 969, "gramas": 79 }
+        ],
+        "jantar": [
+          { "id": 1210, "gramas": 243 }
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "usuarioId": 1,
+      "data": "2025-11-06",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 1509, "gramas": 116 },
+          { "id": 3190, "gramas": 150 }
+        ],
+        "almoco": [
+          { "id": 1810, "gramas": 181 },
+          { "id": 3051, "gramas": 225 }
+        ],
+        "lanches": [
+          { "id": 3479, "gramas": 255 },
+          { "id": 393, "gramas": 174 }
+        ],
+        "jantar": [
+          { "id": 2415, "gramas": 135 }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "usuarioId": 1,
+      "data": "2025-11-07",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 1604, "gramas": 140 },
+          { "id": 2143, "gramas": 79 }
+        ],
+        "almoco": [
+          { "id": 684, "gramas": 191 },
+          { "id": 2514, "gramas": 105 },
+          { "id": 2904, "gramas": 173 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 3362, "gramas": 237 },
+          { "id": 3618, "gramas": 65 },
+          { "id": 1546, "gramas": 127 }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "usuarioId": 1,
+      "data": "2025-11-08",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 1843, "gramas": 70 },
+          { "id": 155, "gramas": 214 },
+          { "id": 1652, "gramas": 157 }
+        ],
+        "almoco": [
+          { "id": 1035, "gramas": 131 },
+          { "id": 2822, "gramas": 281 },
+          { "id": 660, "gramas": 283 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 2965, "gramas": 136 },
+          { "id": 1011, "gramas": 299 },
+          { "id": 3128, "gramas": 194 }
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "usuarioId": 1,
+      "data": "2025-11-09",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 3563, "gramas": 171 },
+          { "id": 1871, "gramas": 287 }
+        ],
+        "almoco": [
+          { "id": 2385, "gramas": 93 },
+          { "id": 3371, "gramas": 123 },
+          { "id": 3060, "gramas": 124 }
+        ],
+        "lanches": [
+          { "id": 2678, "gramas": 107 }
+        ],
+        "jantar": [
+          { "id": 2889, "gramas": 142 }
+        ]
+      }
+    },
+    {
+      "id": 14,
+      "usuarioId": 1,
+      "data": "2025-11-10",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 2301, "gramas": 65 },
+          { "id": 834, "gramas": 80 },
+          { "id": 67, "gramas": 165 }
+        ],
+        "almoco": [
+          { "id": 733, "gramas": 74 },
+          { "id": 1321, "gramas": 124 },
+          { "id": 1584, "gramas": 295 },
+          { "id": 2252, "gramas": 102 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 129, "gramas": 96 }
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "usuarioId": 1,
+      "data": "2025-11-11",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 550, "gramas": 231 }
+        ],
+        "almoco": [
+          { "id": 2174, "gramas": 125 },
+          { "id": 1043, "gramas": 173 },
+          { "id": 488, "gramas": 234 }
+        ],
+        "lanches": [
+          { "id": 713, "gramas": 111 }
+        ],
+        "jantar": [
+          { "id": 1554, "gramas": 225 },
+          { "id": 3245, "gramas": 225 },
+          { "id": 3357, "gramas": 287 }
+        ]
+      }
+    },
+    {
+      "id": 16,
+      "usuarioId": 1,
+      "data": "2025-11-12",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 3334, "gramas": 273 }
+        ],
+        "almoco": [
+          { "id": 1835, "gramas": 234 },
+          { "id": 2857, "gramas": 140 },
+          { "id": 1490, "gramas": 232 },
+          { "id": 1607, "gramas": 190 }
+        ],
+        "lanches": [
+          { "id": 2702, "gramas": 79 }
+        ],
+        "jantar": [
+          { "id": 3020, "gramas": 287 }
+        ]
+      }
+    },
+    {
+      "id": 17,
+      "usuarioId": 1,
+      "data": "2025-11-13",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 843, "gramas": 261 }
+        ],
+        "almoco": [
+          { "id": 2359, "gramas": 85 },
+          { "id": 1674, "gramas": 99 }
+        ],
+        "lanches": [
+          { "id": 2885, "gramas": 182 }
+        ],
+        "jantar": [
+          { "id": 660, "gramas": 270 },
+          { "id": 100, "gramas": 69 },
+          { "id": 1364, "gramas": 61 }
+        ]
+      }
+    },
+    {
+      "id": 18,
+      "usuarioId": 1,
+      "data": "2025-11-14",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 563, "gramas": 111 }
+        ],
+        "almoco": [
+          { "id": 3305, "gramas": 241 },
+          { "id": 2538, "gramas": 144 },
+          { "id": 433, "gramas": 188 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 1641, "gramas": 289 },
+          { "id": 343, "gramas": 163 }
+        ]
+      }
+    },
+    {
+      "id": 19,
+      "usuarioId": 1,
+      "data": "2025-11-15",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 1635, "gramas": 104 }
+        ],
+        "almoco": [
+          { "id": 138, "gramas": 168 },
+          { "id": 2273, "gramas": 277 },
+          { "id": 1076, "gramas": 179 },
+          { "id": 2674, "gramas": 241 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 1225, "gramas": 157 },
+          { "id": 1321, "gramas": 287 }
+        ]
+      }
+    },
+    {
+      "id": 20,
+      "usuarioId": 1,
+      "data": "2025-11-16",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 1807, "gramas": 128 },
+          { "id": 1893, "gramas": 163 }
+        ],
+        "almoco": [
+          { "id": 1262, "gramas": 126 },
+          { "id": 3221, "gramas": 206 }
+        ],
+        "lanches": [
+          { "id": 2385, "gramas": 299 },
+          { "id": 1768, "gramas": 289 }
+        ],
+        "jantar": [
+          { "id": 833, "gramas": 58 },
+          { "id": 2567, "gramas": 293 }
+        ]
+      }
+    },
+    {
+      "id": 21,
+      "usuarioId": 1,
+      "data": "2025-11-17",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 2973, "gramas": 107 }
+        ],
+        "almoco": [
+          { "id": 2014, "gramas": 71 },
+          { "id": 903, "gramas": 86 },
+          { "id": 3613, "gramas": 82 }
+        ],
+        "lanches": [
+          { "id": 708, "gramas": 245 },
+          { "id": 3568, "gramas": 90 }
+        ],
+        "jantar": [
+          { "id": 2612, "gramas": 164 }
+        ]
+      }
+    },
+    {
+      "id": 22,
+      "usuarioId": 1,
+      "data": "2025-11-18",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 972, "gramas": 92 },
+          { "id": 517, "gramas": 97 },
+          { "id": 1605, "gramas": 112 }
+        ],
+        "almoco": [
+          { "id": 1904, "gramas": 272 },
+          { "id": 2286, "gramas": 282 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 754, "gramas": 210 }
+        ]
+      }
+    },
+    {
+      "id": 23,
+      "usuarioId": 1,
+      "data": "2025-11-19",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 2602, "gramas": 60 }
+        ],
+        "almoco": [
+          { "id": 2605, "gramas": 102 },
+          { "id": 2352, "gramas": 68 }
+        ],
+        "lanches": [
+          { "id": 2276, "gramas": 125 }
+        ],
+        "jantar": [
+          { "id": 2959, "gramas": 179 },
+          { "id": 1307, "gramas": 224 },
+          { "id": 2557, "gramas": 75 }
+        ]
+      }
+    },
+    {
+      "id": 24,
+      "usuarioId": 1,
+      "data": "2025-11-20",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 56, "gramas": 166 },
+          { "id": 836, "gramas": 170 }
+        ],
+        "almoco": [
+          { "id": 488, "gramas": 73 },
+          { "id": 3416, "gramas": 132 },
+          { "id": 3329, "gramas": 253 },
+          { "id": 2048, "gramas": 163 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 3170, "gramas": 164 },
+          { "id": 1329, "gramas": 153 }
+        ]
+      }
+    },
+    {
+      "id": 25,
+      "usuarioId": 1,
+      "data": "2025-11-21",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 1664, "gramas": 250 },
+          { "id": 3567, "gramas": 80 }
+        ],
+        "almoco": [
+          { "id": 2438, "gramas": 227 },
+          { "id": 2487, "gramas": 130 },
+          { "id": 3532, "gramas": 196 },
+          { "id": 3545, "gramas": 128 }
+        ],
+        "lanches": [
+          { "id": 766, "gramas": 292 }
+        ],
+        "jantar": [
+          { "id": 2900, "gramas": 280 },
+          { "id": 2271, "gramas": 99 }
+        ]
+      }
+    },
+    {
+      "id": 26,
+      "usuarioId": 1,
+      "data": "2025-11-22",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 1174, "gramas": 151 }
+        ],
+        "almoco": [
+          { "id": 696, "gramas": 290 },
+          { "id": 1623, "gramas": 147 },
+          { "id": 2213, "gramas": 122 },
+          { "id": 3147, "gramas": 266 }
+        ],
+        "lanches": [
+          { "id": 46, "gramas": 236 }
+        ],
+        "jantar": [
+          { "id": 1963, "gramas": 173 },
+          { "id": 2488, "gramas": 227 },
+          { "id": 727, "gramas": 251 }
+        ]
+      }
+    },
+    {
+      "id": 27,
+      "usuarioId": 1,
+      "data": "2025-11-23",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 2578, "gramas": 116 },
+          { "id": 2392, "gramas": 127 },
+          { "id": 2063, "gramas": 250 }
+        ],
+        "almoco": [
+          { "id": 3416, "gramas": 180 },
+          { "id": 876, "gramas": 244 },
+          { "id": 172, "gramas": 246 },
+          { "id": 234, "gramas": 220 }
+        ],
+        "lanches": [
+          { "id": 2420, "gramas": 269 }
+        ],
+        "jantar": [
+          { "id": 3230, "gramas": 190 }
+        ]
+      }
+    },
+    {
+      "id": 28,
+      "usuarioId": 1,
+      "data": "2025-11-24",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 232, "gramas": 162 }
+        ],
+        "almoco": [
+          { "id": 2858, "gramas": 132 },
+          { "id": 2822, "gramas": 177 },
+          { "id": 2037, "gramas": 230 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 3576, "gramas": 117 }
+        ]
+      }
+    },
+    {
+      "id": 29,
+      "usuarioId": 1,
+      "data": "2025-11-25",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 2324, "gramas": 174 }
+        ],
+        "almoco": [
+          { "id": 3138, "gramas": 94 },
+          { "id": 3059, "gramas": 266 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 669, "gramas": 176 },
+          { "id": 3547, "gramas": 66 }
+        ]
+      }
+    },
+    {
+      "id": 30,
+      "usuarioId": 1,
+      "data": "2025-11-26",
+      "refeicoes": {
+        "cafe_da_manha": [
+          { "id": 338, "gramas": 151 },
+          { "id": 3217, "gramas": 62 }
+        ],
+        "almoco": [
+          { "id": 855, "gramas": 145 },
+          { "id": 1520, "gramas": 89 },
+          { "id": 995, "gramas": 195 },
+          { "id": 3333, "gramas": 261 }
+        ],
+        "lanches": [],
+        "jantar": [
+          { "id": 602, "gramas": 241 },
+          { "id": 1157, "gramas": 154 },
+          { "id": 3036, "gramas": 210 }
+        ]
+      }
+    }
+  ]
+}

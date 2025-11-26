@@ -13,7 +13,13 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { abrirChat, fetchUserMessages } from '../../redux/chatSlice';
 
+// IMPORTAÇÕES NOVAS NECESSÁRIAS
+import { processarDadosRelatorio } from "../../components/Utils/nutricao"; // Seu processador existente
+import { gerarRelatorioPDF } from "../../components/Utils/gerarPdf"; // A nova função que criamos acima
+
+// ... (Mantenha o componente VincularPlanoModal exatamente como estava) ...
 function VincularPlanoModal({ show, handleClose, paciente, onSave }) {
+  // ... código do modal ... (sem alterações)
   const [planos, setPlanos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,7 +67,7 @@ function VincularPlanoModal({ show, handleClose, paciente, onSave }) {
   };
 
   const handleDesvincular = () => {
-    onSave(paciente.id, null); // Passa null para desvincular o plano
+    onSave(paciente.id, null); 
   };
 
   return (
@@ -121,11 +127,15 @@ function VincularPlanoModal({ show, handleClose, paciente, onSave }) {
   );
 }
 
-
 // --- Componente Principal da Página ---
 function Pacientes() {
   const [pacientes, setPacientes] = useState([]);
-  const [planos, setPlanos] = useState([]); // Estado para armazenar os planos
+  const [planos, setPlanos] = useState([]);
+  
+  // NOVOS ESTADOS PARA SUPORTAR O RELATÓRIO
+  const [alimentos, setAlimentos] = useState([]);
+  const [diarios, setDiarios] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [termoBusca, setTermoBusca] = useState("");
@@ -135,23 +145,30 @@ function Pacientes() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Busca pacientes e planos simultaneamente
+    // Agora buscamos TUDO que é necessário para gerar o relatório aqui mesmo
     Promise.all([
-      fetch("http://localhost:3001/usuarios").then(res => {
-        if (!res.ok) throw new Error("Falha ao buscar usuários.");
-        return res.json();
-      }),
-      fetch("http://localhost:3001/planos-alimentares").then(res => {
-        if (!res.ok) throw new Error("Falha ao buscar planos.");
-        return res.json();
-      })
+      fetch("http://localhost:3001/usuarios").then(res => { if (!res.ok) throw new Error("Erro usuários"); return res.json(); }),
+      fetch("http://localhost:3001/planos-alimentares").then(res => { if (!res.ok) throw new Error("Erro planos"); return res.json(); }),
+      fetch("http://localhost:3001/alimentos").then(res => { if (!res.ok) throw new Error("Erro alimentos"); return res.json(); }),
+      fetch("http://localhost:3001/diario-alimentar").then(res => { if (!res.ok) throw new Error("Erro diário"); return res.json(); })
     ])
-      .then(([usuariosData, planosData]) => {
+      .then(([usuariosData, planosData, alimentosData, diarioData]) => {
         const clientes = usuariosData["lista-de-usuarios"].filter(
           (usuario) => usuario.tipo.name === "cliente"
         );
         setPacientes(clientes);
-        setPlanos(planosData);
+        
+        // Correção robusta para planos (caso venha como array ou objeto)
+        let listaPlanos = [];
+        if (Array.isArray(planosData)) {
+            listaPlanos = planosData;
+        } else if (planosData["planos-alimentares"]) {
+            listaPlanos = planosData["planos-alimentares"];
+        }
+        setPlanos(listaPlanos);
+        
+        setAlimentos(alimentosData);
+        setDiarios(diarioData);
       })
       .catch((error) => {
         console.error("Erro ao buscar dados:", error);
@@ -162,7 +179,6 @@ function Pacientes() {
       });
   }, []);
 
-  // Cria um mapa de ID do plano para o nome do plano para busca rápida
   const planosMap = useMemo(() => {
     return new Map(planos.map(plano => [plano.id, plano.nome]));
   }, [planos]);
@@ -201,16 +217,53 @@ function Pacientes() {
       return p;
     });
     setPacientes(pacientesAtualizados);
-
+    // fetch de update aqui...
     console.log(`Simulando PATCH para o paciente ${pacienteId}:`, { planoId: planoId });
-    // AQUI VOCÊ FARIA A CHAMADA REAL PARA A API (PATCH/PUT)
-    // fetch(`http://localhost:3001/usuarios/lista-de-usuarios/${pacienteId}`, {
-    //   method: 'PATCH',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ planoId: planoId })
-    // }).then(res => res.json()).then(data => console.log('Paciente atualizado:', data));
-
     handleCloseModal();
+  };
+
+  // --- FUNÇÃO DE DOWNLOAD DO PDF ---
+  const handleBaixarRelatorio = (paciente) => {
+    if (!alimentos.length || !diarios) {
+        alert("Ainda carregando dados do sistema, tente novamente em instantes.");
+        return;
+    }
+
+    // 1. Montar "banco de dados" temporário para o processador
+    const dbTemp = {
+        alimentos: alimentos,
+        diario_alimentar: diarios // A função espera snake_case se usar o nutricao.js original
+    };
+
+    // 2. Processar os dados do diário para calcular totais
+    // Nota: nutricao.js espera um objeto com a chave 'diario_alimentar'
+    const dadosProcessados = processarDadosRelatorio(paciente.id, dbTemp);
+
+    if (dadosProcessados.length === 0) {
+        alert("Este paciente não possui registros no diário alimentar.");
+        return;
+    }
+
+    // 3. Encontrar o plano do paciente
+    const planoPaciente = planos.find(p => p.id === paciente.planoId);
+
+    // 4. Definir metas (se não tiver plano, usa padrão)
+    const metas = {
+        calorias: 2000, 
+        proteinas: 150, 
+        carboidratos: 250, 
+        gorduras: 70,
+        ...paciente
+    };
+
+    // 5. Gerar o PDF
+    gerarRelatorioPDF({
+        dados: dadosProcessados,
+        usuario: paciente,
+        metas: metas,
+        plano: planoPaciente,
+        todosAlimentos: alimentos
+    });
   };
 
   if (loading) {
@@ -243,7 +296,6 @@ function Pacientes() {
             border-color: #198754 !important;
             color: white !important;
           }
-          /* Estilo para o texto do item ativo, para garantir que o texto secundário não fique branco */
           .planos-list .list-group-item.active small {
             color: rgba(255, 255, 255, 0.75) !important;
           }
@@ -292,9 +344,17 @@ function Pacientes() {
                         </small>
                       </div>
                       <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <Button variant="outline-secondary" size="sm">
-                          Visualizar Relatório
+                        
+                        {/* Botão atualizado para chamar o download direto */}
+                        <Button 
+                            variant="outline-secondary" 
+                            size="sm"
+                            onClick={() => handleBaixarRelatorio(paciente)}
+                        >
+                          <i className="bi bi-download me-1"></i>
+                          Baixar Relatório
                         </Button>
+
                         <Button
                           size="sm"
                           variant="success"

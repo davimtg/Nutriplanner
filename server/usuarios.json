@@ -48,7 +48,7 @@
         "senha": "12345678",
         "tipo": { "id": 1, "name": "cliente" },
         "objetivo": "Alimentar-se de forma saudável e perder peso",
-        "planoId": 101,
+        "planoId": 2,
         "idade": 34,
         "sexo": "masculino",
         "altura": 178,
