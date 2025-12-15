@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "json-server": "^0.17.4",
+    "mongoose": "^9.0.1"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "node merge-db.js && npx json-server -p 3001 db.json"
+  }
+}

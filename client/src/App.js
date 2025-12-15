@@ -1,0 +1,91 @@
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
+import Header from "./components/Header/Header";
+import Chat from "./components/Chat/Chat"
+
+import Login from "./pages/Login/Login";
+import Registrar from "./pages/Registrar/Registrar";
+import EsqeuciMinhaSenha from "./pages/EsqueciMinhaSenha/EsqueciMinhaSenha"
+import Perfil from "./pages/Perfil/Perfil";
+import Alimentos from "./pages/Alimentos/Alimentos";
+import Receitas from './pages/Receitas/Receitas';
+
+import ClienteDashboard from "./pages/ClienteDashboard/ClienteDashboard";
+import Biblioteca from './pages/Biblioteca/Biblioteca';
+import Relatorio from "./pages/Relatorio/Relatorio"
+import ListaCompras from './pages/ListaCompras/ListaCompras';
+
+import Pacientes from "./pages/Pacientes/Pacientes"
+import Planos from "./pages/Planos/Planos"
+import Planejamento from "./pages/Planejamento/Planejamento"
+import CriarEditarPlano from './pages/CriarEditarPlano/CriarEditarPlano';
+
+import MediadorDashboard from "./pages/MediadorDashboard/MediadorDashboard";
+import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedidoDetalhes";
+
+
+
+function DashboardRouter() {
+  const userType = useSelector((state) => state.user.userType);
+  if (!userType) return <Navigate to="/" />;
+
+  switch (userType.id) {
+    case 0: return null;
+    case 1: return <ClienteDashboard />;
+    case 2: return <Pacientes />;
+    case 3: return <MediadorDashboard />;
+    default: return <Navigate to="/" />;
+  }
+}
+
+function AppContext() {
+  const location = useLocation();
+
+
+  // Aqui é um código para quando a pessoa não estiver logada,
+  // Não aparecer o header, nem o chat
+  const rotasNaoLogadas = ["/", "/login", "/registrar", "/esqueci-minha-senha"];
+  const mostrarComponentesQuandoLogados = !rotasNaoLogadas.includes(location.pathname);
+  const userType = useSelector((state) => state.user.userType);
+
+  return (
+    <>
+      {mostrarComponentesQuandoLogados && <Header tipo={userType.name}/>}
+      {mostrarComponentesQuandoLogados && <Chat />}
+
+      <Routes>
+        {/* Páginas para Não-Logados */}
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/registrar" element={<Registrar />}/>
+
+        {/* Páginas para Logados */}
+        <Route path="/dashboard" element={<DashboardRouter />} />
+        <Route path="/biblioteca" element={<Biblioteca />} />
+        <Route path="/mediador-pedido/:id" element={<MediadorPedidoDetalhes />} />
+        <Route path="/relatorio" element={<Relatorio />} />
+        <Route path="/planejamento" element={<Planejamento />} />
+        <Route path="/perfil" element={<Perfil/>} />
+        <Route path="/planos" element={<Planos/>}/>
+        <Route path="/planos/criar" element={<CriarEditarPlano />}/>
+        <Route path="/planos/:id" element={<CriarEditarPlano/>}/>
+        <Route path="/esqueci-minha-senha" element={<EsqeuciMinhaSenha/>}/>
+        <Route path="/alimento/:id" element={<Alimentos />} />
+        <Route path="/receita/:id" element={<Receitas />} />
+        <Route path="/ListaCompras" element={<ListaCompras />} />
+      </Routes>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContext />
+    </Router>
+  );
+}
+
+export default App;

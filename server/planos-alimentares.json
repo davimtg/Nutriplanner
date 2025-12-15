@@ -1,0 +1,152 @@
+{
+  "planos-alimentares": [
+    {
+      "id": 1,
+      "nome": null,
+      "objetivo": null,
+      "detalhamento": {
+        "segunda": {
+          "cafe_da_manha": [],
+          "almoco": [],
+          "jantar": []
+        },
+        "terca": {
+          "cafe_da_manha": [],
+          "almoco": [],
+          "jantar": []
+        },
+        "quarta": {
+          "cafe_da_manha": [],
+          "almoco": [],
+          "jantar": []
+        },
+        "quinta": {
+          "cafe_da_manha": [],
+          "almoco": [],
+          "jantar": []
+        },
+        "sexta": {
+          "cafe_da_manha": [],
+          "almoco": [],
+          "jantar": []
+        },
+        "sabado": {
+          "cafe_da_manha": [],
+          "almoco": [],
+          "jantar": []
+        },
+        "domingo": {
+          "cafe_da_manha": [],
+          "almoco": [],
+          "jantar": []
+        }
+      }
+    },
+    {
+      "id": 2,
+      "nome": "Dieta Mediterrânea",
+      "objetivo": "Promover a saúde cardiovascular e o bem-estar geral, com foco em alimentos frescos, vegetais, peixes e gorduras saudáveis.",
+      "detalhamento": {
+        "segunda": {
+          "cafe_da_manha": [
+            { "id": 4, "gramas": 150 },
+            { "id": 52, "gramas": 150 }
+          ],
+          "almoco": [
+            { "id": 37, "gramas": 150 },
+            { "id": 3, "gramas": 100 },
+            { "id": 44, "gramas": 80 },
+            { "id": 24, "gramas": 5 }
+          ],
+          "jantar": [
+            { "id": 20, "gramas": 120 },
+            { "id": 75, "gramas": 150 }
+          ]
+        },
+        "terca": {
+          "cafe_da_manha": [
+            { "id": 13, "gramas": 100 },
+            { "id": 30, "gramas": 5 }
+          ],
+          "almoco": [
+            { "id": 8, "gramas": 150 },
+            { "id": 0, "gramas": 100 },
+            { "id": 73, "gramas": 120 }
+          ],
+          "jantar": [
+            { "id": 31, "gramas": 80 },
+            { "id": 64, "gramas": 20 },
+            { "id": 49, "gramas": 100 },
+            { "id": 59, "gramas": 30 }
+          ]
+        },
+        "quarta": {
+          "cafe_da_manha": [
+            { "id": 4, "gramas": 150 },
+            { "id": 58, "gramas": 100 }
+          ],
+          "almoco": [
+            { "id": 29, "gramas": 150 },
+            { "id": 3, "gramas": 100 },
+            { "id": 72, "gramas": 120 }
+          ],
+          "jantar": [{ "id": 45, "gramas": 250 }]
+        },
+        "quinta": {
+          "cafe_da_manha": [{ "id": 69, "gramas": 120 }],
+          "almoco": [
+            { "id": 37, "gramas": 150 },
+            { "id": 76, "gramas": 100 },
+            { "id": 80, "gramas": 50 }
+          ],
+          "jantar": [
+            { "id": 20, "gramas": 120 },
+            { "id": 79, "gramas": 150 },
+            { "id": 66, "gramas": 5 }
+          ]
+        },
+        "sexta": {
+          "cafe_da_manha": [
+            { "id": 4, "gramas": 150 },
+            { "id": 60, "gramas": 150 }
+          ],
+          "almoco": [
+            { "id": 8, "gramas": 150 },
+            { "id": 0, "gramas": 100 },
+            { "id": 77, "gramas": 150 }
+          ],
+          "jantar": [
+            { "id": 44, "gramas": 100 },
+            { "id": 13, "gramas": 50 },
+            { "id": 37, "gramas": 80 },
+            { "id": 30, "gramas": 5 }
+          ]
+        },
+        "sabado": {
+          "cafe_da_manha": [{ "id": 15, "gramas": 170 }],
+          "almoco": [
+            { "id": 20, "gramas": 150 },
+            { "id": 3, "gramas": 100 },
+            { "id": 38, "gramas": 100 }
+          ],
+          "jantar": [{ "id": 41, "gramas": 250 }]
+        },
+        "domingo": {
+          "cafe_da_manha": [
+            { "id": 4, "gramas": 150 },
+            { "id": 65, "gramas": 130 }
+          ],
+          "almoco": [
+            { "id": 20, "gramas": 200 },
+            { "id": 0, "gramas": 120 },
+            { "id": 74, "gramas": 80 }
+          ],
+          "jantar": [
+            { "id": 49, "gramas": 100 },
+            { "id": 64, "gramas": 30 }
+          ]
+        }
+      }
+    }
+  ]
+}

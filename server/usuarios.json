@@ -1,0 +1,204 @@
+{
+  "usuarios": {
+    "tipo-code": [
+      { "id": 0, "name": "admin" },
+      { "id": 1, "name": "cliente" },
+      { "id": 2, "name": "nutricionista" },
+      { "id": 3, "name": "mediador" }
+    ],
+    "lista-de-usuarios": [
+      {
+        "id": 0,
+        "nome": "Admin",
+        "telefone": "",
+        "endereco": {
+          "rua": "",
+          "numero": "",
+          "bairro": "",
+          "cidade": "",
+          "estado": "",
+          "cep": "",
+          "complemento": ""
+        },
+        "email": "admin@admin.com",
+        "senha": "12345678",
+        "tipo": { "id": 0, "name": "admin" },
+        "objetivo": null,
+        "planoId": null,
+        "idade": null,
+        "sexo": null,
+        "altura": null,
+        "peso": null,
+        "contatosRecentes": []
+      },
+      {
+        "id": 1,
+        "nome": "João da Silva",
+        "telefone": "21999999999",
+        "endereco": {
+          "rua": "Av. Central",
+          "numero": "456",
+          "bairro": "Centro",
+          "cidade": "São Paulo",
+          "estado": "SP",
+          "cep": "01000000",
+          "complemento": "Apto 12"
+        },
+        "email": "joao.da.silva@gmail.com",
+        "senha": "12345678",
+        "tipo": { "id": 1, "name": "cliente" },
+        "objetivo": "Alimentar-se de forma saudável e perder peso",
+        "planoId": 101,
+        "idade": 34,
+        "sexo": "masculino",
+        "altura": 178,
+        "peso": 88,
+        "contatosRecentes": [3, 5, 7]
+      },
+      {
+        "id": 2,
+        "nome": "Marcus Vinicius",
+        "telefone": "21912031021",
+        "endereco": {
+          "rua": "Av. Camarista Méier",
+          "numero": "1012",
+          "bairro": "Cachambi",
+          "cidade": "Rio de Janeiro",
+          "estado": "RJ",
+          "cep": "20770000",
+          "complemento": "Bloco B"
+        },
+        "email": "marcus.vinicius@gmail.com",
+        "senha": "12345678",
+        "tipo": { "id": 1, "name": "cliente" },
+        "objetivo": "Ganhar massa muscular",
+        "planoId": 102,
+        "idade": 28,
+        "sexo": "masculino",
+        "altura": 182,
+        "peso": 76,
+        "contatosRecentes": [3, 6, 1]
+      },
+      {
+        "id": 3,
+        "nome": "Nathália Barbosa",
+        "telefone": "22988888888",
+        "endereco": {
+          "rua": "Rua A",
+          "numero": "123",
+          "bairro": "Tijuca",
+          "cidade": "Rio de Janeiro",
+          "estado": "RJ",
+          "cep": "20540000",
+          "complemento": "Sala 3"
+        },
+        "email": "nathalia.barbosa@gmail.com",
+        "senha": "12345678",
+        "tipo": { "id": 2, "name": "nutricionista" },
+        "objetivo": "Atender clientes com foco em emagrecimento e saúde",
+        "planoId": null,
+        "idade": 32,
+        "sexo": "feminino",
+        "altura": 165,
+        "peso": 60,
+        "contatosRecentes": [1, 5, 6]
+      },
+      {
+        "id": 4,
+        "nome": "Ricardo Assunção",
+        "telefone": "22922882288",
+        "endereco": {
+          "rua": "Rua V",
+          "numero": "321",
+          "bairro": "Botafogo",
+          "cidade": "Rio de Janeiro",
+          "estado": "RJ",
+          "cep": "22250000",
+          "complemento": "Casa"
+        },
+        "email": "ricardo.assuncao@gmail.com",
+        "senha": "12345678",
+        "tipo": { "id": 3, "name": "mediador" },
+        "objetivo": "Facilitar comunicação entre clientes e profissionais",
+        "planoId": null,
+        "idade": 40,
+        "sexo": "masculino",
+        "altura": 175,
+        "peso": 78,
+        "contatosRecentes": [1, 3]
+      },
+      {
+        "id": 5,
+        "nome": "Camila Rocha",
+        "telefone": "21988776655",
+        "endereco": {
+          "rua": "Rua das Flores",
+          "numero": "45",
+          "bairro": "Icaraí",
+          "cidade": "Niterói",
+          "estado": "RJ",
+          "cep": "24220000",
+          "complemento": "Casa 2"
+        },
+        "email": "camila.rocha@example.com",
+        "senha": "12345678",
+        "tipo": { "id": 1, "name": "cliente" },
+        "objetivo": "Melhorar desempenho esportivo",
+        "planoId": 103,
+        "idade": 26,
+        "sexo": "feminino",
+        "altura": 170,
+        "peso": 62,
+        "contatosRecentes": [1, 3, 7]
+      },
+      {
+        "id": 6,
+        "nome": "Eduardo Lima",
+        "telefone": "21977665544",
+        "endereco": {
+          "rua": "Av. das Américas",
+          "numero": "200",
+          "bairro": "Barra da Tijuca",
+          "cidade": "Rio de Janeiro",
+          "estado": "RJ",
+          "cep": "22640100",
+          "complemento": "Apto 1101"
+        },
+        "email": "eduardo.lima@example.com",
+        "senha": "12345678",
+        "tipo": { "id": 2, "name": "nutricionista" },
+        "objetivo": "Atender pacientes com alergias alimentares",
+        "planoId": 201,
+        "idade": 38,
+        "sexo": "masculino",
+        "altura": 180,
+        "peso": 82,
+        "contatosRecentes": [2, 5]
+      },
+      {
+        "id": 7,
+        "nome": "Larissa Fernandes",
+        "telefone": "21966554433",
+        "endereco": {
+          "rua": "Praça Central",
+          "numero": "10",
+          "bairro": "Centro",
+          "cidade": "Niterói",
+          "estado": "RJ",
+          "cep": "24020000",
+          "complemento": "Sala 101"
+        },
+        "email": "larissa.fernandes@example.com",
+        "senha": "12345678",
+        "tipo": { "id": 1, "name": "cliente" },
+        "objetivo": "Manter hábitos saudáveis e controlar colesterol",
+        "planoId": 104,
+        "idade": 45,
+        "sexo": "feminino",
+        "altura": 160,
+        "peso": 70,
+        "contatosRecentes": [1, 5]
+      }
+    ]
+  }
+}
