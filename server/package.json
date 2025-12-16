@@ -10,12 +10,3 @@
     "start": "node merge-db.js && npx json-server -p 3001 db.json"
   }
 }
-{
-  "dependencies": {
-    "json-server": "^0.17.4"
-  },
-  "type": "module",
-  "scripts": {
-    "start": "node merge-db.js && npx json-server -p 3001 db.json"
-  } 
-}
