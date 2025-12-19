@@ -17,4 +17,4 @@ const usuarioSchema = new mongoose.Schema({
   tipo: String, // admin, cliente, nutricionista, mediador
 });
 
-module.exports = mongoose.model("Usuario", usuarioSchema);
+module.exports = mongoose.model("usuario", usuarioSchema);
