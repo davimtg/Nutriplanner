@@ -9,7 +9,9 @@ import {
   ListGroup,
   Alert,
   Spinner,
+
 } from "react-bootstrap";
+import api from "../../services/api";
 
 function Planos() {
   const navigate = useNavigate();
@@ -21,16 +23,12 @@ function Planos() {
   useEffect(() => {
     // --- CORREÇÃO PRINCIPAL AQUI ---
     // Ajustamos a URL para corresponder ao nome do seu arquivo no servidor.
-    fetch("http://localhost:3001/planos-alimentares")
+    // CORREÇÃO PRINCIPAL AQUI
+    // Ajustamos a URL para corresponder ao nome do seu arquivo no servidor.
+    api.get("/planos-alimentares")
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Não foi possível buscar os planos. Verifique se o servidor está rodando.");
-        }
-        return response.json();
-      })
-      .then((data) => {
         // A resposta do json-server já é o array, então 'data' está correto.
-        setPlanos(data);
+        setPlanos(response.data);
       })
       .catch((error) => {
         console.error("Erro ao buscar os planos:", error);

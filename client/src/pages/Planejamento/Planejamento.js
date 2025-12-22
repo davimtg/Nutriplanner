@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Spinner, Alert } from "react-bootstrap";
 
+// Import api service
+import api from "../../services/api";
+
 export default function PaginaPlanejamento() {
+
   const [diaSelecionado, setDiaSelecionado] = useState("Segunda");
   const [planoCompleto, setPlanoCompleto] = useState(null);
   const [todosAlimentos, setTodosAlimentos] = useState([]);
@@ -31,36 +35,44 @@ export default function PaginaPlanejamento() {
   useEffect(() => {
     const fetchDados = async () => {
       try {
-        const [planosRes, alimentosRes] = await Promise.all([
-          fetch('http://localhost:3001/planos-alimentares'),
-          fetch('http://localhost:3001/alimentos')
+        const storedUser = localStorage.getItem("userData");
+        if (!storedUser) throw new Error("Usuário não autenticado.");
+        const user = JSON.parse(storedUser);
+        const [userRes, planosRes, alimentosRes] = await Promise.all([
+          api.get(`/usuarios/${user.id}`),
+          api.get('/planos-alimentares'),
+          api.get('/alimentos')
         ]);
 
-        if (!planosRes.ok) {
-          throw new Error('Falha ao buscar planos. Verifique o json-server.');
-        }
-        if (!alimentosRes.ok) {
-            throw new Error("Falha ao buscar alimentos.");
-        }
+        const currentUser = userRes.data;
+        // Prioritize plan from fresh API data, fallback to local storage (unlikely needed)
+        const userPlanId = currentUser.planoId !== undefined ? currentUser.planoId : (user.planoId || user.PlanoId);
 
-        const planosData = await planosRes.json();
-        const alimentosDataResponse = await alimentosRes.json();
+        const planosData = planosRes.data;
+        const alimentosDataResponse = alimentosRes.data;
         
         const listaDePlanos = Array.isArray(planosData) ? planosData : planosData['planos-alimentares'] || [];
-        const planoDesejado = listaDePlanos.find(plano => plano.id == 2);
-
+        
+        // Find user's plan or default to first if none linked (or handle no plan)
+        let planoDesejado;
+        if (userPlanId) {
+             planoDesejado = listaDePlanos.find(plano => String(plano.id) === String(userPlanId));
+        }
+        
+        // Fallback: removido a pedido do usuário. Exibe mensagem se não tiver plano. (Linhas 59-62 antigas removidas)
         if (!planoDesejado) {
-          throw new Error('Plano alimentar com id: 2 não foi encontrado.');
+            // Se realmente não tiver nada, apenas seta como null e não lança erro
+            setPlanoCompleto(null);
+        } else {
+            setPlanoCompleto(planoDesejado);
         }
 
         const listaDeAlimentos = Array.isArray(alimentosDataResponse) ? alimentosDataResponse : alimentosDataResponse.alimentos || [];
-
-        setPlanoCompleto(planoDesejado);
         setTodosAlimentos(listaDeAlimentos);
 
       } catch (err) {
         console.error("Erro ao buscar dados:", err);
-        setError(err.message);
+        setError(err.message || "Erro desconhecido ao carregar planejamento.");
       } finally {
         setLoading(false);
       }
@@ -149,6 +161,27 @@ export default function PaginaPlanejamento() {
           <p>{error}</p>
         </Alert>
       </div>
+    );
+  }
+
+  // Se não tiver plano carregado (planoCompleto é null), exibe o aviso solicitado
+  if (!planoCompleto) {
+    return (
+        <div className="min-vh-100 bg-light d-flex justify-content-center align-items-center p-4">
+            <div className="bg-white p-5 rounded-3 shadow text-center" style={{ maxWidth: '500px' }}>
+                <i className="bi bi-clipboard-x text-warning" style={{ fontSize: '4rem' }}></i>
+                <h3 className="fw-bold mt-4 text-secondary">Sem Planejamento</h3>
+                <p className="text-muted mt-2">
+                    Você ainda não possui um plano alimentar atribuído.
+                    <br />
+                    Entre em contato com seu nutricionista.
+                </p>
+                <div className="alert alert-warning mt-3" role="alert">
+                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                    Aguardando cadastro de plano.
+                </div>
+            </div>
+        </div>
     );
   }
 

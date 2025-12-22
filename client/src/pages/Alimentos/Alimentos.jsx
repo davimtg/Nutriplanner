@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+import api from "../../services/api";
 
 const COLORS = ["#36A2EB", "#FF6384", "#FFCE56", "#4BC0C0"];
 
@@ -20,8 +21,7 @@ const Alimentos = () => {
   useEffect(() => {
     const fetchAlimento = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/alimentos/${id}`);
-        const data = await res.json();
+        const { data } = await api.get(`/alimentos/${id}`);
         setAlimento(data);
       } catch (err) {
         console.error("Erro ao buscar alimento:", err);
@@ -46,7 +46,7 @@ const Alimentos = () => {
       </div>
     );
 
-  const fator = gramas / alimento["porção-gramas"];
+  const fator = gramas / (alimento.porcaoGramas || alimento["porção-gramas"] || 100);
   const calorias = (alimento.calorias * fator).toFixed(1);
   const carbs = (alimento.carboidrato * fator).toFixed(2);
   const proteina = (alimento.proteina * fator).toFixed(2);

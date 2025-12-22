@@ -1,32 +1,22 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../services/api';
 
 // Buscar pedidos
 export const fetchPedidos = createAsyncThunk(
   'pedidos/fetchPedidos',
   async () => {
-    const response = await fetch('http://localhost:3001/pedidos');
-    const data = await response.json();
-
-  const lista = Array.isArray(data)
-    ? data
-    : data?.pedidos?.['lista-de-pedidos'] || data?.['lista-de-pedidos'] || [];
-
-  return lista;
-
+    const { data } = await api.get('/pedidos');
+    // Backend agora retorna array direto
+    return data;
   }
 );
 
 export const aceitarPedido = createAsyncThunk(
   'pedidos/aceitarPedido',
   async (id) => {
-    const response = await fetch(`http://localhost:3001/pedidos/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        status: { id: 1, name: 'Em Execução' }
-      })
+    const { data } = await api.patch(`/pedidos/${id}`, {
+      status: 'Em Execução' // Ajustado para string conforme Schema
     });
-    const data = await response.json();
     return data;
   }
 );
@@ -34,14 +24,9 @@ export const aceitarPedido = createAsyncThunk(
 export const concluirPedido = createAsyncThunk(
   'pedidos/concluirPedido',
   async (id) => {
-    const response = await fetch(`http://localhost:3001/pedidos/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        status: { id: 2, name: 'Concluído' }
-      })
+    const { data } = await api.patch(`/pedidos/${id}`, {
+      status: 'Concluído' // Ajustado para string
     });
-    const data = await response.json();
     return data;
   }
 );

@@ -1,20 +1,28 @@
 import express from 'express';
 import cors from 'cors';
-import { connectDB } from './db.js';
+import { connectDB } from './src/config/db.js';
+import authRoutes from './src/routes/authRoutes.js';
+import apiRoutes from './src/routes/apiRoutes.js';
 
 const app = express();
+const PORT = process.env.PORT || 3001;
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
+// Conexão DB
 connectDB();
 
-// Você faz um fetch a 'localhost:3001/alguma-coisa"
-app.get('/test', (req, res) => {
-  // E aqui se tem a resposta
-  res.send('teste');
+// Rotas
+app.use('/api/auth', authRoutes);
+app.use('/api', apiRoutes);
+
+// Rota de teste
+app.get('/', (req, res) => {
+  res.send('API Nutriplanner Rodando');
 });
 
-app.listen(3001, () => {
-  console.log('Servidor rodando na porta 3001');
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });

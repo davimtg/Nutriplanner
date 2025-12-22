@@ -13,6 +13,7 @@ import {
   ListGroup,
   FormControl,
 } from "react-bootstrap";
+import api from "../../services/api";
 
 const planoInicialVazio = {
   nome: "",
@@ -65,30 +66,26 @@ export default function CriarEditarPlano() {
     const fetchDadosIniciais = async () => {
       try {
         const [alimentosRes, planoRes] = await Promise.all([
-          fetch("http://localhost:3001/alimentos"),
+          api.get("/alimentos"),
           isEditing
-            ? fetch(`http://localhost:3001/planos-alimentares/${id}`)
+            ? api.get(`/planos-alimentares/${id}`)
             : Promise.resolve(null),
         ]);
 
-        if (!alimentosRes.ok) {
-          throw new Error("Falha ao buscar alimentos.");
-        }
-
-        const alimentosData = await alimentosRes.json();
-        setTodosAlimentos(alimentosData.alimentos || alimentosData);
+        // Backend retorna array direto, mas mantemos o fallback por segurança se houver wrapper
+        setTodosAlimentos(alimentosRes.data.alimentos || alimentosRes.data);
 
         if (isEditing) {
-          if (!planoRes.ok) {
-            throw new Error("Plano alimentar não encontrado.");
+          if (!planoRes) {
+             throw new Error("Erro ao carregar plano (resposta vazia).");
           }
-          const planoData = await planoRes.json();
-          setPlano(planoData);
+           setPlano(planoRes.data);
         } else {
           setPlano(planoInicialVazio);
         }
       } catch (err) {
-        setError(err.message);
+        console.error(err);
+        setError(err.message || "Erro ao carregar dados.");
       } finally {
         setLoading(false);
       }
@@ -181,29 +178,22 @@ export default function CriarEditarPlano() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     const url = isEditing
-      ? `http://localhost:3001/planos-alimentares/${id}`
-      : "http://localhost:3001/planos-alimentares";
-    const method = isEditing ? "PUT" : "POST";
-    fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(plano),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Falha ao salvar o plano.");
-        return res.json();
-      })
-      .then(() => {
-        navigate(`/planos`);
-      })
-      .catch((err) => {
-        setError(err.message);
+      ? `/planos-alimentares/${id}`
+      : "/planos-alimentares";
+    const method = isEditing ? "put" : "post";
+    
+    try {
+        await api[method](url, plano);
+        navigate(`/planos`); // Assmido que a rota existe
+    } catch (err) {
+        console.error(err);
+        setError(err.message || "Falha ao salvar o plano.");
         setLoading(false);
-      });
+    }
   };
 
   if (loading) {

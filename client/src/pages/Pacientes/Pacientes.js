@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+
 import {
   Container,
   Row,
@@ -12,6 +13,9 @@ import {
 } from "react-bootstrap";
 import { useDispatch, useSelector } from 'react-redux';
 import { abrirChat, fetchUserMessages } from '../../redux/chatSlice';
+import api from '../../services/api';
+import { processarDadosRelatorio } from '../../components/Utils/nutricao';
+import { gerarRelatorioPDF } from '../../components/Utils/gerarPdf';
 
 function VincularPlanoModal({ show, handleClose, paciente, onSave }) {
   const [planos, setPlanos] = useState([]);
@@ -27,15 +31,13 @@ function VincularPlanoModal({ show, handleClose, paciente, onSave }) {
       setTermoBuscaPlano("");
       setPlanoSelecionadoId(paciente.planoId || null);
 
-      fetch("http://localhost:3001/planos-alimentares")
+      api.get("/planos-alimentares")
         .then((response) => {
-          if (!response.ok) {
-            throw new Error("Falha ao buscar planos alimentares.");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setPlanos(data);
+           // Backend returns array directly or inside key depending on implementation, 
+           // but crudFactory returns array.
+           const data = response.data;
+           const lista = Array.isArray(data) ? data : data['planos-alimentares'] || [];
+           setPlanos(lista);
         })
         .catch((err) => {
           console.error("Erro ao buscar planos:", err);
@@ -134,33 +136,117 @@ function Pacientes() {
   const currentUser = useSelector(state => state.user.userData);
   const dispatch = useDispatch();
 
+
+  const handleBaixarRelatorio = async (e, paciente) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Feedback imediato
+    // alert(`Gerando relatório para ${paciente.nome}...`); // Opcional, ou usar um toast/state
+    console.log("Iniciando processo para:", paciente.nome);
+
+    try {
+        /* const confirmacao = window.confirm(`Deseja baixar o relatório de ${paciente.nome}?`);
+        if (!confirmacao) return; */
+        
+        // Vamos usar um indicador visual temporário no botão? 
+        // Por enquanto, confiar que o processo é rápido. 
+        // Se demorar, o browser vai mostrar loading.
+        document.body.style.cursor = 'wait';
+
+        console.log("Iniciando busca de dados...");
+        // Precisamos: Diario do usuario, Todos Alimentos, Todos Planos
+        const [diarioRes, alimentosRes, planosRes] = await Promise.all([
+             api.get(`/diario-alimentar?usuarioId=${paciente.id}`),
+             api.get('/alimentos'),
+             api.get('/planos-alimentares')
+        ]);
+        console.log("Dados recebidos do servidor.");
+
+        const diarioData = diarioRes.data;
+        const alimentosData = alimentosRes.data;
+        // Handle potential wrapper for plans
+        const planosData = planosRes.data;
+        const todosPlanos = Array.isArray(planosData) ? planosData : planosData['planos-alimentares'] || [];
+
+        // 2. Montar estrutura para processamento
+        const dbMontado = {
+            alimentos: alimentosData,
+            diario_alimentar: diarioData
+        };
+
+        const dadosProcessados = processarDadosRelatorio(paciente.id, dbMontado);
+
+        if (dadosProcessados.length === 0) {
+            alert("Este paciente não possui registros no diário alimentar.");
+            return;
+        }
+
+        // 3. Montar objeto metas (necessário para o PDF)
+        const metasUsuario = {
+            calorias: 2000,
+            proteinas: 150,
+            carboidratos: 250,
+            gorduras: 70,
+            ...paciente // Spread com dados do paciente (nome, objetivo, etc)
+        };
+        
+        // 4. Gerar PDF
+        // Encontrar o plano ativo do paciente na lista de planos
+        const planoAtivo = todosPlanos.find(p => p.id === paciente.planoId);
+        
+        gerarRelatorioPDF({
+          dados: dadosProcessados,
+          usuario: paciente,
+          metas: metasUsuario,
+          plano: planoAtivo
+        });
+        
+    } catch (error) {
+        console.error("Erro ao gerar relatório:", error);
+        alert("Erro ao gerar o relatório:\n" + error.message);
+    } finally {
+        document.body.style.cursor = 'default';
+    }
+  };
+
   useEffect(() => {
-    // Busca pacientes e planos simultaneamente
+    // Busca planos primeiro, depois pacientes do nutricionista
+    // Poderia ser paralelo, mas vamos garantir o ID do nutricionista
+    if (!currentUser || !currentUser.id) return;
+
+    setLoading(true);
+
     Promise.all([
-      fetch("http://localhost:3001/usuarios").then(res => {
-        if (!res.ok) throw new Error("Falha ao buscar usuários.");
-        return res.json();
-      }),
-      fetch("http://localhost:3001/planos-alimentares").then(res => {
-        if (!res.ok) throw new Error("Falha ao buscar planos.");
-        return res.json();
-      })
+      // O filtro "Option B": buscar apenas do nutricionista logado
+      api.get("/usuarios", { params: { nutricionistaId: currentUser.id } }),
+      api.get("/planos-alimentares")
     ])
-      .then(([usuariosData, planosData]) => {
-        const clientes = usuariosData["lista-de-usuarios"].filter(
-          (usuario) => usuario.tipo.name === "cliente"
+      .then(([usuariosRes, planosRes]) => {
+        const usuariosData = usuariosRes.data;
+        const planosData = planosRes.data;
+
+        // Adaptação: Se a API retornar objeto com chave 'lista-de-usuarios' (legado) ou array direto
+        const listaUsuarios = Array.isArray(usuariosData) ? usuariosData : usuariosData["lista-de-usuarios"] || [];
+        
+        // O backend já filtra, mas garantimos que são clientes (caso o filtro backend falhe ou traga outros tipos)
+        const clientes = listaUsuarios.filter(
+          (usuario) => usuario.tipo && (usuario.tipo.name === "cliente" || usuario.tipo.id === 1)
         );
+        
+        const listaPlanos = Array.isArray(planosData) ? planosData : planosData['planos-alimentares'] || [];
+
         setPacientes(clientes);
-        setPlanos(planosData);
+        setPlanos(listaPlanos);
       })
-      .catch((error) => {
-        console.error("Erro ao buscar dados:", error);
-        setError("Não foi possível carregar os dados. Verifique o json-server.");
+      .catch((err) => {
+        console.error("Erro ao buscar dados:", err);
+        setError("Não foi possível carregar os dados. Tente novamente mais tarde.");
       })
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [currentUser]);
 
   // Cria um mapa de ID do plano para o nome do plano para busca rápida
   const planosMap = useMemo(() => {
@@ -170,7 +256,7 @@ function Pacientes() {
   const pacientesFiltrados = useMemo(
     () =>
       pacientes.filter((paciente) =>
-        paciente.nome.toLowerCase().includes(termoBusca.toLowerCase())
+        paciente.nome && paciente.nome.toLowerCase().includes(termoBusca.toLowerCase())
       ),
     [termoBusca, pacientes]
   );
@@ -193,7 +279,8 @@ function Pacientes() {
     }))
   };
 
-  const handleSalvarPlano = (pacienteId, planoId) => {
+  const handleSalvarPlano = async (pacienteId, planoId) => {
+    // Atualiza otimisticamente a UI
     const pacientesAtualizados = pacientes.map(p => {
       if (p.id === pacienteId) {
         return { ...p, planoId: planoId };
@@ -202,13 +289,14 @@ function Pacientes() {
     });
     setPacientes(pacientesAtualizados);
 
-    console.log(`Simulando PATCH para o paciente ${pacienteId}:`, { planoId: planoId });
-    // AQUI VOCÊ FARIA A CHAMADA REAL PARA A API (PATCH/PUT)
-    // fetch(`http://localhost:3001/usuarios/lista-de-usuarios/${pacienteId}`, {
-    //   method: 'PATCH',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ planoId: planoId })
-    // }).then(res => res.json()).then(data => console.log('Paciente atualizado:', data));
+    try {
+        await api.patch(`/usuarios/${pacienteId}`, { planoId: planoId });
+        console.log(`Paciente ${pacienteId} atualizado com plano ${planoId}`);
+    } catch (err) {
+        console.error("Erro ao atualizar plano do paciente:", err);
+        alert("Erro ao salvar alteração no servidor.");
+        // Reverteria a alteração otimista aqui se fosse crítico
+    }
 
     handleCloseModal();
   };
@@ -292,8 +380,12 @@ function Pacientes() {
                         </small>
                       </div>
                       <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <Button variant="outline-secondary" size="sm">
-                          Visualizar Relatório
+                        <Button 
+                          variant="outline-secondary" 
+                          size="sm"
+                          onClick={(e) => handleBaixarRelatorio(e, paciente)}
+                        >
+                          Baixar Relatório
                         </Button>
                         <Button
                           size="sm"
