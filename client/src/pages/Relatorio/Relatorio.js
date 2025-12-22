@@ -6,6 +6,7 @@ import { Container, Row, Col, Card, Button, Spinner, Alert } from "react-bootstr
 import { processarDadosRelatorio } from "../../components/Utils/nutricao";
 import BotoesExportacao from "./BotoesExportacao";
 import { DetalhesDia, GraficoSemanal } from "./PaineisVisuais";
+import api from "../../services/api"; // Import api service
 
 export default function PaginaRelatorio() {
   // Estado dos dados
@@ -21,88 +22,66 @@ export default function PaginaRelatorio() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ID do usuário logado (Simulado)
-  const USUARIO_ID = 1;
-
   useEffect(() => {
-    setLoading(true);
+    const fetchDados = async () => {
+      setLoading(true);
+      try {
+        // Obter dados do usuário logado (armazenado no localStorage no Login)
+        const storedUser = localStorage.getItem('userData');
+        if (!storedUser) {
+           throw new Error("Usuário não autenticado.");
+        }
+        const userFound = JSON.parse(storedUser);
+         // Ensure ID is number if needed by utils
+        const USUARIO_ID = Number(userFound.id);
 
-    // Buscamos todas as tabelas necessárias em paralelo
-    Promise.all([
-      fetch("http://localhost:3001/usuarios").then(res => {
-        if (!res.ok) throw new Error("Falha ao buscar usuários");
-        return res.json();
-      }),
-      fetch("http://localhost:3001/alimentos").then(res => {
-        if (!res.ok) throw new Error("Falha ao buscar alimentos");
-        return res.json();
-      }),
-      fetch("http://localhost:3001/diario-alimentar").then(res => {
-        if (!res.ok) throw new Error("Falha ao buscar diário alimentar");
-        return res.json();
-      }),
-      // NOVO: Buscar os planos alimentares para passar ao PDF
-      fetch("http://localhost:3001/planos-alimentares").then(res => {
-        if (!res.ok) throw new Error("Falha ao buscar planos alimentares");
-        return res.json();
-      })
-    ])
-    .then(([usuariosData, alimentosData, diarioData, planosData]) => {
-      
-      // 1. Salvar dados crus que serão usados na exportação
-      setListaAlimentos(alimentosData);
-      // Extrair o array de planos (o json-server retorna { "planos-alimentares": [...] })
-      const arrayPlanos = Array.isArray(planosData) ? planosData : (planosData["planos-alimentares"] || []);
-      setListaPlanos(arrayPlanos);
+        // Buscamos todas as tabelas necessárias em paralelo usando 'api'
+        const [alimentosData, diarioData, planosData] = await Promise.all([
+          api.get("/alimentos").then(res => res.data),
+          // Filter diary by user ID to behave like old filtered fetch
+          api.get(`/diario-alimentar?usuarioId=${USUARIO_ID}`).then(res => res.data),
+          api.get("/planos-alimentares").then(res => res.data)
+        ]);
 
-      // 2. Montamos um objeto "db" simulado para o processamento interno
-      const dbMontado = {
-        usuarios: usuariosData,
-        alimentos: alimentosData,
-        diario_alimentar: diarioData
-      };
+        // 1. Salvar dados crus que serão usados na exportação
+        setListaAlimentos(alimentosData);
+        // Extrair o array de planos (backend might return array directly or wrapped)
+        const arrayPlanos = Array.isArray(planosData) ? planosData : (planosData["planos-alimentares"] || []);
+        setListaPlanos(arrayPlanos);
 
-      // 3. Encontrar usuário
-      let listaUsuarios = usuariosData;
-      if (usuariosData["lista-de-usuarios"]) {
-        listaUsuarios = usuariosData["lista-de-usuarios"];
+        // 2. Montamos um objeto "db" simulado para o processamento interno (nutricao.js expects this structure)
+        const dbMontado = {
+          alimentos: alimentosData,
+          diario_alimentar: diarioData
+        };
+
+        // 4. Definir Metas (using user data)
+        const metasUsuario = {
+            calorias: 2000,
+            proteinas: 150,
+            carboidratos: 250,
+            gorduras: 70,
+            ...userFound // Merge user properties
+        };
+        
+        setUsuario({ ...userFound, metas: metasUsuario });
+
+        // 5. Processar dados para os gráficos
+        const dados = processarDadosRelatorio(USUARIO_ID, dbMontado);
+        setDadosProcessados(dados);
+
+        if (dados.length > 0) {
+          setDiaSelecionado(dados[dados.length - 1]);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar relatório:", err);
+        setError(err.message || "Erro desconhecido");
+      } finally {
+        setLoading(false);
       }
-      
-      const userFound = Array.isArray(listaUsuarios)
-        ? listaUsuarios.find(u => u.id === USUARIO_ID)
-        : null;
+    };
 
-      if (!userFound) {
-        throw new Error("Usuário não encontrado no banco de dados.");
-      }
-
-      // 4. Definir Metas
-      const metasUsuario = {
-          calorias: 2000,
-          proteinas: 150,
-          carboidratos: 250,
-          gorduras: 70,
-          ...userFound
-      };
-      
-      setUsuario({ ...userFound, metas: metasUsuario });
-
-      // 5. Processar dados para os gráficos
-      const dados = processarDadosRelatorio(USUARIO_ID, dbMontado);
-      setDadosProcessados(dados);
-
-      if (dados.length > 0) {
-        setDiaSelecionado(dados[dados.length - 1]);
-      }
-    })
-    .catch(err => {
-      console.error("Erro ao carregar relatório:", err);
-      setError(err.message);
-    })
-    .finally(() => {
-      setLoading(false);
-    });
-
+    fetchDados();
   }, []);
 
   if (loading) {

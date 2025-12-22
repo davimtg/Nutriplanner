@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import api from "../../services/api";
 import { Link } from "react-router-dom";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useSelector } from "react-redux";
@@ -37,9 +38,9 @@ const Biblioteca = () => {
         return;
       }
       try {
-        const res = await fetch(`http://localhost:3001/receitas?id=${favoritosIds.join("&id=")}`);
-        const data = await res.json();
-        setFavoritas(data);
+        const query = favoritosIds.map(id => `id=${id}`).join("&");
+        const res = await api.get(`/receitas?${query}`);
+        setFavoritas(res.data);
       } catch (err) {
         console.error("Erro ao buscar receitas favoritas:", err);
       }
@@ -59,15 +60,15 @@ const Biblioteca = () => {
       setLoading(true);
       try {
         const [alimentosRes, receitasRes] = await Promise.all([
-          fetch(`http://localhost:3001/alimentos?nome_like=${query}&_limit=10`, {
+          api.get(`/alimentos?nome_like=${query}&_limit=10`, {
             signal: controller.signal,
-          }).then((res) => res.json()),
-          fetch(`http://localhost:3001/receitas?nome_like=${query}&_limit=18`, {
+          }),
+          api.get(`/receitas?nome_like=${query}&_limit=18`, {
             signal: controller.signal,
-          }).then((res) => res.json()),
+          }),
         ]);
-        setAlimentos(alimentosRes);
-        setReceitas(receitasRes);
+        setAlimentos(alimentosRes.data);
+        setReceitas(receitasRes.data);
       } catch (err) {
         if (err.name !== "AbortError") console.error("Erro ao buscar dados:", err);
       } finally {
@@ -125,11 +126,7 @@ const Biblioteca = () => {
 
   const submitReceita = async () => {
     try {
-      await fetch("http://localhost:3001/receitas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(novaReceita),
-      });
+      await api.post("/receitas", novaReceita);
       setShowCriar(false);
       alert("Receita criada com sucesso!");
       setNovaReceita({
@@ -145,6 +142,16 @@ const Biblioteca = () => {
       });
     } catch (err) {
       console.error("Erro ao criar receita:", err);
+    }
+  };
+
+  // Helper para carregar imagem com segurança
+  const tryLoadImage = (imgName) => {
+    if (!imgName) return "https://placehold.co/600x400?text=Sem+Imagem";
+    try {
+      return require(`../../assets/img/receitas/${imgName}`);
+    } catch (err) {
+      return "https://placehold.co/600x400?text=Imagem+N%C3%A3o+Encontrada";
     }
   };
 
@@ -196,9 +203,10 @@ const Biblioteca = () => {
                 <Link to={`/receita/${r.id}`} className="text-decoration-none">
                   <div className="card h-100">
                     <img
-                      src={require(`../../assets/img/receitas/${r.img}`)}
+                      src={tryLoadImage(r.img)}
                       className="card-img-top"
                       alt={r.nome}
+                      style={{ height: 200, objectFit: "cover" }}
                     />
                     <div className="card-body">
                       <h5 className="card-title">{r.nome}</h5>
@@ -226,12 +234,12 @@ const Biblioteca = () => {
                 <div key={r.id} className="col-md-4 mb-4 text-center">
                   <Link to={`/receita/${r.id}`} onClick={() => setShowFavoritas(false)}>
                     <img
-                      src={require(`../../assets/img/receitas/${r.img}`)}
+                      src={tryLoadImage(r.img)}
                       alt={r.nome}
                       className="img-fluid rounded mb-2"
                       style={{ maxHeight: "150px", objectFit: "cover" }}
                     />
-                    <h6>{r.nome}</h6>
+                    <h6 className="text-truncate" title={r.nome}>{r.nome}</h6>
                   </Link>
                 </div>
               ))}

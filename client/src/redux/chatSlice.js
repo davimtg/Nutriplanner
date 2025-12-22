@@ -1,15 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../services/api';
 
 export const fetchUserMessages = createAsyncThunk(
   'mensagens/fetchUserMessages',
   async ({ remetenteId, destinatarioId }) => {
     const [enviadasRes, recebidasRes] = await Promise.all([
-      fetch(`http://localhost:3001/mensagens?remetenteId=${remetenteId}&destinatarioId=${destinatarioId}`),
-      fetch(`http://localhost:3001/mensagens?remetenteId=${destinatarioId}&destinatarioId=${remetenteId}`)
+      api.get(`/mensagens?remetenteId=${remetenteId}&destinatarioId=${destinatarioId}`),
+      api.get(`/mensagens?remetenteId=${destinatarioId}&destinatarioId=${remetenteId}`)
     ]);
 
-    const enviadas = await enviadasRes.json();
-    const recebidas = await recebidasRes.json();
+    const enviadas = enviadasRes.data;
+    const recebidas = recebidasRes.data;
 
     return [...enviadas, ...recebidas];
   }
@@ -20,13 +21,8 @@ export const enviarMensagem = createAsyncThunk(
     'mensagens/enviarMensagem',
     async (mensagemData, { rejectWithValue }) => {
         try {
-            const response = await fetch('http://localhost:3001/mensagens', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mensagemData)
-            });
-            if (!response.ok) throw new Error('Erro ao enviar mensagem');
-            return await response.json();
+            const { data } = await api.post('/mensagens', mensagemData);
+            return data;
         } catch (error) {
             return rejectWithValue(error.message);
         }

@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { setUserType, setUserData } from "../../redux/userSlice";
 import styles from "./Login.module.css";
 import icon from "../../assets/img/logotipo/icon/nutriplanner-gradient.svg";
+import api from "../../services/api";
 
 export default function Login() {
   const userTypes = [
@@ -16,39 +17,31 @@ export default function Login() {
   const [selectedType, setSelectedType] = useState(userTypes[1]);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   async function entrar() {
-  try {
-    const res = await fetch("http://localhost:3001/usuarios");
-    if (!res.ok) throw new Error("Falha ao conectar ao servidor");
+    try {
+      const { data } = await api.post("/auth/login", { email, senha });
+      
+      const { user, token } = data;
 
-    const data = await res.json();
+      // O token já é salvo no localStorage? 
+      // O userSlice salva userData e userType no localStorage.
+      // Vamos salvar o token explicitamente aqui ou no api.js (mas api.js lê do localStorage).
+      localStorage.setItem("token", token);
 
-    // pega a lista de usuários, evitando undefined
-    const usuarios = data?.["lista-de-usuarios"] || [];
+      // Compatibilidade com o que o Frontend já espera (userData, userType)
+      dispatch(setUserType(user.tipo));
+      dispatch(setUserData(user));
 
-    // procura o usuário com email e senha
-    console.log(usuarios);
-
-    const user = usuarios.find(u => u.email === email && u.senha === senha);
-
-    if (!user) {
-      alert("Usuário ou senha incorretos.");
-      return;
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Erro no login:", error);
+      const msg = error.response?.data?.message || "Erro ao tentar fazer login.";
+      alert(msg);
     }
-
-    // salva no Redux
-    dispatch(setUserType(user.tipo));
-    dispatch(setUserData(user));
-
-    navigate("/dashboard");
-  } catch (error) {
-    console.error("Erro no login:", error);
-    alert("Erro ao tentar fazer login. Verifique a conexão com o servidor.");
   }
-}
 
 
 
