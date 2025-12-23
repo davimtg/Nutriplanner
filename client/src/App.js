@@ -24,6 +24,7 @@ import CriarEditarPlano from './pages/CriarEditarPlano/CriarEditarPlano';
 
 import MediadorDashboard from "./pages/MediadorDashboard/MediadorDashboard";
 import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedidoDetalhes";
+import Admin from "./pages/Admin/Admin";
 
 
 
@@ -32,7 +33,7 @@ function DashboardRouter() {
   if (!userType) return <Navigate to="/" />;
 
   switch (userType.id) {
-    case 0: return null;
+    case 0: return <Admin />;
     case 1: return <ClienteDashboard />;
     case 2: return <Pacientes />;
     case 3: return <MediadorDashboard />;
@@ -75,6 +76,7 @@ function AppContext() {
         <Route path="/alimento/:id" element={<Alimentos />} />
         <Route path="/receita/:id" element={<Receitas />} />
         <Route path="/ListaCompras" element={<ListaCompras />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </>
   );

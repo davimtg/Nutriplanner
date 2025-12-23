@@ -114,8 +114,35 @@ export default function Perfil() {
   return (
     <Container className="mt-4">
       <Row className="align-items-center mb-4">
-        <Col xs={12} md={4} className="d-flex justify-content-center">
-          <Image src={profile} roundedCircle width={150} height={150} />
+        <Col xs={12} md={4} className="d-flex flex-column align-items-center">
+          <Image
+            src={formData.foto || profile}
+            roundedCircle
+            width={150}
+            height={150}
+            style={{ objectFit: 'cover', marginBottom: '10px' }}
+          />
+          {editando && (
+            <Form.Group controlId="formFile" className="mb-3">
+              <Form.Label>Alterar Foto</Form.Label>
+              <Form.Control
+                type="file"
+                size="sm"
+                accept=".jpg,.jpeg,.png"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      // Dispara atualização direta no estado local (formData)
+                      handleChange({ target: { name: 'foto', value: reader.result } });
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+            </Form.Group>
+          )}
         </Col>
         <Col xs={12} md={8} className="d-flex flex-column justify-content-center align-items-center">
           <h2 className={styles.nomeUsuario}>{formData.nome}</h2>

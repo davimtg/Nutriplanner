@@ -21,7 +21,7 @@ const ReceitaSchema = new mongoose.Schema({
   ingredientes: [String], // Adaptado para receber strings do JSON legado
   modoPreparo: String, // Se houver
   tempo: mongoose.Schema.Types.Mixed, // JSON "tempo", era tempoPreparo
-  imagem: String,
+  img: String,
   passos: [String], // JSON tem array de passos
   tipo: String,
   porcao: String,

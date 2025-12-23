@@ -303,8 +303,17 @@ const Biblioteca = () => {
               <Form.Label>Imagem (apenas JPG)</Form.Label>
               <Form.Control
                 type="file"
-                accept=".jpg"
-                onChange={(e) => handleChange("img", e.target.files[0]?.name || "")}
+                accept=".jpg,.jpeg,.png"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      handleChange("img", reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
                 required
               />
             </Form.Group>

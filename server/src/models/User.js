@@ -23,6 +23,7 @@ const UserSchema = new mongoose.Schema({
   telefone: String,
   endereco: EnderecoSchema,
   tipo: TipoUsuarioSchema,
+  foto: String, // Base64 da foto de perfil
   objetivo: String,
   planoId: Number,
   nutricionistaId: Number, // Reference to the nutritionist's ID

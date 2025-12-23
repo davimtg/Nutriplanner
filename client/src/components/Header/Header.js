@@ -1,7 +1,7 @@
-import { useState } from "react"; 
-import { useNavigate } from "react-router-dom"; 
-import styles from "./Header.module.css"; 
-import iconDesktop from "../../assets/img/logotipo/icon/nutriplanner-gradient.svg"; 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "./Header.module.css";
+import iconDesktop from "../../assets/img/logotipo/icon/nutriplanner-gradient.svg";
 import icon from "../../assets/img/logotipo/solid/nutriplanner-horizontal-colorido.svg";
 
 export default function Header({ tipo }) {
@@ -24,7 +24,7 @@ export default function Header({ tipo }) {
       { label: "Relatório", page: "relatorio" },
       { label: "Lista de Compras", page: "ListaCompras" },
       { label: "Perfil", page: "perfil" }
-      
+
     ],
     nutricionista: [
       { label: "Pacientes", page: "dashboard" },
@@ -36,8 +36,8 @@ export default function Header({ tipo }) {
       { label: "Perfil", page: "perfil" },
     ],
     admin: [
-      { label: "Usuários", page: "usuarios" },
-      { label: "Configurações", page: "configuracoes" },
+      { label: "Painel Admin", page: "admin" },
+      { label: "Perfil", page: "perfil" },
     ]
   };
 
@@ -52,12 +52,11 @@ export default function Header({ tipo }) {
             className={styles["header-logo"]}
             src={icon}
             alt="Logo Nutriplanner"
-            onClick={() => navigate("/")}
           />
         </picture>
 
         <div className={styles["header-toggle-nav"]} onClick={toggle}>
-          { <svg className={styles["icon"]} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg> }
+          {<svg className={styles["icon"]} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16" /><path d="M4 12h16" /><path d="M4 19h16" /></svg>}
         </div>
 
         <div className={styles["header-nav"]}>
@@ -78,9 +77,9 @@ export default function Header({ tipo }) {
         <nav className={styles["nav"]}>
           <div className={`${styles["nav-item"]} ${styles["end"]}`}>
             <div className={styles["header-toggle-nav"]} onClick={toggle}>
-              <svg className={styles["icon"]} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M18 6 6 18"/> <path d="m6 6 12 12"/>
-              </svg> 
-            </div> 
+              <svg className={styles["icon"]} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M18 6 6 18" /> <path d="m6 6 12 12" />
+              </svg>
+            </div>
           </div>
 
           {menuItems.map((item) => (
