@@ -65,10 +65,14 @@ export const createCRUDRoutes = (Model) => {
     },
     create: async (req, res) => {
       try {
-        // Logica simples de ID incremental se não vier no body ( json-server fazia isso? )
-        // Vamos confiar que o frontend manda ou gerar um timestamp/random por hora se crítico.
-        // O seed preservou IDs. Novos itens precisarão de ID.
         let data = req.body;
+
+        // Hashing de senha se estiver presente no body
+        if (data.senha) {
+          const salt = await bcrypt.genSalt(10);
+          data.senha = await bcrypt.hash(data.senha, salt);
+        }
+
         if (!data.id) {
           const lastItem = await Model.findOne().sort({ id: -1 });
           data.id = lastItem ? lastItem.id + 1 : 1;

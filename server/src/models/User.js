@@ -44,6 +44,9 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.pre('save', async function () {
   if (!this.isModified('senha')) return;
+  // Se a senha já parece um hash do bcrypt, não hashear novamente
+  if (this.senha && this.senha.startsWith('$2')) return;
+
   const salt = await bcrypt.genSalt(10);
   this.senha = await bcrypt.hash(this.senha, salt);
 });

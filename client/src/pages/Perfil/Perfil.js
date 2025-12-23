@@ -1,25 +1,58 @@
 import profile from '../../assets/img/profilePic/testPng.png';
 import styles from './Perfil.module.css';
 import { useState, useEffect } from 'react';
-import { Button, Form, Container, Row, Col, Image, Tab, Tabs, Spinner } from 'react-bootstrap';
+import { Button, Form, Container, Row, Col, Image, Tab, Tabs, Spinner, Alert, Card, Modal } from 'react-bootstrap';
 import { setUserData, updateUserById, fetchUserById } from '../../redux/userSlice'
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { clearUser } from '../../redux/userSlice';
+import api from '../../services/api';
 
 export default function Perfil() {
   const [editando, setEditando] = useState(false);
   const [novaSenha, setNovaSenha] = useState('');
+  const [loadingLocal, setLoadingLocal] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const formData = useSelector((state) => state.user.userData);
-  const loading = useSelector((state) => state.user.loading);
+  const loadingRedux = useSelector((state) => state.user.loading);
+  const loading = loadingLocal || loadingRedux;
+
+  // states p nutris
+  const [nutricionistas, setNutricionistas] = useState([]);
+  const [selectedNutriId, setSelectedNutriId] = useState("");
+
+  // states de enderecos
+  const [novoEndereco, setNovoEndereco] = useState({ apelido: '', rua: '', numero: '', bairro: '', cidade: '', estado: '', cep: '', complemento: '' });
+  const [showModalEndereco, setShowModalEndereco] = useState(false);
+  const [editingAddressIndex, setEditingAddressIndex] = useState(-1); // -1 = criando novo
 
   useEffect(() => {
     if (formData?.id) {
       dispatch(fetchUserById(formData.id));
     }
   }, [dispatch, formData?.id]);
+
+  useEffect(() => {
+    // carrega nutris
+    const loadNutris = async () => {
+      try {
+        const usersRes = await api.get("/usuarios");
+        const nutris = usersRes.data.filter(u => u.tipo?.name?.toLowerCase() === 'nutricionista');
+        setNutricionistas(nutris);
+      } catch (error) {
+        console.error("Erro ao carregar nutricionistas:", error);
+      }
+    };
+    loadNutris();
+  }, []);
+
+  useEffect(() => {
+    if (formData?.nutricionistaId) {
+      setSelectedNutriId(formData.nutricionistaId);
+    }
+  }, [formData]);
 
   const handleClick = async (e) => {
     e.preventDefault();
@@ -30,60 +63,42 @@ export default function Perfil() {
   }
 
   const handleLogout = () => {
-    // Limpar localStorage
     localStorage.removeItem("token");
-    // Limpar Redux
     dispatch(clearUser());
-    // Redirecionar
     navigate('/login');
+  };
+
+  const formatCEP = (value) => {
+    const cepLimpo = value.replace(/[^\d]/g, '');
+    if (cepLimpo.length > 8) return value.slice(0, 9);
+    return cepLimpo.length > 5
+      ? cepLimpo.slice(0, 5) + '-' + cepLimpo.slice(5)
+      : cepLimpo;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Safe access to endereco
-    const enderecoAtual = formData.endereco || {};
-
     if (name.startsWith('endereco.')) {
       const campo = name.split('.')[1];
+      const enderecoAtual = formData.endereco || {};
 
       if (campo === 'cep') {
-        const cepLimpo = value.replace(/[^\d]/g, ''); // remove tudo que não for número
-        if (cepLimpo.length > 8) return;
-
-        const cepFormatado = cepLimpo.length > 5
-          ? cepLimpo.slice(0, 5) + '-' + cepLimpo.slice(5)
-          : cepLimpo;
-
-        const enderecoAtualizado = {
-          ...enderecoAtual,
-          [campo]: cepFormatado
-        };
-
+        const formatted = formatCEP(value);
+        if (formatted.length > 9) return;
         dispatch(setUserData({
           ...formData,
-          endereco: enderecoAtualizado
+          endereco: { ...enderecoAtual, [campo]: formatted }
         }));
         return;
       }
 
-      if (campo === 'estado') {
-        if (/\d/.test(value)) return;
-        if (value.length > 2) return;
-      }
-
-      if (campo === 'cidade') {
-        if (/\d/.test(value)) return;
-      }
-
-      const enderecoAtualizado = {
-        ...enderecoAtual,
-        [campo]: value
-      };
+      if ((campo === 'estado' || campo === 'cidade') && /\d/.test(value)) return;
+      if (campo === 'estado' && value.length > 2) return;
 
       dispatch(setUserData({
         ...formData,
-        endereco: enderecoAtualizado
+        endereco: { ...enderecoAtual, [campo]: value }
       }));
     } else {
       dispatch(setUserData({
@@ -93,11 +108,11 @@ export default function Perfil() {
     }
   };
 
-
   const handleSubmit = async () => {
+    setLoadingLocal(true);
     try {
       const payload = { ...formData };
-      delete payload.senha; // Remove senha antiga/hash
+      delete payload.senha; // Remove hash atual
 
       if (novaSenha && novaSenha.trim() !== '') {
         payload.senha = novaSenha;
@@ -105,17 +120,81 @@ export default function Perfil() {
 
       await dispatch(updateUserById(payload)).unwrap();
       alert('Informações atualizadas com sucesso!');
-      setNovaSenha(''); // Limpa o campo após salvar
+      setNovaSenha('');
     } catch (err) {
       console.error(err);
       alert('Falha ao atualizar usuário.');
+    } finally {
+      setLoadingLocal(false);
     }
+  };
+
+  const handleSaveNutri = async () => {
+    if (!formData) return;
+    setLoadingLocal(true);
+    try {
+      const payload = { ...formData, nutricionistaId: Number(selectedNutriId) };
+      delete payload.senha; // Segurança
+
+      await dispatch(updateUserById(payload)).unwrap();
+      alert("Nutricionista definido com sucesso!");
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao definir nutricionista.");
+    } finally {
+      setLoadingLocal(false);
+    }
+  };
+
+  // --- gestao de enderecos ---
+  const handleOpenAddModal = () => {
+    setNovoEndereco({ apelido: '', rua: '', numero: '', bairro: '', cidade: '', estado: '', cep: '', complemento: '' });
+    setEditingAddressIndex(-1);
+    setShowModalEndereco(true);
+  }
+
+  const handleEditEndereco = (index) => {
+    const enderecosAtuais = formData.enderecos || [];
+    if (enderecosAtuais[index]) {
+      setNovoEndereco(enderecosAtuais[index]);
+      setEditingAddressIndex(index);
+      setShowModalEndereco(true);
+    }
+  }
+
+  const handleSaveEndereco = () => {
+    if (!novoEndereco.apelido || !novoEndereco.rua) {
+      alert("Preencha pelo menos Apelido e Rua.");
+      return;
+    }
+
+    const enderecosAtuais = formData.enderecos ? [...formData.enderecos] : [];
+    if (enderecosAtuais.length === 0 && formData.endereco && formData.endereco.rua) {
+      enderecosAtuais.push({ ...formData.endereco, apelido: 'Principal (Antigo)' });
+    }
+
+    if (editingAddressIndex >= 0) {
+      enderecosAtuais[editingAddressIndex] = novoEndereco;
+    } else {
+      enderecosAtuais.push(novoEndereco);
+    }
+
+    dispatch(setUserData({ ...formData, enderecos: enderecosAtuais }));
+    setShowModalEndereco(false);
+    if (!editando) setEditando(true); // Ativa salvar p persistir
+  };
+
+  const handleRemoveEndereco = (index) => {
+    if (!window.confirm("Remover este endereço?")) return;
+    const novaLista = (formData.enderecos || []).filter((_, i) => i !== index);
+    dispatch(setUserData({ ...formData, enderecos: novaLista }));
+    if (!editando) setEditando(true);
   };
 
   if (!formData) return <Spinner animation="border" />;
 
-  // Helper for safe access
-  const endereco = formData.endereco || {};
+  const enderecosList = formData.enderecos || [];
+  const temEnderecoUnico = !enderecosList.length && formData.endereco && formData.endereco.rua;
 
   return (
     <Container className="mt-4">
@@ -140,7 +219,6 @@ export default function Perfil() {
                   if (file) {
                     const reader = new FileReader();
                     reader.onloadend = () => {
-                      // Dispara atualização direta no estado local (formData)
                       handleChange({ target: { name: 'foto', value: reader.result } });
                     };
                     reader.readAsDataURL(file);
@@ -160,19 +238,12 @@ export default function Perfil() {
             >
               {loading ? <Spinner animation="border" size="sm" /> : editando ? 'Salvar Configurações' : 'Alterar Configurações'}
             </Button>
-
-            <Button
-              variant="danger"
-              onClick={handleLogout}
-            >
-              Sair
-            </Button>
+            <Button variant="danger" onClick={handleLogout}>Sair</Button>
           </div>
         </Col>
       </Row>
 
       <Tabs defaultActiveKey="basicas" id="perfil-tabs" className="mb-3">
-        {/* Informações básicas */}
         <Tab eventKey="basicas" title="Informações básicas">
           <Form>
             <Row className="mt-3">
@@ -207,47 +278,95 @@ export default function Perfil() {
           </Form>
         </Tab>
 
-        {/* Endereço */}
-        <Tab eventKey="endereco" title="Endereço">
-          <Form>
-            <Row className="mt-3">
-              <Form.Group as={Col} md={6} controlId="rua">
-                <Form.Label>Rua</Form.Label>
-                <Form.Control type="text" name="endereco.rua" value={endereco.rua || ''} onChange={handleChange} disabled={!editando} />
-              </Form.Group>
-              <Form.Group as={Col} md={2} controlId="numero">
-                <Form.Label>Número</Form.Label>
-                <Form.Control type="number" name="endereco.numero" value={endereco.numero || ''} onChange={handleChange} disabled={!editando} />
-              </Form.Group>
-              <Form.Group as={Col} md={4} controlId="bairro">
-                <Form.Label>Bairro</Form.Label>
-                <Form.Control type="text" name="endereco.bairro" value={endereco.bairro || ''} onChange={handleChange} disabled={!editando} />
-              </Form.Group>
+        <Tab eventKey="enderecos" title="Endereços">
+          <div className="p-3">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5>Meus Endereços</h5>
+              <Button variant="outline-primary" size="sm" onClick={handleOpenAddModal}>+ Adicionar Endereço</Button>
+            </div>
+
+            {enderecosList.length === 0 && !temEnderecoUnico && (
+              <p className="text-muted">Nenhum endereço cadastrado. Adicione um para facilitar suas entregas.</p>
+            )}
+
+            <Row xs={1} md={2} className="g-3">
+              {temEnderecoUnico && (
+                <Col>
+                  <Card className="h-100 border-warning">
+                    <Card.Body>
+                      <Card.Title>Principal (Legado)</Card.Title>
+                      <Card.Text>
+                        {formData.endereco.rua}, {formData.endereco.numero}<br />
+                        {formData.endereco.bairro} - {formData.endereco.cidade}
+                      </Card.Text>
+                      <div className="text-muted small">Este endereço será migrado ao salvar novos.</div>
+                      {editando && (
+                        <div className="d-flex gap-2 justify-content-end mt-2">
+                          <Button variant="outline-secondary" size="sm" onClick={() => {
+                            setNovoEndereco({ ...formData.endereco, apelido: 'Principal' });
+                            setEditingAddressIndex(-1);
+                            setShowModalEndereco(true);
+                          }}>Migrar p/ Lista</Button>
+                        </div>
+                      )}
+                    </Card.Body>
+                  </Card>
+                </Col>
+              )}
+
+              {enderecosList.map((end, idx) => (
+                <Col key={idx}>
+                  <Card className="h-100">
+                    <Card.Body>
+                      <Card.Title>{end.apelido || `Endereço ${idx + 1}`}</Card.Title>
+                      <Card.Text>
+                        {end.rua}, {end.numero} {end.complemento ? ` - ${end.complemento}` : ''}<br />
+                        {end.bairro}, {end.cidade} - {end.estado}<br />
+                        CEP: {end.cep}
+                      </Card.Text>
+                      {editando && (
+                        <div className="d-flex gap-2 justify-content-end">
+                          <Button variant="outline-secondary" size="sm" onClick={() => handleEditEndereco(idx)}>Editar</Button>
+                          <Button variant="outline-danger" size="sm" onClick={() => handleRemoveEndereco(idx)}>Remover</Button>
+                        </div>
+                      )}
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
             </Row>
-            <Row className="mt-3">
-              <Form.Group as={Col} md={4} controlId="cidade">
-                <Form.Label>Cidade</Form.Label>
-                <Form.Control type="text" name="endereco.cidade" value={endereco.cidade || ''} onChange={handleChange} disabled={!editando} />
-              </Form.Group>
-              <Form.Group as={Col} md={4} controlId="estado">
-                <Form.Label>Estado</Form.Label>
-                <Form.Control type="text" name="endereco.estado" value={endereco.estado || ''} onChange={handleChange} disabled={!editando} />
-              </Form.Group>
-              <Form.Group as={Col} md={4} controlId="cep">
-                <Form.Label>CEP</Form.Label>
-                <Form.Control type="text" name="endereco.cep" value={endereco.cep || ''} onChange={handleChange} disabled={!editando} />
-              </Form.Group>
-            </Row>
-            <Row className="mt-3">
-              <Form.Group as={Col} md={12} controlId="complemento">
-                <Form.Label>Complemento</Form.Label>
-                <Form.Control type="text" name="endereco.complemento" value={endereco.complemento || ''} onChange={handleChange} disabled={!editando} />
-              </Form.Group>
-            </Row>
-          </Form>
+          </div>
         </Tab>
 
-        {/* Informações nutricionais */}
+        <Tab eventKey="nutricionista" title="Nutricionista">
+          <div className="p-3">
+            <h5 className="mb-3">Meu Nutricionista</h5>
+            <Alert variant="info">Selecione o profissional que irá acompanhar sua dieta.</Alert>
+            <Row className="align-items-end">
+              <Col md={8}>
+                <Form.Group controlId="nutricionistaId">
+                  <Form.Label>Selecione um Nutricionista</Form.Label>
+                  <Form.Select
+                    value={selectedNutriId}
+                    onChange={(e) => setSelectedNutriId(e.target.value)}
+                    disabled={!editando && !formData.nutricionistaId}
+                  >
+                    <option value="">-- Sem Nutricionista --</option>
+                    {nutricionistas.map(n => (
+                      <option key={n.id} value={n.id}>{n.nome}</option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={4}>
+                <Button variant="primary" onClick={handleSaveNutri} className="mt-2" disabled={loading}>
+                  {loading ? <Spinner animation="border" size="sm" /> : 'Atualizar Nutricionista'}
+                </Button>
+              </Col>
+            </Row>
+          </div>
+        </Tab>
+
         <Tab eventKey="nutricionais" title="Informações nutricionais">
           <Form>
             <Row className="mt-3">
@@ -266,13 +385,88 @@ export default function Perfil() {
             </Row>
             <Row className="mt-3">
               <Form.Group as={Col} md={6} controlId="planoId">
-                <Form.Label>Plano</Form.Label>
-                <Form.Control type="text" name="planoId" value={formData.planoId || ''} onChange={handleChange} disabled={!editando} />
+                <Form.Label>Plano Atual (ID)</Form.Label>
+                <Form.Control type="text" name="planoId" value={formData.planoId || ''} disabled />
               </Form.Group>
             </Row>
           </Form>
         </Tab>
       </Tabs>
+
+      <Modal show={showModalEndereco} onHide={() => setShowModalEndereco(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{editingAddressIndex >= 0 ? 'Editar Endereço' : 'Adicionar Endereço'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Apelido do Local (Ex: Casa, Trabalho)</Form.Label>
+              <Form.Control type="text" placeholder="Nome para este endereço"
+                value={novoEndereco.apelido}
+                onChange={e => setNovoEndereco({ ...novoEndereco, apelido: e.target.value })}
+              />
+            </Form.Group>
+            <Row className="mb-3">
+              <Col md={9}>
+                <Form.Label>Rua</Form.Label>
+                <Form.Control type="text" value={novoEndereco.rua}
+                  onChange={e => setNovoEndereco({ ...novoEndereco, rua: e.target.value })}
+                />
+              </Col>
+              <Col md={3}>
+                <Form.Label>Número</Form.Label>
+                <Form.Control type="text" value={novoEndereco.numero}
+                  onChange={e => setNovoEndereco({ ...novoEndereco, numero: e.target.value })}
+                />
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col md={6}>
+                <Form.Label>Bairro</Form.Label>
+                <Form.Control type="text" value={novoEndereco.bairro}
+                  onChange={e => setNovoEndereco({ ...novoEndereco, bairro: e.target.value })}
+                />
+              </Col>
+              <Col md={6}>
+                <Form.Label>Cidade</Form.Label>
+                <Form.Control type="text" value={novoEndereco.cidade}
+                  onChange={e => setNovoEndereco({ ...novoEndereco, cidade: e.target.value })}
+                />
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col md={6}>
+                <Form.Label>Estado</Form.Label>
+                <Form.Control type="text" value={novoEndereco.estado}
+                  onChange={e => {
+                    if (/\d/.test(e.target.value)) return;
+                    if (e.target.value.length > 2) return;
+                    setNovoEndereco({ ...novoEndereco, estado: e.target.value.toUpperCase() });
+                  }}
+                />
+              </Col>
+              <Col md={6}>
+                <Form.Label>CEP</Form.Label>
+                <Form.Control type="text" value={novoEndereco.cep}
+                  onChange={e => setNovoEndereco({ ...novoEndereco, cep: formatCEP(e.target.value) })}
+                />
+              </Col>
+            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label>Complemento</Form.Label>
+              <Form.Control type="text" value={novoEndereco.complemento}
+                onChange={e => setNovoEndereco({ ...novoEndereco, complemento: e.target.value })}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModalEndereco(false)}>Cancelar</Button>
+          <Button variant="primary" onClick={handleSaveEndereco}>
+            {editingAddressIndex >= 0 ? 'Salvar Alterações' : 'Adicionar à Lista'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }
