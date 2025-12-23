@@ -22,13 +22,10 @@ export default function Login() {
 
   async function entrar() {
     try {
-      const { data } = await api.post("/auth/login", { email, senha });
-      
+      const { data } = await api.post("/auth/login", { email, senha, tipo: selectedType });
+
       const { user, token } = data;
 
-      // O token já é salvo no localStorage? 
-      // O userSlice salva userData e userType no localStorage.
-      // Vamos salvar o token explicitamente aqui ou no api.js (mas api.js lê do localStorage).
       localStorage.setItem("token", token);
 
       // Compatibilidade com o que o Frontend já espera (userData, userType)
@@ -42,8 +39,6 @@ export default function Login() {
       alert(msg);
     }
   }
-
-
 
   return (
     <div className={styles["login"]}>

@@ -52,14 +52,14 @@ function AppContext() {
 
   return (
     <>
-      {mostrarComponentesQuandoLogados && <Header tipo={userType.name}/>}
+      {mostrarComponentesQuandoLogados && userType && <Header tipo={userType.name} />}
       {mostrarComponentesQuandoLogados && <Chat />}
 
       <Routes>
         {/* Páginas para Não-Logados */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/registrar" element={<Registrar />}/>
+        <Route path="/registrar" element={<Registrar />} />
 
         {/* Páginas para Logados */}
         <Route path="/dashboard" element={<DashboardRouter />} />
@@ -67,11 +67,11 @@ function AppContext() {
         <Route path="/mediador-pedido/:id" element={<MediadorPedidoDetalhes />} />
         <Route path="/relatorio" element={<Relatorio />} />
         <Route path="/planejamento" element={<Planejamento />} />
-        <Route path="/perfil" element={<Perfil/>} />
-        <Route path="/planos" element={<Planos/>}/>
-        <Route path="/planos/criar" element={<CriarEditarPlano />}/>
-        <Route path="/planos/:id" element={<CriarEditarPlano/>}/>
-        <Route path="/esqueci-minha-senha" element={<EsqeuciMinhaSenha/>}/>
+        <Route path="/perfil" element={<Perfil />} />
+        <Route path="/planos" element={<Planos />} />
+        <Route path="/planos/criar" element={<CriarEditarPlano />} />
+        <Route path="/planos/:id" element={<CriarEditarPlano />} />
+        <Route path="/esqueci-minha-senha" element={<EsqeuciMinhaSenha />} />
         <Route path="/alimento/:id" element={<Alimentos />} />
         <Route path="/receita/:id" element={<Receitas />} />
         <Route path="/ListaCompras" element={<ListaCompras />} />

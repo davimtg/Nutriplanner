@@ -18,7 +18,7 @@ const TipoUsuarioSchema = new mongoose.Schema({
 const UserSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true }, // Mantendo ID numérico legado
   nome: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true }, // Removido unique global para permitir multiplos tipos
   senha: { type: String, required: true }, // TODO: Migrar para hash posteriormente
   telefone: String,
   endereco: EnderecoSchema,

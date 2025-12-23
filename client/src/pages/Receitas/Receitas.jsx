@@ -44,6 +44,16 @@ export default function Receitas() {
     proteina: (nutricional.proteina * fator).toFixed(1),
   };
 
+  const tryLoadImage = (imgName) => {
+    if (!imgName) return "https://placehold.co/600x400?text=Sem+Imagem";
+    if (imgName.startsWith("data:")) return imgName;
+    try {
+      return require(`../../assets/img/receitas/${imgName}`);
+    } catch (err) {
+      return "https://placehold.co/600x400?text=Imagem+N%C3%A3o+Encontrada";
+    }
+  };
+
   return (
     <div className="container my-5">
       <Button variant="secondary" className="mb-4" onClick={() => navigate(-1)}>
@@ -57,7 +67,7 @@ export default function Receitas() {
             style={{ overflow: "hidden" }}
           >
             <img
-              src={require(`../../assets/img/receitas/${img}`)}
+              src={tryLoadImage(img)}
               alt={nome}
               style={{
                 maxHeight: "100%",
