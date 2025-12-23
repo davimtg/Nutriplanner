@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Button, Form, Offcanvas, Card, InputGroup, ListGroup, Image, Col } from 'react-bootstrap';
+import { useState, useEffect, useRef } from 'react';
+import { Button, Form, Offcanvas, Card, InputGroup, ListGroup, Image, Col, Badge } from 'react-bootstrap';
 import BubbleIcon from '../../assets/img/chat-bubble-icon.png';
 import styles from './Chat.module.css';
 import ChatMessages from '../ChatMessages/ChatMessages';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUserMessages, enviarMensagem, abrirChat, alternarChat, limparMensagens } from '../../redux/chatSlice';
+import { fetchUserMessages, enviarMensagem, abrirChat, alternarChat, limparMensagens, fetchUnreadMessages, markMessagesAsRead } from '../../redux/chatSlice';
+import api from '../../services/api';
 
 export default function Chat() {
     const [show, setShow] = useState(false); // Usado para mostrar a aba de usuarios do chat
@@ -15,25 +16,70 @@ export default function Chat() {
     const targetUser = useSelector(state => state.chat.targetUser);
     const showChatWindow = useSelector(state => state.chat.showChatWindow); // Usado para mostrar um chat com um usuario 
     const currentUser = useSelector(state => state.user.userData);
+    const unreadCounts = useSelector(state => state.chat.unreadCounts); // Mapa { senderId: count }
 
     const dispatch = useDispatch();
 
+    const targetUserRef = useRef(targetUser);
+    const showChatWindowRef = useRef(showChatWindow);
+
     useEffect(() => {
-        const fetchUsers = async () => { // Carrega todos os usuarios (temporario)
+        targetUserRef.current = targetUser;
+        showChatWindowRef.current = showChatWindow;
+    }, [targetUser, showChatWindow]);
+
+    useEffect(() => {
+        if (!currentUser) return;
+        // Poll unread messages every 5 seconds
+        const interval = setInterval(() => {
+            dispatch(fetchUnreadMessages(currentUser.id)).then((action) => {
+                const unreadMsgs = action.payload || [];
+                const currentTarget = targetUserRef.current;
+                const isWindowOpen = showChatWindowRef.current;
+
+                // If chat is open with the sender of a new message
+                if (isWindowOpen && currentTarget) {
+                    const hasNewFromTarget = unreadMsgs.some(m => m.remetenteId === currentTarget.id);
+
+                    if (hasNewFromTarget) {
+                        // Mark as read and refresh messages
+                        dispatch(markMessagesAsRead({ remetenteId: currentTarget.id, destinatarioId: currentUser.id }));
+                        dispatch(fetchUserMessages({
+                            remetenteId: currentUser.id,
+                            destinatarioId: currentTarget.id
+                        }));
+                    }
+                }
+            });
+        }, 5000);
+        // Initial fetch
+        dispatch(fetchUnreadMessages(currentUser.id));
+
+        return () => clearInterval(interval);
+    }, [currentUser, dispatch]);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
             try {
-                const res = await fetch('http://localhost:3001/usuarios');
-                const data = await res.json();
-                setAllUsers(data['lista-de-usuarios'] || []);
+                const res = await api.get('/usuarios');
+                setAllUsers(res.data || []);
             } catch (error) {
                 console.error('Erro ao carregar usuários:', error);
             }
         };
-        fetchUsers();
-    }, []);
+        // Carrega sempre ao montar para garantir dados frescos, ou quando abrir
+        if (show || currentUser) fetchUsers();
+    }, [show, currentUser]);
 
     const handleOpenUserWindow = (user) => {
         dispatch(limparMensagens()); // Ao abrir uma conversa, limpa as mensagens antigas para forçar a atualizar o das mensagens estado
         dispatch(abrirChat(user));
+
+        // Mark messages as read immediately
+        if (currentUser) {
+            dispatch(markMessagesAsRead({ remetenteId: user.id, destinatarioId: currentUser.id }));
+        }
+
         dispatch(fetchUserMessages({
             remetenteId: currentUser.id,
             destinatarioId: user.id // targetUser.id
@@ -74,32 +120,63 @@ export default function Chat() {
 
     function RecentContactList({ onOpen }) { // Renderiza lista de contatos recentes
         const contatos = currentUser?.contatosRecentes || [];
-        const users = allUsers.filter(user => contatos.includes(user.id));
+        // Identify users with unread messages
+        const unreadIds = Object.keys(unreadCounts).map(Number);
+        // Merge and unique
+        const allIds = Array.from(new Set([...contatos, ...unreadIds]));
+
+        // Filtra usuarios
+        let users = allUsers.filter(user => allIds.includes(user.id));
+
+        // Ordenacao: quem tem mais msg nao lida aparece primeiro
+        users.sort((a, b) => {
+            const countA = unreadCounts[a.id] || 0;
+            const countB = unreadCounts[b.id] || 0;
+            return countB - countA;
+        });
+
         return (
             <>
-                {users.map(user => (
-                    <Card key={user.id} className="mb-3">
-                        <Card.Body>
-                            <Card.Title>{user.nome}</Card.Title>
-                            <Card.Subtitle className="mb-2 text-muted">{user.tipo?.name}</Card.Subtitle>
-                            <Button variant="success" onClick={() => onOpen(user)}>
-                                Conversar
-                            </Button>
-                        </Card.Body>
-                    </Card>
-                ))}
+                {users.map(user => {
+                    const unread = unreadCounts[user.id] || 0;
+                    return (
+                        <Card key={user.id} className="mb-3" style={{ cursor: 'pointer' }} onClick={() => onOpen(user)}>
+                            <Card.Body className="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <Card.Title className="mb-0">{user.nome}</Card.Title>
+                                    <Card.Subtitle className="text-muted small">{user.tipo?.name}</Card.Subtitle>
+                                </div>
+                                <div className="d-flex align-items-center gap-2">
+                                    {unread > 0 && <Badge bg="danger" pill>{unread}</Badge>}
+                                    <Button variant="outline-success" size="sm" onClick={(e) => { e.stopPropagation(); onOpen(user); }}>
+                                        Conversar
+                                    </Button>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    );
+                })}
             </>
         );
     }
 
     if (!currentUser) return null;
 
+    // Total unread messages
+    const totalUnread = Object.values(unreadCounts).reduce((acc, curr) => acc + curr, 0);
+
     return (
         <>      {/* Botão flutuante */}
             <button className={styles.floatingBtn} onClick={() => setShow(true)} aria-label="Abrir chat">
                 <Image className={styles.floatingIcon} src={BubbleIcon} />
+                {totalUnread > 0 && (
+                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.7em' }}>
+                        {totalUnread > 99 ? '99+' : totalUnread}
+                        <span className="visually-hidden">unread messages</span>
+                    </span>
+                )}
             </button>
-                {/* Offcanvas de usuarios para conversar */}
+            {/* Offcanvas de usuarios para conversar */}
             <Offcanvas show={show} onHide={() => setShow(false)} placement="end">
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Chat</Offcanvas.Title>
@@ -146,7 +223,7 @@ export default function Chat() {
                     )}
                 </Offcanvas.Body>
             </Offcanvas>
-                {/* Offcanvas da conversa com um usuario */}
+            {/* Offcanvas da conversa com um usuario */}
             <Offcanvas className={styles.chatOffcanvas} show={showChatWindow} onHide={toggleChatWindow} placement="end">
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Chat com {targetUser?.nome}</Offcanvas.Title>

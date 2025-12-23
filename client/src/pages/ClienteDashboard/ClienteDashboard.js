@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
+import api from "../../services/api";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import s from "./ClienteDashboard.module.css";
 
-/**
- * ClienteDashboard — visual + calculadora de macros
- * (estilos migrados para CSS Module)
- */
+// dashboard cliente - visual e calc de macros
+// migrei estilos pro css module
 
-// ===== Utilitários de data =====
+// utils de data
 const fmtKey = (d) => d.toISOString().slice(0, 10); // YYYY-MM-DD
 const startOfWeekMonday = (d) => {
   const tmp = new Date(d);
@@ -26,59 +25,216 @@ const addWeeks = (d, n) => addDays(d, n * 7);
 const fmtShort = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" });
 const weekdayShort = new Intl.DateTimeFormat("pt-BR", { weekday: "short" });
 
-// ===== Persistência local (por dia) =====
-const loadDayMeals = (dateKey) => {
-  try {
-    const raw = localStorage.getItem(`meals-${dateKey}`);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (_) { return null; }
-};
-const saveDayMeals = (dateKey, data) => {
-  try { localStorage.setItem(`meals-${dateKey}`, JSON.stringify(data)); } catch (_) {}
-};
+// persistencia via api
+// n usa mais localstorage. usamos 'api' e cache em memoria.
 
-// ===== Metas (carregadas de localStorage; fallback padrão) =====
+// helper p criar id numerico (se precisar no front)
+// melhor deixar o back gerar id
+// mas pro post precisamos saber se ja existe
+
+// Helper mapping
+const mapMealKeyToBackend = (k) => (k === "cafe" ? "cafe_da_manha" : k);
+const mapMealKeyFromBackend = (k) => (k === "cafe_da_manha" ? "cafe" : k);
+
+const emptyDay = () => ({ cafe: [], almoco: [], jantar: [], lanches: [] });
+
+// metas (load do localstorage; fallback default)
 const defaultGoals = { calorias: 2500, carboidrato: 300, gordura: 70, proteina: 150 };
-const loadGoals = () => {
-  try { const raw = localStorage.getItem("macro-goals"); if (raw) return JSON.parse(raw); } catch (_) {}
-  return defaultGoals;
-};
-const saveGoals = (goals) => { try { localStorage.setItem("macro-goals", JSON.stringify(goals)); } catch (_) {} };
+const saveGoals = (goals) => { try { localStorage.setItem("macro-goals", JSON.stringify(goals)); } catch (_) { } };
 
-// ===== Modelo =====
+// modelo
 const MEAL_TYPES = [
   { id: "cafe", label: "Café da Manhã", bi: "bi-cup-hot", color: "warning" },
   { id: "almoco", label: "Almoço", bi: "bi-fork-knife", color: "info" },
   { id: "jantar", label: "Jantar", bi: "bi-moon-stars", color: "danger" },
   { id: "lanches", label: "Lanches", bi: "bi-cookie", color: "secondary" },
 ];
-const emptyDay = () => ({ cafe: [], almoco: [], jantar: [], lanches: [] });
 
-// ===== Componente principal =====
+// comp principal
 export default function ClienteDashboard() {
-  // Semana baseada em hoje
   const [baseDate, setBaseDate] = useState(() => new Date());
   const weekStart = useMemo(() => startOfWeekMonday(baseDate), [baseDate]);
   const weekDays = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
 
-  // Dia selecionado
   const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const selectedKey = fmtKey(selectedDate);
+  const selectedKey = fmtKey(selectedDate); // YYYY-MM-DD
 
-  // Dados do dia selecionado
-  const [dayMeals, setDayMeals] = useState(() => loadDayMeals(selectedKey) || emptyDay());
-  useEffect(() => { setDayMeals(loadDayMeals(selectedKey) || emptyDay()); }, [selectedKey]);
-  useEffect(() => { saveDayMeals(selectedKey, dayMeals); }, [selectedKey, dayMeals]);
+  // cache dados
+  const [allFoods, setAllFoods] = useState([]);
+  const [allRecipes, setAllRecipes] = useState([]);
+
+  const [userDiary, setUserDiary] = useState([]); // Todos os registros do usuário
+  const [userData, setUserData] = useState(null);
+
+  // state do dia atual (hidratado)
+  const [dayMeals, setDayMeals] = useState(emptyDay());
+  const [currentDiaryId, setCurrentDiaryId] = useState(null); // id do registro no banco
 
   // Metas
-  const [goals, setGoals] = useState(loadGoals());
+  const [goals, setGoals] = useState(defaultGoals);
+
+  // 1. carga inicial (foods, recipes, user data, user diary)
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const storedUser = localStorage.getItem("userData");
+        if (!storedUser) return;
+        const parsedUser = JSON.parse(storedUser);
+        setUserData(parsedUser);
+
+        // Load Goals from local for now OR could be in DB (not implemented yet, keeping local preference)
+        const localGoals = localStorage.getItem("macro-goals");
+        if (localGoals) setGoals(JSON.parse(localGoals));
+
+        // busca alimentos, receitas, diario
+        const [foodsRes, recipesRes, diaryRes] = await Promise.all([
+          api.get("/alimentos?_limit=1000"),
+          api.get("/receitas?_limit=1000"),
+          api.get(`/diario-alimentar?usuarioId=${parsedUser.id}`)
+        ]);
+
+        setAllFoods(foodsRes.data);
+        setAllRecipes(recipesRes.data);
+        setUserDiary(diaryRes.data);
+
+      } catch (err) {
+        console.error("Erro ao carregar dados iniciais:", err);
+      }
+    };
+    loadInitialData();
+  }, []);
+
+  // 2. hidratacao do dia selecionado
+  useEffect(() => {
+    if (!userData) return;
+
+    // encontrar registro da data selectedKey
+    // back retorna string iso "2023-11-20T00:00:00.000Z"
+    // selectedKey eh "2023-11-20"
+    const entry = userDiary.find(d => typeof d.data === 'string' && d.data.startsWith(selectedKey));
+
+    if (entry) {
+      setCurrentDiaryId(entry.id);
+
+      // hidrata itens
+      const newMeals = emptyDay();
+
+      // entry.refeicoes keys: cafe_da_manha, almoco, ...
+      if (entry.refeicoes) {
+        Object.keys(entry.refeicoes).forEach(backendKey => {
+          const frontendKey = mapMealKeyFromBackend(backendKey);
+          if (!newMeals[frontendKey]) return;
+
+          const itensRaw = entry.refeicoes[backendKey] || [];
+
+          newMeals[frontendKey] = itensRaw.map(item => {
+            // tenta achar em alimentos ou receitas
+            // schema do diario grava { id, gramas }, mas n diz se eh alimento ou receita...
+            // assumi que id de alimento e receita n colidem ou vamos tentar achar
+            // como os jsons originais tinham ids distintos (alimento 1..n, receita 1..n), pode ter colisao?
+            // seed recriou tudo.
+            // fix: diario schema atual SO tem 'id'. falha de design do schema herdado ou a gente precisa inferir.
+            // p mvp, procura em alimentos primeiro. se n achar, receitas. 
+            // se colidir, erro.
+
+            let found = allFoods.find(f => f.id === item.id);
+            let kind = "alimento";
+
+            if (!found) {
+              found = allRecipes.find(r => r.id === item.id);
+              kind = "receita";
+            }
+
+            if (!found) return null; // Item não existe mais no DB
+
+            // recalcula macros
+            const base = found.nutricional || {
+              calorias: found.calorias || 0,
+              proteina: found.proteina || 0,
+              carboidrato: found.carboidrato || 0,
+              gordura: found.gordura || 0
+            };
+
+            // diferenca de calc: receitas as vezes salvam por 'gramas' no diario, mas front usa porcoes
+            // simplificacao: vamo assumir q item.gramas eh o peso consumido.
+            const fator = item.gramas / 100;
+
+            return {
+              kind,
+              id: found.id,
+              nome: found.nome,
+              quantidade_g: kind === 'alimento' ? item.gramas : undefined,
+              porcoes: kind === 'receita' ? 1 : undefined, // Info perdida se salvamos só gramas
+              gramasPorPorcao: kind === 'receita' ? item.gramas : undefined, // Info perdida
+              macros: {
+                calorias: base.calorias * fator,
+                proteina: base.proteina * fator,
+                carboidrato: base.carboidrato * fator,
+                gordura: base.gordura * fator
+              }
+            };
+          }).filter(Boolean);
+        });
+      }
+      setDayMeals(newMeals);
+
+    } else {
+      setCurrentDiaryId(null);
+      setDayMeals(emptyDay());
+    }
+
+  }, [selectedKey, userDiary, allFoods, allRecipes, userData]);
+
+  // 3. salvar (debounced ou direto?) -> vamos salvar direto no add/remove p consistencia
+  const syncToBackend = async (newDayMeals, diaryId) => {
+    if (!userData) return;
+
+    // Converter Frontend -> Backend Schema
+    const refeicoesBackend = {};
+    ["cafe", "almoco", "jantar", "lanches"].forEach(key => {
+      const backendKey = mapMealKeyToBackend(key);
+      refeicoesBackend[backendKey] = newDayMeals[key].map(it => ({
+        id: it.id, // id do alimento/receita
+        gramas: it.kind === 'alimento'
+          ? it.quantidade_g
+          : (it.porcoes * it.gramasPorPorcao) // calcula total gramas p receita
+      }));
+    });
+
+    const payload = {
+      usuarioId: userData.id,
+      data: selectedKey, // "YYYY-MM-DD" -> Backend deve aceitar ou converter
+      refeicoes: refeicoesBackend
+    };
+
+    try {
+      if (diaryId) {
+        // Update
+        await api.put(`/diario-alimentar/${diaryId}`, payload);
+        // Update local cache of diary to reflect changes (avoid refetch)
+        setUserDiary(prev => prev.map(d => d.id === diaryId ? { ...d, ...payload } : d));
+      } else {
+        // Create
+        const res = await api.post("/diario-alimentar", payload);
+        // Add to local cache
+        const newEntry = res.data;
+        setUserDiary(prev => [...prev, newEntry]);
+        setCurrentDiaryId(newEntry.id);
+      }
+    } catch (err) {
+      console.error("Erro ao salvar:", err);
+      alert("Erro ao salvar refeição. Tente novamente.");
+    }
+  };
+
+  // Metas
   useEffect(() => saveGoals(goals), [goals]);
 
   // Totais do dia
   const totals = useMemo(() => {
     const sum = { calorias: 0, carboidrato: 0, gordura: 0, proteina: 0 };
     for (const mt of MEAL_TYPES) {
+      if (!dayMeals[mt.id]) continue;
       for (const it of dayMeals[mt.id]) {
         sum.calorias += it.macros.calorias || 0;
         sum.carboidrato += it.macros.carboidrato || 0;
@@ -89,11 +245,11 @@ export default function ClienteDashboard() {
     return sum;
   }, [dayMeals]);
 
-  // ===== Modal de adicionar item =====
+  // ===== modal add item =====
   const [modalOpen, setModalOpen] = useState(false);
   const [targetMeal, setTargetMeal] = useState(null);
 
-  // Busca
+  // busca
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
   const [resultAlimentos, setResultAlimentos] = useState([]);
@@ -109,10 +265,12 @@ export default function ClienteDashboard() {
     const t = setTimeout(async () => {
       setLoading(true);
       try {
-        const [rawA, rawR] = await Promise.all([
-          fetch(`http://localhost:3001/alimentos?q=${encodeURIComponent(term)}&_limit=300`, { signal: ctrl.signal }).then((r) => r.json()),
-          fetch(`http://localhost:3001/receitas?q=${encodeURIComponent(term)}&_limit=300`, { signal: ctrl.signal }).then((r) => r.json()),
+        const [resA, resR] = await Promise.all([
+          api.get(`/alimentos?q=${encodeURIComponent(term)}&_limit=300`, { signal: ctrl.signal }),
+          api.get(`/receitas?q=${encodeURIComponent(term)}&_limit=300`, { signal: ctrl.signal }),
         ]);
+        const rawA = resA.data;
+        const rawR = resR.data;
         const termNorm = norm(term);
         const sortByName = (a, b) => (a?.nome || "").localeCompare(b?.nome || "");
         const filterByNome = (arr) => (Array.isArray(arr) ? arr : []).filter((x) => norm(x?.nome).includes(termNorm)).sort(sortByName);
@@ -128,7 +286,7 @@ export default function ClienteDashboard() {
     return () => { clearTimeout(t); ctrl.abort(); };
   }, [modalOpen, q]);
 
-  // Seleção do item encontrado
+  // selecao item encontrado
   const [selectedItem, setSelectedItem] = useState(null);
   const [grams, setGrams] = useState(150);
   const [porcoes, setPorcoes] = useState(1);
@@ -164,27 +322,55 @@ export default function ClienteDashboard() {
   };
   const closeModal = () => setModalOpen(false);
 
+  // helpers update local + sync
+  const updateMeals = (cb) => {
+    // CB retorna novo state
+    setDayMeals(prev => {
+      const newState = cb(prev);
+      // Dispara sync usando o estado calculado
+      syncToBackend(newState, currentDiaryId);
+      return newState;
+    });
+  };
+
+  // adaptar funcoes existentes 
   const confirmAdd = () => {
     if (!targetMeal || !selectedItem) return;
-    const payload = {
+    const computed = computedMacros; // do useMemo
+
+    // Preparar payload state local
+    const itemPayload = {
       kind: selectedItem.kind,
       id: selectedItem.dados.id,
       nome: selectedItem.dados.nome,
-      macros: computedMacros,
+      macros: computed,
     };
-    if (selectedItem.kind === "alimento") payload.quantidade_g = Math.max(0, Math.round(grams));
-    else { payload.porcoes = Math.max(0, Math.round(porcoes)); payload.gramasPorPorcao = Math.max(1, Math.round(gramasPorPorcao)); }
 
-    setDayMeals((prev) => ({ ...prev, [targetMeal]: [...prev[targetMeal], payload] }));
+    if (selectedItem.kind === "alimento") {
+      itemPayload.quantidade_g = Math.max(0, Math.round(grams));
+    } else {
+      itemPayload.porcoes = Math.max(0, Math.round(porcoes));
+      itemPayload.gramasPorPorcao = Math.max(1, Math.round(gramasPorPorcao));
+    }
+
+    // usa wrapper de update
+    updateMeals(prev => ({
+      ...prev,
+      [targetMeal]: [...prev[targetMeal], itemPayload]
+    }));
+
     closeModal();
   };
 
   const removeItem = (mealId, idx) => {
-    setDayMeals((prev) => ({ ...prev, [mealId]: prev[mealId].filter((_, i) => i !== idx) }));
+    updateMeals(prev => ({
+      ...prev,
+      [mealId]: prev[mealId].filter((_, i) => i !== idx)
+    }));
   };
 
-  // Helpers de UI
-  const isSameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  // helpers de ui
+  const isSameDay = (a, b) => a.toISOString().slice(0, 10) === b.toISOString().slice(0, 10);
   const weekRangeLabel = (start) => `${fmtShort.format(start)} — ${fmtShort.format(addDays(start, 6))}`;
 
   const MacroBar = ({ label, value, goal, variant }) => {
@@ -209,7 +395,7 @@ export default function ClienteDashboard() {
   const circle = { r: 45, stroke: 10 };
   const C = 2 * Math.PI * circle.r;
 
-  // ===== UI =====
+  // ===== ui =====
   return (
     <div className="min-vh-100 bg-light text-dark p-3 p-md-4">
       <div className={`container ${s.container}`}>
@@ -250,7 +436,8 @@ export default function ClienteDashboard() {
           </div>
         </div>
 
-        {/* PROGRESSO DO DIA */}
+
+        {/* progresso do dia */}
         <div className={`${s.card} p-4 p-md-5 mb-4`}>
           <h5 className="fw-bold mb-3">Progresso de hoje</h5>
           <div className="d-flex flex-column flex-md-row align-items-center gap-4">
@@ -270,11 +457,11 @@ export default function ClienteDashboard() {
               </div>
             </div>
 
-            {/* Barras de macros */}
+            {/* barras de macros */}
             <div className="flex-grow-1 w-100">
-              <MacroBar label="Proteínas"   value={+totals.proteina.toFixed(1)}   goal={goals.proteina}   variant="protein" />
+              <MacroBar label="Proteínas" value={+totals.proteina.toFixed(1)} goal={goals.proteina} variant="protein" />
               <MacroBar label="Carboidratos" value={+totals.carboidrato.toFixed(1)} goal={goals.carboidrato} variant="carb" />
-              <MacroBar label="Gorduras"     value={+totals.gordura.toFixed(1)}     goal={goals.gordura}     variant="fat" />
+              <MacroBar label="Gorduras" value={+totals.gordura.toFixed(1)} goal={goals.gordura} variant="fat" />
             </div>
           </div>
         </div>
@@ -315,7 +502,7 @@ export default function ClienteDashboard() {
           </div>
         ))}
 
-        {/* CALCULADORA DE MACROS */}
+        {/* calc de macros */}
         <div className={`${s.card} p-4 mt-4`}>
           <h5 className="fw-bold mb-3">Calculadora de Macros</h5>
           <MacroCalculator goals={goals} setGoals={setGoals} />
@@ -327,7 +514,7 @@ export default function ClienteDashboard() {
             <div className="modal-dialog modal-md">
               <div className="modal-content rounded-4">
                 <div className="modal-header border-0">
-                  <h5 className="modal-title fw-bold">Adicionar Refeição — {MEAL_TYPES.find((m)=>m.id===targetMeal)?.label}</h5>
+                  <h5 className="modal-title fw-bold">Adicionar Refeição — {MEAL_TYPES.find((m) => m.id === targetMeal)?.label}</h5>
                   <button className="btn-close" onClick={closeModal}></button>
                 </div>
                 <div className="modal-body pt-0">
@@ -450,7 +637,7 @@ export default function ClienteDashboard() {
   );
 }
 
-// ===== Calculadora de Macros =====
+// ===== calc de macros =====
 function MacroCalculator({ goals, setGoals }) {
   const [sexo, setSexo] = useState("masculino");
   const [idade, setIdade] = useState(30);
@@ -485,8 +672,6 @@ function MacroCalculator({ goals, setGoals }) {
   const kcalRestante = Math.max(0, kcalObjetivo - (kcalProteina + kcalGordura));
   const carboidrato = Math.round(kcalRestante / 4);
 
-  const aplicar = () => setGoals({ calorias: kcalObjetivo, carboidrato, gordura, proteina });
-
   return (
     <div>
       <div className="row g-3">
@@ -499,20 +684,20 @@ function MacroCalculator({ goals, setGoals }) {
         </div>
         <div className="col-md-3">
           <label className="form-label">Idade</label>
-          <input type="number" className="form-control" value={idade} min={10} max={100} onChange={(e)=>setIdade(+e.target.value||0)} />
+          <input type="number" className="form-control" value={idade} min={10} max={100} onChange={(e) => setIdade(+e.target.value || 0)} />
         </div>
         <div className="col-md-3">
           <label className="form-label">Peso (kg)</label>
-          <input type="number" className="form-control" value={peso} min={20} max={250} onChange={(e)=>setPeso(+e.target.value||0)} />
+          <input type="number" className="form-control" value={peso} min={20} max={250} onChange={(e) => setPeso(+e.target.value || 0)} />
         </div>
         <div className="col-md-3">
           <label className="form-label">Altura (cm)</label>
-          <input type="number" className="form-control" value={altura} min={120} max={230} onChange={(e)=>setAltura(+e.target.value||0)} />
+          <input type="number" className="form-control" value={altura} min={120} max={230} onChange={(e) => setAltura(+e.target.value || 0)} />
         </div>
 
         <div className="col-md-4">
           <label className="form-label">Atividade</label>
-          <select className="form-select" value={atividade} onChange={(e)=>setAtividade(e.target.value)}>
+          <select className="form-select" value={atividade} onChange={(e) => setAtividade(e.target.value)}>
             <option value="sedentario">Sedentário (pouco ou nenhum exercício)</option>
             <option value="leve">Leve (1-3x/semana)</option>
             <option value="moderado">Moderado (3-5x/semana)</option>
@@ -522,7 +707,7 @@ function MacroCalculator({ goals, setGoals }) {
         </div>
         <div className="col-md-4">
           <label className="form-label">Objetivo</label>
-          <select className="form-select" value={objetivo} onChange={(e)=>setObjetivo(e.target.value)}>
+          <select className="form-select" value={objetivo} onChange={(e) => setObjetivo(e.target.value)}>
             <option value="manter">Manter</option>
             <option value="cutting">Perder gordura (−20%)</option>
             <option value="bulking">Ganhar massa (+15%)</option>
@@ -530,11 +715,11 @@ function MacroCalculator({ goals, setGoals }) {
         </div>
         <div className="col-md-2">
           <label className="form-label">Proteína (g/kg)</label>
-          <input type="number" step="0.1" className="form-control" value={protGKg} min={1.2} max={2.5} onChange={(e)=>setProtGKg(+e.target.value||0)} />
+          <input type="number" step="0.1" className="form-control" value={protGKg} min={1.2} max={2.5} onChange={(e) => setProtGKg(+e.target.value || 0)} />
         </div>
         <div className="col-md-2">
           <label className="form-label">Gordura (% kcal)</label>
-          <input type="number" className="form-control" value={fatPct} min={15} max={40} onChange={(e)=>setFatPct(+e.target.value||0)} />
+          <input type="number" className="form-control" value={fatPct} min={15} max={40} onChange={(e) => setFatPct(+e.target.value || 0)} />
         </div>
       </div>
 

@@ -17,24 +17,28 @@ const MediadorDashboard = () => {
   const [filtro, setFiltro] = useState('todos');
 
   useEffect(() => {
-    if (status === 'idle') {
-      dispatch(fetchPedidos());
-    }
-  }, [status, dispatch]);
+    // Busca sempre que montar o componente para garantir dados frescos
+    dispatch(fetchPedidos());
+  }, [dispatch]);
 
-    const normalize = (str) =>
+  const normalize = (str) =>
     str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
 
+  const getStatusName = (status) => {
+    if (!status) return '';
+    return status.name ? status.name : status;
+  };
+
   const pendentes = pedidos.filter(
-    (pedido) => normalize(pedido.status.name) === 'pendente'
+    (pedido) => normalize(getStatusName(pedido.status)) === 'pendente'
   ).length;
 
   const emExecucao = pedidos.filter(
-    (pedido) => normalize(pedido.status.name) === 'em execucao'
+    (pedido) => normalize(getStatusName(pedido.status)) === 'em execucao'
   ).length;
 
   const concluidos = pedidos.filter(
-    (pedido) => normalize(pedido.status.name) === 'concluido'
+    (pedido) => normalize(getStatusName(pedido.status)) === 'concluido'
   ).length;
 
   const total = pedidos.length;
@@ -49,7 +53,7 @@ const MediadorDashboard = () => {
   const pedidosFiltrados =
     filtro === 'todos'
       ? pedidos
-      : pedidos.filter((pedido) => normalize(pedido.status.name) === filtro);
+      : pedidos.filter((pedido) => normalize(getStatusName(pedido.status)) === filtro);
 
   return (
     <div className={styles.dashboard}>
@@ -75,9 +79,8 @@ const MediadorDashboard = () => {
           {filtros.map((f) => (
             <button
               key={f.value}
-              className={`${styles['filter-btn']} ${
-                filtro === f.value ? styles['active'] : ''
-              }`}
+              className={`${styles['filter-btn']} ${filtro === f.value ? styles['active'] : ''
+                }`}
               onClick={() => setFiltro(f.value)}
             >
               {f.label}

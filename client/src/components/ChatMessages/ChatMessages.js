@@ -22,14 +22,11 @@ export default function ChatMessages({ currentUserId }) {
             key={index}
             className={`${styles.mensagemCard} ${msg.remetenteId === currentUserId ? styles.enviada : styles.recebida}`}
           >
-            <Card.Header>
-              <span className={styles.remetente}>{msg.remetenteNome}</span>
-            </Card.Header>
             <Card.Body className={styles.mensagemConteudo}>
-              {msg.conteudo}
+              {msg.texto || msg.conteudo}
             </Card.Body>
             <CardBody className={styles.timestamp}>
-              <span>{new Date(msg.timestamp).toLocaleString()}</span>
+              <span>{new Date(msg.data || msg.timestamp).toLocaleString()}</span>
             </CardBody>
           </Card>
         ))}

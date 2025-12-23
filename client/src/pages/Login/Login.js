@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { Toast, ToastContainer } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUserType, setUserData } from "../../redux/userSlice";
 import styles from "./Login.module.css";
 import icon from "../../assets/img/logotipo/icon/nutriplanner-gradient.svg";
+import api from "../../services/api";
 
 export default function Login() {
   const userTypes = [
@@ -16,41 +18,50 @@ export default function Login() {
   const [selectedType, setSelectedType] = useState(userTypes[1]);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const navigate = useNavigate();
+
+  const [toast, setToast] = useState({ show: false, message: '', variant: 'danger' });
+  const showToast = (message, variant = 'danger') => setToast({ show: true, message, variant });
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   async function entrar() {
-  try {
-    const res = await fetch("http://localhost:3001/usuarios");
-    if (!res.ok) throw new Error("Falha ao conectar ao servidor");
+    try {
+      const { data } = await api.post("/auth/login", { email, senha, tipo: selectedType });
 
-    const data = await res.json();
+      const { user, token } = data;
 
-    // pega a lista de usuários, evitando undefined
-    const usuarios = data?.["lista-de-usuarios"] || [];
+      // Validação de Tipo de Usuário (Regra de Negócio)
+      // "Se o user escolhe 'cliente', só loga se o tipo no banco for compatível. 
+      //  Exceção: se o user no banco for admin"
 
-    // procura o usuário com email e senha
-    console.log(usuarios);
+      const dbUserType = user.tipo;
+      const selectedTypeId = selectedType.id;
+      const isAdmin = (dbUserType.id === 0 || dbUserType.name === 'admin');
 
-    const user = usuarios.find(u => u.email === email && u.senha === senha);
+      // Verificação específica para "cliente" conforme pedido, 
+      // mas faz sentido aplicar para todos para consistência, exceto Admin.
+      // Se eu selecionei X, e sou Y (e Y não é admin), bloqueia.
 
-    if (!user) {
-      alert("Usuário ou senha incorretos.");
-      return;
+      if (!isAdmin) {
+        if (dbUserType.id !== selectedTypeId) {
+          showToast('Credenciais inválidas', 'danger');
+          return; // Bloqueia o login
+        }
+      }
+
+      localStorage.setItem("token", token);
+
+      // Compatibilidade com o que o Frontend já espera (userData, userType)
+      dispatch(setUserType(user.tipo));
+      dispatch(setUserData(user));
+
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Erro no login:", error);
+      const msg = error.response?.data?.message || "Erro ao tentar fazer login.";
+      showToast(msg, "danger");
     }
-
-    // salva no Redux
-    dispatch(setUserType(user.tipo));
-    dispatch(setUserData(user));
-
-    navigate("/dashboard");
-  } catch (error) {
-    console.error("Erro no login:", error);
-    alert("Erro ao tentar fazer login. Verifique a conexão com o servidor.");
   }
-}
-
-
 
   return (
     <div className={styles["login"]}>
@@ -118,6 +129,17 @@ export default function Login() {
           Não tem uma conta? <a href="/registrar">Registre-se.</a>
         </p>
       </div>
+
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 9999 }}>
+        <Toast onClose={() => setToast({ ...toast, show: false })} show={toast.show} delay={3000} autohide bg={toast.variant}>
+          <Toast.Header>
+            <strong className="me-auto">NutriPlanner</strong>
+          </Toast.Header>
+          <Toast.Body className={toast.variant === 'danger' ? 'text-white' : ''}>
+            {toast.message}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </div>
   );
 }

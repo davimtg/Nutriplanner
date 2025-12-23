@@ -14,7 +14,7 @@ const PedidoCard = ({ pedido }) => {
         {pedido.itens && pedido.itens.length > 0 ? (
           pedido.itens.map((item, i) => (
             <li key={i}>
-              {item.name} — {item.quantidade}
+              {item.nome || item.name} — {item.quantidade}
               {item.marca ? ` (${item.marca})` : ''}
             </li>
           ))
@@ -23,7 +23,7 @@ const PedidoCard = ({ pedido }) => {
         )}
       </ul>
 
-      
+
       <Link to={`/mediador-pedido/${pedido.id}`} className={styles['btn-detalhes']}>
         Ver detalhes
       </Link>

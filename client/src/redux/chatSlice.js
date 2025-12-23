@@ -1,18 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import api from '../services/api';
 
 export const fetchUserMessages = createAsyncThunk(
-  'mensagens/fetchUserMessages',
-  async ({ remetenteId, destinatarioId }) => {
-    const [enviadasRes, recebidasRes] = await Promise.all([
-      fetch(`http://localhost:3001/mensagens?remetenteId=${remetenteId}&destinatarioId=${destinatarioId}`),
-      fetch(`http://localhost:3001/mensagens?remetenteId=${destinatarioId}&destinatarioId=${remetenteId}`)
-    ]);
+    'mensagens/fetchUserMessages',
+    async ({ remetenteId, destinatarioId }) => {
+        const [enviadasRes, recebidasRes] = await Promise.all([
+            api.get(`/mensagens?remetenteId=${remetenteId}&destinatarioId=${destinatarioId}`),
+            api.get(`/mensagens?remetenteId=${destinatarioId}&destinatarioId=${remetenteId}`)
+        ]);
 
-    const enviadas = await enviadasRes.json();
-    const recebidas = await recebidasRes.json();
+        const enviadas = enviadasRes.data;
+        const recebidas = recebidasRes.data;
 
-    return [...enviadas, ...recebidas];
-  }
+        return [...enviadas, ...recebidas];
+    }
 );
 
 
@@ -20,16 +21,42 @@ export const enviarMensagem = createAsyncThunk(
     'mensagens/enviarMensagem',
     async (mensagemData, { rejectWithValue }) => {
         try {
-            const response = await fetch('http://localhost:3001/mensagens', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(mensagemData)
-            });
-            if (!response.ok) throw new Error('Erro ao enviar mensagem');
-            return await response.json();
+            // No backend schema: remetenteId, destinatarioId, texto, data
+            const payload = {
+                remetenteId: mensagemData.remetenteId,
+                destinatarioId: mensagemData.destinatarioId,
+                texto: mensagemData.conteudo,
+                data: mensagemData.timestamp
+            };
+            const { data } = await api.post('/mensagens', payload);
+            return data;
         } catch (error) {
             return rejectWithValue(error.message);
         }
+    }
+);
+
+export const fetchUnreadMessages = createAsyncThunk(
+    'mensagens/fetchUnreadMessages',
+    async (userId) => {
+        // Fetch all unread messages for this user
+        const response = await api.get(`/mensagens?destinatarioId=${userId}&lida=false`);
+        return response.data;
+    }
+);
+
+export const markMessagesAsRead = createAsyncThunk(
+    'mensagens/markAsRead',
+    async ({ remetenteId, destinatarioId }, { dispatch }) => {
+        // 1. Get unread msgs from this specific sender
+        const { data: unreadMsgs } = await api.get(`/mensagens?remetenteId=${remetenteId}&destinatarioId=${destinatarioId}&lida=false`);
+
+        // 2. Update each to read=true (inefficient but works with standard CRUD)
+        await Promise.all(unreadMsgs.map(msg =>
+            api.patch(`/mensagens/${msg.id}`, { lida: true })
+        ));
+
+        return { remetenteId, count: unreadMsgs.length };
     }
 );
 
@@ -37,6 +64,7 @@ const chatSlice = createSlice({
     name: 'chat',
     initialState: {
         lista: [],
+        unreadCounts: {}, // { [remetenteId]: count }
         status: 'idle',
         error: null,
         targetUser: null,
@@ -49,11 +77,18 @@ const chatSlice = createSlice({
             state.lista = [];
             state.status = 'idle';
             state.error = null;
+            // Optimistically clear unread count
+            if (state.unreadCounts[action.payload.id]) {
+                state.unreadCounts[action.payload.id] = 0;
+            }
         },
         limparMensagens(state) {
             state.lista = [];
             state.status = 'idle';
             state.error = null;
+            // Keep targetUser and showChatWindow state managed by actions above or toggle
+        },
+        fecharChat(state) {
             state.targetUser = null;
             state.showChatWindow = false;
         },
@@ -70,13 +105,9 @@ const chatSlice = createSlice({
                 const { remetenteId, destinatarioId } = action.meta.arg;
                 const chave = `mensagens_${remetenteId}_${destinatarioId}`;
 
-                if (action.payload && action.payload.length > 0) {
-                    state.lista = action.payload;
-                    localStorage.setItem(chave, JSON.stringify(action.payload));
-                } else {
-                    const mensagensLocais = JSON.parse(localStorage.getItem(chave)) || [];
-                    state.lista = mensagensLocais;
-                }
+                // Always trust the backend response. If it's empty, it means no messages (or they were deleted).
+                state.lista = action.payload || [];
+                localStorage.setItem(chave, JSON.stringify(state.lista));
                 state.status = 'succeeded';
             })
             .addCase(fetchUserMessages.rejected, (state, action) => {
@@ -85,16 +116,27 @@ const chatSlice = createSlice({
             })
             .addCase(enviarMensagem.fulfilled, (state, action) => {
                 state.lista.push(action.payload);
-
                 const chave = `mensagens_${action.payload.remetenteId}_${action.payload.destinatarioId}`;
                 const mensagensSalvas = JSON.parse(localStorage.getItem(chave)) || [];
                 mensagensSalvas.push(action.payload);
                 localStorage.setItem(chave, JSON.stringify(mensagensSalvas));
+            })
+            .addCase(fetchUnreadMessages.fulfilled, (state, action) => {
+                const counts = {};
+                action.payload.forEach(msg => {
+                    counts[msg.remetenteId] = (counts[msg.remetenteId] || 0) + 1;
+                });
+                state.unreadCounts = counts;
+            })
+            .addCase(markMessagesAsRead.fulfilled, (state, action) => {
+                const { remetenteId } = action.payload;
+                if (state.unreadCounts[remetenteId]) {
+                    state.unreadCounts[remetenteId] = 0;
+                }
             });
-
     }
 });
 
-export const { abrirChat, alternarChat, limparMensagens } = chatSlice.actions;
+export const { abrirChat, fecharChat, alternarChat, limparMensagens } = chatSlice.actions;
 export default chatSlice.reducer;
 
