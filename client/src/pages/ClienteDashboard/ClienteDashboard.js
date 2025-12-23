@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import api from "../../services/api";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import s from "./ClienteDashboard.module.css";
@@ -26,17 +27,18 @@ const addWeeks = (d, n) => addDays(d, n * 7);
 const fmtShort = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" });
 const weekdayShort = new Intl.DateTimeFormat("pt-BR", { weekday: "short" });
 
-// ===== Persistência local (por dia) =====
-const loadDayMeals = (dateKey) => {
-  try {
-    const raw = localStorage.getItem(`meals-${dateKey}`);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (_) { return null; }
-};
-const saveDayMeals = (dateKey, data) => {
-  try { localStorage.setItem(`meals-${dateKey}`, JSON.stringify(data)); } catch (_) {}
-};
+// ===== Persistência Via API =====
+// Não usamos mais localStorage. Usamos 'api' e cache em memória (ou refetch).
+
+// Helper para criar ID numérico aleatório (caso precise gerar no front, embora o backend faça isso)
+// Melhor deixar o backend gerar o ID do registro diário.
+// Mas para 'post' precisamos saber se já existe.
+
+// Helper mapping
+const mapMealKeyToBackend = (k) => (k === "cafe" ? "cafe_da_manha" : k);
+const mapMealKeyFromBackend = (k) => (k === "cafe_da_manha" ? "cafe" : k);
+
+const emptyDay = () => ({ cafe: [], almoco: [], jantar: [], lanches: [] });
 
 // ===== Metas (carregadas de localStorage; fallback padrão) =====
 const defaultGoals = { calorias: 2500, carboidrato: 300, gordura: 70, proteina: 150 };
@@ -53,32 +55,192 @@ const MEAL_TYPES = [
   { id: "jantar", label: "Jantar", bi: "bi-moon-stars", color: "danger" },
   { id: "lanches", label: "Lanches", bi: "bi-cookie", color: "secondary" },
 ];
-const emptyDay = () => ({ cafe: [], almoco: [], jantar: [], lanches: [] });
 
 // ===== Componente principal =====
 export default function ClienteDashboard() {
-  // Semana baseada em hoje
   const [baseDate, setBaseDate] = useState(() => new Date());
   const weekStart = useMemo(() => startOfWeekMonday(baseDate), [baseDate]);
   const weekDays = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
 
-  // Dia selecionado
   const [selectedDate, setSelectedDate] = useState(() => new Date());
-  const selectedKey = fmtKey(selectedDate);
+  const selectedKey = fmtKey(selectedDate); // YYYY-MM-DD
 
-  // Dados do dia selecionado
-  const [dayMeals, setDayMeals] = useState(() => loadDayMeals(selectedKey) || emptyDay());
-  useEffect(() => { setDayMeals(loadDayMeals(selectedKey) || emptyDay()); }, [selectedKey]);
-  useEffect(() => { saveDayMeals(selectedKey, dayMeals); }, [selectedKey, dayMeals]);
+  // Cache de dados
+  const [allFoods, setAllFoods] = useState([]);
+  const [allRecipes, setAllRecipes] = useState([]);
+  const [userDiary, setUserDiary] = useState([]); // Todos os registros do usuário
+  const [userData, setUserData] = useState(null);
+
+  // Estado do dia atual (hidratado)
+  const [dayMeals, setDayMeals] = useState(emptyDay());
+  const [currentDiaryId, setCurrentDiaryId] = useState(null); // ID do registro no banco (se existir)
 
   // Metas
-  const [goals, setGoals] = useState(loadGoals());
+  const [goals, setGoals] = useState(defaultGoals);
+
+  // 1. Carga Inicial (Foods, Recipes, User Data, User Diary)
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const storedUser = localStorage.getItem("userData");
+        if(!storedUser) return;
+        const parsedUser = JSON.parse(storedUser);
+        setUserData(parsedUser);
+
+        // Load Goals from local for now OR could be in DB (not implemented yet, keeping local preference)
+        const localGoals = localStorage.getItem("macro-goals");
+        if(localGoals) setGoals(JSON.parse(localGoals));
+
+        const [foodsRes, recipesRes, diaryRes] = await Promise.all([
+            api.get("/alimentos?_limit=1000"), // Fetch enough to cover basics
+            api.get("/receitas?_limit=1000"),
+            api.get(`/diario-alimentar?usuarioId=${parsedUser.id}`)
+        ]);
+
+        setAllFoods(foodsRes.data);
+        setAllRecipes(recipesRes.data);
+        setUserDiary(diaryRes.data);
+
+      } catch (err) {
+        console.error("Erro ao carregar dados iniciais:", err);
+      }
+    };
+    loadInitialData();
+  }, []);
+
+  // 2. Hidratação do Dia Selecionado
+  useEffect(() => {
+    if (!userData) return;
+
+    // Encontrar registro correspondente à data selectedKey
+    // O backend retorna data como string ISO "2023-11-20T00:00:00.000Z"
+    // selectedKey é "2023-11-20"
+    const entry = userDiary.find(d => typeof d.data === 'string' && d.data.startsWith(selectedKey));
+
+    if (entry) {
+        setCurrentDiaryId(entry.id);
+        
+        // Hidratar itens
+        const newMeals = emptyDay();
+        
+        // entry.refeicoes keys: cafe_da_manha, almoco, ...
+        if (entry.refeicoes) {
+            Object.keys(entry.refeicoes).forEach(backendKey => {
+                const frontendKey = mapMealKeyFromBackend(backendKey);
+                if (!newMeals[frontendKey]) return;
+
+                const itensRaw = entry.refeicoes[backendKey] || [];
+                
+                newMeals[frontendKey] = itensRaw.map(item => {
+                    // Tenta achar em alimentos ou receitas
+                    // O schema do diario grava { id, gramas }, mas não diz se é alimento ou receita...
+                    // ASSUNÇÃO MAJORITÁRIA: ID de alimento e receita não colidem ou vamos tentar achar
+                    // Como os arquivos json originais tinham IDs distintos (alimento 1..n, receita 1..n), pode haver colisão?
+                    // Originalmente 'alimentos.json' ids eram 1, 2, 3... e 'receitas.json' idem?
+                    // Verificar check-data.js...
+                    // O Seed recriou. Alimentos 1..597. Receitas 1..10. Colisão possível!
+                    // FIX: O Diario Schema atual SÓ tem 'id'. Falha de Design do Schema herdado OU a gente precisa inferir.
+                    // Para MVP, vamos procurar em Alimentos primeiro. Se não achar, Receitas. 
+                    // Se colidir, vai dar erro.
+                    
+                    let found = allFoods.find(f => f.id === item.id);
+                    let kind = "alimento";
+                    
+                    if (!found) {
+                        found = allRecipes.find(r => r.id === item.id);
+                        kind = "receita";
+                    }
+
+                    if (!found) return null; // Item não existe mais no DB
+
+                    // Recalcular macros
+                    const base = found.nutricional || {
+                        calorias: found.calorias || 0,
+                        proteina: found.proteina || 0,
+                        carboidrato: found.carboidrato || 0,
+                        gordura: found.gordura || 0
+                    };
+
+                    // Diferença de cálculo: Receitas as vezes salvam por 'gramas' no diario, mas front usa porcoes
+                    // Simplificação: Vamos assumir que 'item.gramas' é o peso consumido.
+                    const fator = item.gramas / 100;
+
+                    return {
+                        kind,
+                        id: found.id,
+                        nome: found.nome,
+                        quantidade_g: kind === 'alimento' ? item.gramas : undefined,
+                        porcoes: kind === 'receita' ? 1 : undefined, // Info perdida se salvamos só gramas
+                        gramasPorPorcao: kind === 'receita' ? item.gramas : undefined, // Info perdida
+                        macros: {
+                            calorias: base.calorias * fator,
+                            proteina: base.proteina * fator,
+                            carboidrato: base.carboidrato * fator,
+                            gordura: base.gordura * fator
+                        }
+                    };
+                }).filter(Boolean);
+            });
+        }
+        setDayMeals(newMeals);
+
+    } else {
+        setCurrentDiaryId(null);
+        setDayMeals(emptyDay());
+    }
+
+  }, [selectedKey, userDiary, allFoods, allRecipes, userData]);
+
+  // 3. Salvar (Debounced ou Direto?) -> Vamos salvar direto no add/remove para consistência
+  const syncToBackend = async (newDayMeals, diaryId) => {
+      if (!userData) return;
+
+      // Converter Frontend -> Backend Schema
+      const refeicoesBackend = {};
+      ["cafe", "almoco", "jantar", "lanches"].forEach(key => {
+          const backendKey = mapMealKeyToBackend(key);
+          refeicoesBackend[backendKey] = newDayMeals[key].map(it => ({
+             id: it.id, // ID do alimento/receita
+             gramas: it.kind === 'alimento' 
+                ? it.quantidade_g 
+                : (it.porcoes * it.gramasPorPorcao) // Calcula total gramas para receita
+          }));
+      });
+
+      const payload = {
+        usuarioId: userData.id,
+        data: selectedKey, // "YYYY-MM-DD" -> Backend deve aceitar ou converter
+        refeicoes: refeicoesBackend
+      };
+
+      try {
+          if (diaryId) {
+              // Update
+              await api.put(`/diario-alimentar/${diaryId}`, payload);
+              // Update local cache of diary to reflect changes (avoid refetch)
+              setUserDiary(prev => prev.map(d => d.id === diaryId ? { ...d, ...payload } : d));
+          } else {
+              // Create
+              const res = await api.post("/diario-alimentar", payload);
+              // Add to local cache
+              const newEntry = res.data;
+              setUserDiary(prev => [...prev, newEntry]);
+              setCurrentDiaryId(newEntry.id);
+          }
+      } catch (err) {
+          console.error("Erro ao salvar:", err);
+          alert("Erro ao salvar refeição. Tente novamente.");
+      }
+  };
+
+  // Metas
   useEffect(() => saveGoals(goals), [goals]);
 
   // Totais do dia
   const totals = useMemo(() => {
     const sum = { calorias: 0, carboidrato: 0, gordura: 0, proteina: 0 };
     for (const mt of MEAL_TYPES) {
+        if (!dayMeals[mt.id]) continue; 
       for (const it of dayMeals[mt.id]) {
         sum.calorias += it.macros.calorias || 0;
         sum.carboidrato += it.macros.carboidrato || 0;
@@ -109,10 +271,12 @@ export default function ClienteDashboard() {
     const t = setTimeout(async () => {
       setLoading(true);
       try {
-        const [rawA, rawR] = await Promise.all([
-          fetch(`http://localhost:3001/alimentos?q=${encodeURIComponent(term)}&_limit=300`, { signal: ctrl.signal }).then((r) => r.json()),
-          fetch(`http://localhost:3001/receitas?q=${encodeURIComponent(term)}&_limit=300`, { signal: ctrl.signal }).then((r) => r.json()),
+        const [resA, resR] = await Promise.all([
+          api.get(`/alimentos?q=${encodeURIComponent(term)}&_limit=300`, { signal: ctrl.signal }),
+          api.get(`/receitas?q=${encodeURIComponent(term)}&_limit=300`, { signal: ctrl.signal }),
         ]);
+        const rawA = resA.data;
+        const rawR = resR.data;
         const termNorm = norm(term);
         const sortByName = (a, b) => (a?.nome || "").localeCompare(b?.nome || "");
         const filterByNome = (arr) => (Array.isArray(arr) ? arr : []).filter((x) => norm(x?.nome).includes(termNorm)).sort(sortByName);
@@ -164,27 +328,55 @@ export default function ClienteDashboard() {
   };
   const closeModal = () => setModalOpen(false);
 
+  // Helpers de Update Local + Sync
+  const updateMeals = (cb) => {
+      // CB retorna novo state
+      setDayMeals(prev => {
+          const newState = cb(prev);
+          // Dispara sync usando o estado calculado
+          syncToBackend(newState, currentDiaryId);
+          return newState;
+      });
+  };
+
+  // Adaptar funções existentes 
   const confirmAdd = () => {
     if (!targetMeal || !selectedItem) return;
-    const payload = {
+    const computed = computedMacros; // do useMemo
+    
+    // Preparar payload state local
+    const itemPayload = {
       kind: selectedItem.kind,
       id: selectedItem.dados.id,
       nome: selectedItem.dados.nome,
-      macros: computedMacros,
+      macros: computed,
     };
-    if (selectedItem.kind === "alimento") payload.quantidade_g = Math.max(0, Math.round(grams));
-    else { payload.porcoes = Math.max(0, Math.round(porcoes)); payload.gramasPorPorcao = Math.max(1, Math.round(gramasPorPorcao)); }
 
-    setDayMeals((prev) => ({ ...prev, [targetMeal]: [...prev[targetMeal], payload] }));
+    if (selectedItem.kind === "alimento") {
+        itemPayload.quantidade_g = Math.max(0, Math.round(grams));
+    } else { 
+        itemPayload.porcoes = Math.max(0, Math.round(porcoes)); 
+        itemPayload.gramasPorPorcao = Math.max(1, Math.round(gramasPorPorcao)); 
+    }
+
+    // Usar wrapper de update
+    updateMeals(prev => ({
+        ...prev,
+        [targetMeal]: [...prev[targetMeal], itemPayload]
+    }));
+    
     closeModal();
   };
 
   const removeItem = (mealId, idx) => {
-    setDayMeals((prev) => ({ ...prev, [mealId]: prev[mealId].filter((_, i) => i !== idx) }));
+    updateMeals(prev => ({
+        ...prev,
+        [mealId]: prev[mealId].filter((_, i) => i !== idx)
+    }));
   };
 
   // Helpers de UI
-  const isSameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  const isSameDay = (a, b) => a.toISOString().slice(0,10) === b.toISOString().slice(0,10);
   const weekRangeLabel = (start) => `${fmtShort.format(start)} — ${fmtShort.format(addDays(start, 6))}`;
 
   const MacroBar = ({ label, value, goal, variant }) => {

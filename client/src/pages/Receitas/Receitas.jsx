@@ -4,6 +4,7 @@ import { Card, Button, ProgressBar } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleFavorito } from "../../redux/favoritosSlice";
 import "bootstrap/dist/css/bootstrap.min.css";
+import api from "../../services/api";
 
 export default function Receitas() {
   const { id } = useParams();
@@ -19,10 +20,9 @@ export default function Receitas() {
   useEffect(() => {
     const fetchReceita = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/receitas?id=${id}`);
-        const data = await res.json();
-        if (data.length > 0) setReceita(data[0]);
-        else console.error("Receita não encontrada");
+        // Usando getById (retorna objeto direto)
+        const { data } = await api.get(`/receitas/${id}`);
+        setReceita(data);
       } catch (err) {
         console.error("Erro ao carregar receita:", err);
       }

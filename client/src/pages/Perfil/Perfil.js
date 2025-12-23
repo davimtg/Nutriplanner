@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button, Form, Container, Row, Col, Image, Tab, Tabs, Spinner } from 'react-bootstrap';
 import { setUserData, updateUserById } from '../../redux/userSlice'
 import { useSelector, useDispatch } from 'react-redux';
+import api from '../../services/api';
 
 export default function Perfil() {
   const [editando, setEditando] = useState(false);
@@ -22,6 +23,9 @@ export default function Perfil() {
 const handleChange = (e) => {
   const { name, value } = e.target;
 
+  // Safe access to endereco
+  const enderecoAtual = formData.endereco || {};
+
   if (name.startsWith('endereco.')) {
     const campo = name.split('.')[1];
 
@@ -34,7 +38,7 @@ const handleChange = (e) => {
         : cepLimpo;
 
       const enderecoAtualizado = {
-        ...formData.endereco,
+        ...enderecoAtual,
         [campo]: cepFormatado
       };
 
@@ -55,7 +59,7 @@ const handleChange = (e) => {
     }
 
     const enderecoAtualizado = {
-      ...formData.endereco,
+      ...enderecoAtual,
       [campo]: value
     };
 
@@ -72,12 +76,28 @@ const handleChange = (e) => {
 };
 
 
-
-
   const handleSubmit = async () => {
-    dispatch(updateUserById(formData.id));
+    setLoading(true);
+    try {
+      // Use API service
+      const res = await api.put(`/usuarios/${formData.id}`, formData);
+
+      const updatedUser = res.data;
+      dispatch(setUserData(updatedUser));
+      alert('Informações atualizadas com sucesso!');
+    } catch (err) {
+      console.error(err);
+      alert('Falha ao atualizar usuário.');
+    } finally {
+      setLoading(false);
+    }
   };
-  console.log(formData);
+
+  if (!formData) return <Spinner animation="border" />;
+
+  // Helper for safe access
+  const endereco = formData.endereco || {};
+
   return (
     <Container className="mt-4">
       <Row className="align-items-center mb-4">
@@ -104,25 +124,25 @@ const handleChange = (e) => {
             <Row className="mt-3">
               <Form.Group as={Col} md={6} controlId="nome">
                 <Form.Label>Nome</Form.Label>
-                <Form.Control type="text" name="nome" value={formData.nome} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="nome" value={formData.nome || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={6} controlId="email">
                 <Form.Label>Email</Form.Label>
-                <Form.Control type="email" name="email" value={formData.email} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="email" name="email" value={formData.email || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
             </Row>
             <Row className="mt-3">
               <Form.Group as={Col} md={6} controlId="senha">
                 <Form.Label>Senha</Form.Label>
-                <Form.Control type="password" name="senha" value={formData.senha} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="password" name="senha" value={formData.senha || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={3} controlId="idade">
                 <Form.Label>Idade</Form.Label>
-                <Form.Control type="number" min="0" max="200" name="idade" value={formData.idade} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="number" min="0" max="200" name="idade" value={formData.idade || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={3} controlId="sexo">
                 <Form.Label>Sexo</Form.Label>
-                <Form.Select name="sexo" value={formData.sexo} onChange={handleChange} disabled={!editando}>
+                <Form.Select name="sexo" value={formData.sexo || ''} onChange={handleChange} disabled={!editando}>
                   <option value="">Selecione</option>
                   <option value="masculino">Masculino</option>
                   <option value="feminino">Feminino</option>
@@ -139,35 +159,35 @@ const handleChange = (e) => {
             <Row className="mt-3">
               <Form.Group as={Col} md={6} controlId="rua">
                 <Form.Label>Rua</Form.Label>
-                <Form.Control type="text" name="endereco.rua" value={formData.endereco.rua} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="endereco.rua" value={endereco.rua || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={2} controlId="numero">
                 <Form.Label>Número</Form.Label>
-                <Form.Control type="number" name="endereco.numero" value={formData.endereco.numero} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="number" name="endereco.numero" value={endereco.numero || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={4} controlId="bairro">
                 <Form.Label>Bairro</Form.Label>
-                <Form.Control type="text" name="endereco.bairro" value={formData.endereco.bairro} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="endereco.bairro" value={endereco.bairro || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
             </Row>
             <Row className="mt-3">
               <Form.Group as={Col} md={4} controlId="cidade">
                 <Form.Label>Cidade</Form.Label>
-                <Form.Control type="text" name="endereco.cidade" value={formData.endereco.cidade} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="endereco.cidade" value={endereco.cidade || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={4} controlId="estado">
                 <Form.Label>Estado</Form.Label>
-                <Form.Control type="text" name="endereco.estado" value={formData.endereco.estado} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="endereco.estado" value={endereco.estado || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={4} controlId="cep">
                 <Form.Label>CEP</Form.Label>
-                <Form.Control type="text" name="endereco.cep" value={formData.endereco.cep} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="endereco.cep" value={endereco.cep || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
             </Row>
             <Row className="mt-3">
               <Form.Group as={Col} md={12} controlId="complemento">
                 <Form.Label>Complemento</Form.Label>
-                <Form.Control type="text" name="endereco.complemento" value={formData.endereco.complemento} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="endereco.complemento" value={endereco.complemento || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
             </Row>
           </Form>
@@ -179,21 +199,21 @@ const handleChange = (e) => {
             <Row className="mt-3">
               <Form.Group as={Col} md={4} controlId="altura">
                 <Form.Label>Altura (cm)</Form.Label>
-                <Form.Control type="number" name="altura" value={formData.altura} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="number" name="altura" value={formData.altura || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={4} controlId="peso">
                 <Form.Label>Peso (kg)</Form.Label>
-                <Form.Control type="number" name="peso" value={formData.peso} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="number" name="peso" value={formData.peso || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
               <Form.Group as={Col} md={4} controlId="objetivo">
                 <Form.Label>Objetivo</Form.Label>
-                <Form.Control type="text" name="objetivo" value={formData.objetivo} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="objetivo" value={formData.objetivo || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
             </Row>
             <Row className="mt-3">
               <Form.Group as={Col} md={6} controlId="planoId">
                 <Form.Label>Plano</Form.Label>
-                <Form.Control type="text" name="planoId" value={formData.planoId} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="text" name="planoId" value={formData.planoId || ''} onChange={handleChange} disabled={!editando} />
               </Form.Group>
             </Row>
           </Form>
