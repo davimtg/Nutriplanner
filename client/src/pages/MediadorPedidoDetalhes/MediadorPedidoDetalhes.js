@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { concluirPedido } from '../../redux/pedidosSlice'; // talvez renomear redux action, mas ok reusar update generico
+import { concluirPedido, aceitarPedido, cancelarPedido } from '../../redux/pedidosSlice';
 import api from '../../services/api';
-import { Button, Form, Table, Badge } from 'react-bootstrap';
 import styles from './MediadorPedidoDetalhes.module.css';
+import { Badge, Button, Table, Form } from 'react-bootstrap';
 
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -22,32 +22,49 @@ const MediadorPedidoDetalhes = () => {
   const [prices, setPrices] = useState({});
 
   const dispatch = useDispatch();
+  const normalize = (str) =>
+    str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
+
+  const fetchPedido = () => {
+    api.get(`/pedidos/${id}`)
+      .then(response => {
+        setPedido(response.data);
+        setLoading(false);
+      })
+      .catch(erro => {
+        console.error("Erro ao buscar pedido:", erro);
+        setLoading(false);
+      });
+  };
 
   useEffect(() => {
-    const fetchPedido = async () => {
-      try {
-        const { data } = await api.get(`/pedidos/${id}`);
-        setPedido(data);
-
-        // init checklist e precos se n tiver
-        if (data && data.itens) {
-          const initialCheck = {};
-          const initialPrices = {};
-          data.itens.forEach((item, idx) => {
-            initialCheck[idx] = false;
-            initialPrices[idx] = item.valor || 0;
-          });
-          setChecklist(initialCheck);
-          setPrices(initialPrices);
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error("Erro ao buscar pedido:", error);
-        setLoading(false);
-      }
-    };
     fetchPedido();
   }, [id]);
+
+
+  const handleConcluir = () => {
+    dispatch(concluirPedido(pedido.id)).then((action) => {
+      if (action.meta.requestStatus === 'fulfilled') {
+        setPedido({ ...pedido, status: action.payload.status });
+      }
+    });
+  };
+
+  const handleAceitar = () => {
+    dispatch(aceitarPedido(pedido.id)).then((action) => {
+      if (action.meta.requestStatus === 'fulfilled') {
+        setPedido({ ...pedido, status: action.payload.status });
+      }
+    });
+  };
+
+  const handleCancelar = () => {
+    dispatch(cancelarPedido(pedido.id)).then((action) => {
+      if (action.meta.requestStatus === 'fulfilled') {
+        setPedido({ ...pedido, status: action.payload.status });
+      }
+    });
+  };
 
   const handleCheckboxChange = (index) => {
     setChecklist(prev => ({ ...prev, [index]: !prev[index] }));
@@ -134,7 +151,6 @@ const MediadorPedidoDetalhes = () => {
 
       <h3 className="mb-3">Lista de Compras</h3>
 
-      {/* barra de subtotal fixa ou topo */}
       <div className="alert alert-info d-flex justify-content-between align-items-center">
         <span><strong>Total dos itens marcados:</strong></span>
         <span className="fs-4 fw-bold">{currencyFormatter.format(subtotalMarcados)}</span>
@@ -199,7 +215,7 @@ const MediadorPedidoDetalhes = () => {
           </Button>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 

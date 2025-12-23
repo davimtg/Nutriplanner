@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 
-// --- Alimento ---
 const AlimentoSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
   nome: String,
@@ -14,26 +13,24 @@ const AlimentoSchema = new mongoose.Schema({
 
 export const Alimento = mongoose.model('Alimento', AlimentoSchema);
 
-// --- Receita ---
 const ReceitaSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
   nome: String,
-  ingredientes: [String], // Adaptado para receber strings do JSON legado
-  modoPreparo: String, // Se houver
-  tempo: mongoose.Schema.Types.Mixed, // JSON "tempo", era tempoPreparo
-  img: String,
-  passos: [String], // JSON tem array de passos
+  ingredientes: [String],
+  modoPreparo: String,
+  tempo: mongoose.Schema.Types.Mixed,
+  imagem: String,
+  passos: [String],
   tipo: String,
   porcao: String,
   sumario: String,
-  nutricional: mongoose.Schema.Types.Mixed // JSON tem objeto nutricional
+  nutricional: mongoose.Schema.Types.Mixed
 });
 
 export const Receita = mongoose.model('Receita', ReceitaSchema);
 
-// --- Plano Alimentar ---
 const ItemRefeicaoSchema = new mongoose.Schema({
-  id: Number, // ID do alimento ou receita
+  id: Number,
   gramas: Number
 }, { _id: false });
 
@@ -62,19 +59,35 @@ const PlanoAlimentarSchema = new mongoose.Schema({
 
 export const PlanoAlimentar = mongoose.model('PlanoAlimentar', PlanoAlimentarSchema);
 
-// --- Pedido ---
+
+const PedidoItemSchema = new mongoose.Schema({
+  id: Number,
+  "alimento-id": Number,
+  name: String,
+  quantidade: mongoose.Schema.Types.Mixed,
+  marca: String
+}, { _id: false });
+
+const PedidoStatusSchema = new mongoose.Schema({
+  id: Number,
+  name: String
+}, { _id: false });
+
 const PedidoSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
   userId: Number,
+  "user-id": Number,
+  cliente: String,
+  telefone: String,
+  endereco: String,
   data: Date,
-  itens: [mongoose.Schema.Types.Mixed], // Flexível para aceitar { nome, quantidade, valor, checked }
-  status: String,
+  itens: [PedidoItemSchema],
+  status: PedidoStatusSchema,
   total: Number
 });
 
 export const Pedido = mongoose.model('Pedido', PedidoSchema);
 
-// --- Mensagem ---
 const MensagemSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
   remetenteId: Number,
@@ -86,7 +99,6 @@ const MensagemSchema = new mongoose.Schema({
 
 export const Mensagem = mongoose.model('Mensagem', MensagemSchema);
 
-// --- Diario Alimentar ---
 const DiarioAlimentarSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
   usuarioId: { type: Number, required: true },

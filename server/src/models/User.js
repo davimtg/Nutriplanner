@@ -18,10 +18,10 @@ const TipoUsuarioSchema = new mongoose.Schema({
 }, { _id: false });
 
 const UserSchema = new mongoose.Schema({
-  id: { type: Number, required: true, unique: true }, // mantendo id numerico legado
+  id: { type: Number, required: true, unique: true },
   nome: { type: String, required: true },
-  email: { type: String, required: true }, // removido unique global p permitir multiplos tipos
-  senha: { type: String, required: true }, // todo: migrar p hash depois
+  email: { type: String, required: true },
+  senha: { type: String, required: true },
   telefone: String,
   // endereco principal (legado/padrao)
   endereco: EnderecoSchema,
@@ -31,12 +31,12 @@ const UserSchema = new mongoose.Schema({
   foto: String, // Base64 da foto de perfil
   objetivo: String,
   planoId: Number,
-  nutricionistaId: Number, // ref pro id do nutri
+  nutricionistaId: Number,
   idade: Number,
   sexo: String,
   altura: Number,
   peso: Number,
-  contatosRecentes: [Number] // array ids users
+  contatosRecentes: [Number]
 }, {
   timestamps: true
 });
