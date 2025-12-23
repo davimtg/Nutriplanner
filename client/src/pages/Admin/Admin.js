@@ -352,10 +352,6 @@ export default function Admin() {
     const fetchData = async () => {
         setLoading(true);
         try {
-
-            const queryChar = searchText ? '&' : '?';
-            const baseQuery = searchText ? `?q=${searchText}` : '';
-            const pagination = `${baseQuery}${baseQuery ? '&' : '?'}?_page=${page}&_limit=${LIMIT}`;
             // Correção da construção da query string:
             // Se tem busca: ?q=texto&_page=1&_limit=100
             // Se não tem: ?_page=1&_limit=100

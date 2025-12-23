@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import { Link } from "react-router-dom";
-import { Modal, Button, Form, Tabs, Tab, Row, Col } from "react-bootstrap";
+import { Modal, Button, Form } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import "bootstrap/dist/css/bootstrap.min.css";
 

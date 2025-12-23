@@ -47,20 +47,9 @@ export const register = async (req, res) => {
   const { nome, email, senha, tipo } = req.body;
 
   try {
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: 'E-mail já cadastrado' });
-    }
-
-    // Gerar ID sequencial (simples para este caso)
-    const lastUser = await User.findOne().sort({ id: -1 });
-    const newId = lastUser ? lastUser.id + 1 : 1;
-
     // Formatar tipo de usuário se vier como string do frontend
     let tipoObj = tipo;
-    // Se for string, tentamos mapear para o objeto esperado (ou deixamos o frontend enviar o objeto)
-    // O frontend atual envia strings "cliente", "nutricionista", etc.
-    // O Schema espera { id: Number, name: String }
+    // Se for string, tentamos mapear para o objeto esperado
     if (typeof tipo === 'string') {
       const typesMap = {
         'admin': { id: 0, name: 'admin' },
@@ -70,6 +59,18 @@ export const register = async (req, res) => {
       };
       tipoObj = typesMap[tipo.toLowerCase()] || { id: 1, name: 'cliente' };
     }
+
+    // A regra agora é: E-mail pode repetir, mas NÃO no mesmo tipo.
+    // userExists vira userExistsInType
+    const userExistsInType = await User.findOne({ email, 'tipo.name': tipoObj.name });
+
+    if (userExistsInType) {
+      return res.status(400).json({ message: 'E-mail já cadastrado para este tipo de usuário' });
+    }
+
+    // Gerar ID sequencial (simples para este caso)
+    const lastUser = await User.findOne().sort({ id: -1 });
+    const newId = lastUser ? lastUser.id + 1 : 1;
 
     // Criptografar senha
     const salt = await bcrypt.genSalt(10);

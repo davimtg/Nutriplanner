@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Toast, ToastContainer } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUserType, setUserData } from "../../redux/userSlice";
@@ -13,21 +14,20 @@ export default function Registrar() {
   const [senha, setSenha] = useState("");
   const [confirmSenha, setConfirmSenha] = useState("");
 
+  const [toast, setToast] = useState({ show: false, message: '', variant: 'success' });
+  const showToast = (message, variant = 'success') => setToast({ show: true, message, variant });
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  function irParaLogin() {
-    navigate("/login");
-  }
-
   async function handleRegister() {
     if (!nome || !email || !senha || !confirmSenha) {
-      alert("Preencha todos os campos.");
+      showToast("Preencha todos os campos.", "warning");
       return;
     }
 
     if (senha !== confirmSenha) {
-      alert("As senhas não coincidem.");
+      showToast("As senhas não coincidem.", "danger");
       return;
     }
 
@@ -48,12 +48,16 @@ export default function Registrar() {
       dispatch(setUserType(user.tipo));
       dispatch(setUserData(user));
 
-      alert("Registro realizado com sucesso!");
-      navigate("/dashboard");
+      dispatch(setUserData(user));
+
+      showToast("Registro realizado com sucesso!", "success");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
     } catch (error) {
       console.error("Erro no registro:", error);
       const msg = error.response?.data?.message || "Erro ao tentar registrar.";
-      alert(msg);
+      showToast(msg, "danger");
     }
   }
 
@@ -127,6 +131,17 @@ export default function Registrar() {
           Já tem uma conta? <a href="/login">Faça o login.</a>
         </p>
       </div>
+
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 9999 }}>
+        <Toast onClose={() => setToast({ ...toast, show: false })} show={toast.show} delay={3000} autohide bg={toast.variant}>
+          <Toast.Header>
+            <strong className="me-auto">NutriPlanner</strong>
+          </Toast.Header>
+          <Toast.Body className={toast.variant === 'danger' ? 'text-white' : ''}>
+            {toast.message}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </div>
   );
 }

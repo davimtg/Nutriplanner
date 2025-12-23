@@ -42,11 +42,7 @@ const emptyDay = () => ({ cafe: [], almoco: [], jantar: [], lanches: [] });
 
 // ===== Metas (carregadas de localStorage; fallback padrão) =====
 const defaultGoals = { calorias: 2500, carboidrato: 300, gordura: 70, proteina: 150 };
-const loadGoals = () => {
-  try { const raw = localStorage.getItem("macro-goals"); if (raw) return JSON.parse(raw); } catch (_) {}
-  return defaultGoals;
-};
-const saveGoals = (goals) => { try { localStorage.setItem("macro-goals", JSON.stringify(goals)); } catch (_) {} };
+const saveGoals = (goals) => { try { localStorage.setItem("macro-goals", JSON.stringify(goals)); } catch (_) { } };
 
 // ===== Modelo =====
 const MEAL_TYPES = [
@@ -83,18 +79,18 @@ export default function ClienteDashboard() {
     const loadInitialData = async () => {
       try {
         const storedUser = localStorage.getItem("userData");
-        if(!storedUser) return;
+        if (!storedUser) return;
         const parsedUser = JSON.parse(storedUser);
         setUserData(parsedUser);
 
         // Load Goals from local for now OR could be in DB (not implemented yet, keeping local preference)
         const localGoals = localStorage.getItem("macro-goals");
-        if(localGoals) setGoals(JSON.parse(localGoals));
+        if (localGoals) setGoals(JSON.parse(localGoals));
 
         const [foodsRes, recipesRes, diaryRes] = await Promise.all([
-            api.get("/alimentos?_limit=1000"), // Fetch enough to cover basics
-            api.get("/receitas?_limit=1000"),
-            api.get(`/diario-alimentar?usuarioId=${parsedUser.id}`)
+          api.get("/alimentos?_limit=1000"), // Fetch enough to cover basics
+          api.get("/receitas?_limit=1000"),
+          api.get(`/diario-alimentar?usuarioId=${parsedUser.id}`)
         ]);
 
         setAllFoods(foodsRes.data);
@@ -118,119 +114,119 @@ export default function ClienteDashboard() {
     const entry = userDiary.find(d => typeof d.data === 'string' && d.data.startsWith(selectedKey));
 
     if (entry) {
-        setCurrentDiaryId(entry.id);
-        
-        // Hidratar itens
-        const newMeals = emptyDay();
-        
-        // entry.refeicoes keys: cafe_da_manha, almoco, ...
-        if (entry.refeicoes) {
-            Object.keys(entry.refeicoes).forEach(backendKey => {
-                const frontendKey = mapMealKeyFromBackend(backendKey);
-                if (!newMeals[frontendKey]) return;
+      setCurrentDiaryId(entry.id);
 
-                const itensRaw = entry.refeicoes[backendKey] || [];
-                
-                newMeals[frontendKey] = itensRaw.map(item => {
-                    // Tenta achar em alimentos ou receitas
-                    // O schema do diario grava { id, gramas }, mas não diz se é alimento ou receita...
-                    // ASSUNÇÃO MAJORITÁRIA: ID de alimento e receita não colidem ou vamos tentar achar
-                    // Como os arquivos json originais tinham IDs distintos (alimento 1..n, receita 1..n), pode haver colisão?
-                    // Originalmente 'alimentos.json' ids eram 1, 2, 3... e 'receitas.json' idem?
-                    // Verificar check-data.js...
-                    // O Seed recriou. Alimentos 1..597. Receitas 1..10. Colisão possível!
-                    // FIX: O Diario Schema atual SÓ tem 'id'. Falha de Design do Schema herdado OU a gente precisa inferir.
-                    // Para MVP, vamos procurar em Alimentos primeiro. Se não achar, Receitas. 
-                    // Se colidir, vai dar erro.
-                    
-                    let found = allFoods.find(f => f.id === item.id);
-                    let kind = "alimento";
-                    
-                    if (!found) {
-                        found = allRecipes.find(r => r.id === item.id);
-                        kind = "receita";
-                    }
+      // Hidratar itens
+      const newMeals = emptyDay();
 
-                    if (!found) return null; // Item não existe mais no DB
+      // entry.refeicoes keys: cafe_da_manha, almoco, ...
+      if (entry.refeicoes) {
+        Object.keys(entry.refeicoes).forEach(backendKey => {
+          const frontendKey = mapMealKeyFromBackend(backendKey);
+          if (!newMeals[frontendKey]) return;
 
-                    // Recalcular macros
-                    const base = found.nutricional || {
-                        calorias: found.calorias || 0,
-                        proteina: found.proteina || 0,
-                        carboidrato: found.carboidrato || 0,
-                        gordura: found.gordura || 0
-                    };
+          const itensRaw = entry.refeicoes[backendKey] || [];
 
-                    // Diferença de cálculo: Receitas as vezes salvam por 'gramas' no diario, mas front usa porcoes
-                    // Simplificação: Vamos assumir que 'item.gramas' é o peso consumido.
-                    const fator = item.gramas / 100;
+          newMeals[frontendKey] = itensRaw.map(item => {
+            // Tenta achar em alimentos ou receitas
+            // O schema do diario grava { id, gramas }, mas não diz se é alimento ou receita...
+            // ASSUNÇÃO MAJORITÁRIA: ID de alimento e receita não colidem ou vamos tentar achar
+            // Como os arquivos json originais tinham IDs distintos (alimento 1..n, receita 1..n), pode haver colisão?
+            // Originalmente 'alimentos.json' ids eram 1, 2, 3... e 'receitas.json' idem?
+            // Verificar check-data.js...
+            // O Seed recriou. Alimentos 1..597. Receitas 1..10. Colisão possível!
+            // FIX: O Diario Schema atual SÓ tem 'id'. Falha de Design do Schema herdado OU a gente precisa inferir.
+            // Para MVP, vamos procurar em Alimentos primeiro. Se não achar, Receitas. 
+            // Se colidir, vai dar erro.
 
-                    return {
-                        kind,
-                        id: found.id,
-                        nome: found.nome,
-                        quantidade_g: kind === 'alimento' ? item.gramas : undefined,
-                        porcoes: kind === 'receita' ? 1 : undefined, // Info perdida se salvamos só gramas
-                        gramasPorPorcao: kind === 'receita' ? item.gramas : undefined, // Info perdida
-                        macros: {
-                            calorias: base.calorias * fator,
-                            proteina: base.proteina * fator,
-                            carboidrato: base.carboidrato * fator,
-                            gordura: base.gordura * fator
-                        }
-                    };
-                }).filter(Boolean);
-            });
-        }
-        setDayMeals(newMeals);
+            let found = allFoods.find(f => f.id === item.id);
+            let kind = "alimento";
+
+            if (!found) {
+              found = allRecipes.find(r => r.id === item.id);
+              kind = "receita";
+            }
+
+            if (!found) return null; // Item não existe mais no DB
+
+            // Recalcular macros
+            const base = found.nutricional || {
+              calorias: found.calorias || 0,
+              proteina: found.proteina || 0,
+              carboidrato: found.carboidrato || 0,
+              gordura: found.gordura || 0
+            };
+
+            // Diferença de cálculo: Receitas as vezes salvam por 'gramas' no diario, mas front usa porcoes
+            // Simplificação: Vamos assumir que 'item.gramas' é o peso consumido.
+            const fator = item.gramas / 100;
+
+            return {
+              kind,
+              id: found.id,
+              nome: found.nome,
+              quantidade_g: kind === 'alimento' ? item.gramas : undefined,
+              porcoes: kind === 'receita' ? 1 : undefined, // Info perdida se salvamos só gramas
+              gramasPorPorcao: kind === 'receita' ? item.gramas : undefined, // Info perdida
+              macros: {
+                calorias: base.calorias * fator,
+                proteina: base.proteina * fator,
+                carboidrato: base.carboidrato * fator,
+                gordura: base.gordura * fator
+              }
+            };
+          }).filter(Boolean);
+        });
+      }
+      setDayMeals(newMeals);
 
     } else {
-        setCurrentDiaryId(null);
-        setDayMeals(emptyDay());
+      setCurrentDiaryId(null);
+      setDayMeals(emptyDay());
     }
 
   }, [selectedKey, userDiary, allFoods, allRecipes, userData]);
 
   // 3. Salvar (Debounced ou Direto?) -> Vamos salvar direto no add/remove para consistência
   const syncToBackend = async (newDayMeals, diaryId) => {
-      if (!userData) return;
+    if (!userData) return;
 
-      // Converter Frontend -> Backend Schema
-      const refeicoesBackend = {};
-      ["cafe", "almoco", "jantar", "lanches"].forEach(key => {
-          const backendKey = mapMealKeyToBackend(key);
-          refeicoesBackend[backendKey] = newDayMeals[key].map(it => ({
-             id: it.id, // ID do alimento/receita
-             gramas: it.kind === 'alimento' 
-                ? it.quantidade_g 
-                : (it.porcoes * it.gramasPorPorcao) // Calcula total gramas para receita
-          }));
-      });
+    // Converter Frontend -> Backend Schema
+    const refeicoesBackend = {};
+    ["cafe", "almoco", "jantar", "lanches"].forEach(key => {
+      const backendKey = mapMealKeyToBackend(key);
+      refeicoesBackend[backendKey] = newDayMeals[key].map(it => ({
+        id: it.id, // ID do alimento/receita
+        gramas: it.kind === 'alimento'
+          ? it.quantidade_g
+          : (it.porcoes * it.gramasPorPorcao) // Calcula total gramas para receita
+      }));
+    });
 
-      const payload = {
-        usuarioId: userData.id,
-        data: selectedKey, // "YYYY-MM-DD" -> Backend deve aceitar ou converter
-        refeicoes: refeicoesBackend
-      };
+    const payload = {
+      usuarioId: userData.id,
+      data: selectedKey, // "YYYY-MM-DD" -> Backend deve aceitar ou converter
+      refeicoes: refeicoesBackend
+    };
 
-      try {
-          if (diaryId) {
-              // Update
-              await api.put(`/diario-alimentar/${diaryId}`, payload);
-              // Update local cache of diary to reflect changes (avoid refetch)
-              setUserDiary(prev => prev.map(d => d.id === diaryId ? { ...d, ...payload } : d));
-          } else {
-              // Create
-              const res = await api.post("/diario-alimentar", payload);
-              // Add to local cache
-              const newEntry = res.data;
-              setUserDiary(prev => [...prev, newEntry]);
-              setCurrentDiaryId(newEntry.id);
-          }
-      } catch (err) {
-          console.error("Erro ao salvar:", err);
-          alert("Erro ao salvar refeição. Tente novamente.");
+    try {
+      if (diaryId) {
+        // Update
+        await api.put(`/diario-alimentar/${diaryId}`, payload);
+        // Update local cache of diary to reflect changes (avoid refetch)
+        setUserDiary(prev => prev.map(d => d.id === diaryId ? { ...d, ...payload } : d));
+      } else {
+        // Create
+        const res = await api.post("/diario-alimentar", payload);
+        // Add to local cache
+        const newEntry = res.data;
+        setUserDiary(prev => [...prev, newEntry]);
+        setCurrentDiaryId(newEntry.id);
       }
+    } catch (err) {
+      console.error("Erro ao salvar:", err);
+      alert("Erro ao salvar refeição. Tente novamente.");
+    }
   };
 
   // Metas
@@ -240,7 +236,7 @@ export default function ClienteDashboard() {
   const totals = useMemo(() => {
     const sum = { calorias: 0, carboidrato: 0, gordura: 0, proteina: 0 };
     for (const mt of MEAL_TYPES) {
-        if (!dayMeals[mt.id]) continue; 
+      if (!dayMeals[mt.id]) continue;
       for (const it of dayMeals[mt.id]) {
         sum.calorias += it.macros.calorias || 0;
         sum.carboidrato += it.macros.carboidrato || 0;
@@ -330,20 +326,20 @@ export default function ClienteDashboard() {
 
   // Helpers de Update Local + Sync
   const updateMeals = (cb) => {
-      // CB retorna novo state
-      setDayMeals(prev => {
-          const newState = cb(prev);
-          // Dispara sync usando o estado calculado
-          syncToBackend(newState, currentDiaryId);
-          return newState;
-      });
+    // CB retorna novo state
+    setDayMeals(prev => {
+      const newState = cb(prev);
+      // Dispara sync usando o estado calculado
+      syncToBackend(newState, currentDiaryId);
+      return newState;
+    });
   };
 
   // Adaptar funções existentes 
   const confirmAdd = () => {
     if (!targetMeal || !selectedItem) return;
     const computed = computedMacros; // do useMemo
-    
+
     // Preparar payload state local
     const itemPayload = {
       kind: selectedItem.kind,
@@ -353,30 +349,30 @@ export default function ClienteDashboard() {
     };
 
     if (selectedItem.kind === "alimento") {
-        itemPayload.quantidade_g = Math.max(0, Math.round(grams));
-    } else { 
-        itemPayload.porcoes = Math.max(0, Math.round(porcoes)); 
-        itemPayload.gramasPorPorcao = Math.max(1, Math.round(gramasPorPorcao)); 
+      itemPayload.quantidade_g = Math.max(0, Math.round(grams));
+    } else {
+      itemPayload.porcoes = Math.max(0, Math.round(porcoes));
+      itemPayload.gramasPorPorcao = Math.max(1, Math.round(gramasPorPorcao));
     }
 
     // Usar wrapper de update
     updateMeals(prev => ({
-        ...prev,
-        [targetMeal]: [...prev[targetMeal], itemPayload]
+      ...prev,
+      [targetMeal]: [...prev[targetMeal], itemPayload]
     }));
-    
+
     closeModal();
   };
 
   const removeItem = (mealId, idx) => {
     updateMeals(prev => ({
-        ...prev,
-        [mealId]: prev[mealId].filter((_, i) => i !== idx)
+      ...prev,
+      [mealId]: prev[mealId].filter((_, i) => i !== idx)
     }));
   };
 
   // Helpers de UI
-  const isSameDay = (a, b) => a.toISOString().slice(0,10) === b.toISOString().slice(0,10);
+  const isSameDay = (a, b) => a.toISOString().slice(0, 10) === b.toISOString().slice(0, 10);
   const weekRangeLabel = (start) => `${fmtShort.format(start)} — ${fmtShort.format(addDays(start, 6))}`;
 
   const MacroBar = ({ label, value, goal, variant }) => {
@@ -464,9 +460,9 @@ export default function ClienteDashboard() {
 
             {/* Barras de macros */}
             <div className="flex-grow-1 w-100">
-              <MacroBar label="Proteínas"   value={+totals.proteina.toFixed(1)}   goal={goals.proteina}   variant="protein" />
+              <MacroBar label="Proteínas" value={+totals.proteina.toFixed(1)} goal={goals.proteina} variant="protein" />
               <MacroBar label="Carboidratos" value={+totals.carboidrato.toFixed(1)} goal={goals.carboidrato} variant="carb" />
-              <MacroBar label="Gorduras"     value={+totals.gordura.toFixed(1)}     goal={goals.gordura}     variant="fat" />
+              <MacroBar label="Gorduras" value={+totals.gordura.toFixed(1)} goal={goals.gordura} variant="fat" />
             </div>
           </div>
         </div>
@@ -519,7 +515,7 @@ export default function ClienteDashboard() {
             <div className="modal-dialog modal-md">
               <div className="modal-content rounded-4">
                 <div className="modal-header border-0">
-                  <h5 className="modal-title fw-bold">Adicionar Refeição — {MEAL_TYPES.find((m)=>m.id===targetMeal)?.label}</h5>
+                  <h5 className="modal-title fw-bold">Adicionar Refeição — {MEAL_TYPES.find((m) => m.id === targetMeal)?.label}</h5>
                   <button className="btn-close" onClick={closeModal}></button>
                 </div>
                 <div className="modal-body pt-0">
@@ -677,8 +673,6 @@ function MacroCalculator({ goals, setGoals }) {
   const kcalRestante = Math.max(0, kcalObjetivo - (kcalProteina + kcalGordura));
   const carboidrato = Math.round(kcalRestante / 4);
 
-  const aplicar = () => setGoals({ calorias: kcalObjetivo, carboidrato, gordura, proteina });
-
   return (
     <div>
       <div className="row g-3">
@@ -691,20 +685,20 @@ function MacroCalculator({ goals, setGoals }) {
         </div>
         <div className="col-md-3">
           <label className="form-label">Idade</label>
-          <input type="number" className="form-control" value={idade} min={10} max={100} onChange={(e)=>setIdade(+e.target.value||0)} />
+          <input type="number" className="form-control" value={idade} min={10} max={100} onChange={(e) => setIdade(+e.target.value || 0)} />
         </div>
         <div className="col-md-3">
           <label className="form-label">Peso (kg)</label>
-          <input type="number" className="form-control" value={peso} min={20} max={250} onChange={(e)=>setPeso(+e.target.value||0)} />
+          <input type="number" className="form-control" value={peso} min={20} max={250} onChange={(e) => setPeso(+e.target.value || 0)} />
         </div>
         <div className="col-md-3">
           <label className="form-label">Altura (cm)</label>
-          <input type="number" className="form-control" value={altura} min={120} max={230} onChange={(e)=>setAltura(+e.target.value||0)} />
+          <input type="number" className="form-control" value={altura} min={120} max={230} onChange={(e) => setAltura(+e.target.value || 0)} />
         </div>
 
         <div className="col-md-4">
           <label className="form-label">Atividade</label>
-          <select className="form-select" value={atividade} onChange={(e)=>setAtividade(e.target.value)}>
+          <select className="form-select" value={atividade} onChange={(e) => setAtividade(e.target.value)}>
             <option value="sedentario">Sedentário (pouco ou nenhum exercício)</option>
             <option value="leve">Leve (1-3x/semana)</option>
             <option value="moderado">Moderado (3-5x/semana)</option>
@@ -714,7 +708,7 @@ function MacroCalculator({ goals, setGoals }) {
         </div>
         <div className="col-md-4">
           <label className="form-label">Objetivo</label>
-          <select className="form-select" value={objetivo} onChange={(e)=>setObjetivo(e.target.value)}>
+          <select className="form-select" value={objetivo} onChange={(e) => setObjetivo(e.target.value)}>
             <option value="manter">Manter</option>
             <option value="cutting">Perder gordura (−20%)</option>
             <option value="bulking">Ganhar massa (+15%)</option>
@@ -722,11 +716,11 @@ function MacroCalculator({ goals, setGoals }) {
         </div>
         <div className="col-md-2">
           <label className="form-label">Proteína (g/kg)</label>
-          <input type="number" step="0.1" className="form-control" value={protGKg} min={1.2} max={2.5} onChange={(e)=>setProtGKg(+e.target.value||0)} />
+          <input type="number" step="0.1" className="form-control" value={protGKg} min={1.2} max={2.5} onChange={(e) => setProtGKg(+e.target.value || 0)} />
         </div>
         <div className="col-md-2">
           <label className="form-label">Gordura (% kcal)</label>
-          <input type="number" className="form-control" value={fatPct} min={15} max={40} onChange={(e)=>setFatPct(+e.target.value||0)} />
+          <input type="number" className="form-control" value={fatPct} min={15} max={40} onChange={(e) => setFatPct(+e.target.value || 0)} />
         </div>
       </div>
 
