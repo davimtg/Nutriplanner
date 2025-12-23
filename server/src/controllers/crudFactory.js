@@ -29,7 +29,7 @@ export const createCRUDRoutes = (Model) => {
 
         // Handle array of IDs (e.g. ?id=1&id=2)
         if (query.id && Array.isArray(query.id)) {
-            query.id = { $in: query.id };
+          query.id = { $in: query.id };
         }
 
         console.log('Final Mongo Query:', query);
@@ -59,10 +59,10 @@ export const createCRUDRoutes = (Model) => {
         // O seed preservou IDs. Novos itens precisarão de ID.
         let data = req.body;
         if (!data.id) {
-            const lastItem = await Model.findOne().sort({ id: -1 });
-            data.id = lastItem ? lastItem.id + 1 : 1;
+          const lastItem = await Model.findOne().sort({ id: -1 });
+          data.id = lastItem ? lastItem.id + 1 : 1;
         }
-        
+
         const newItem = new Model(data);
         await newItem.save();
         res.status(201).json(newItem);
@@ -73,7 +73,7 @@ export const createCRUDRoutes = (Model) => {
     update: async (req, res) => {
       try {
         const item = await Model.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
-         if (!item) return res.status(404).json({ message: 'Item não encontrado' });
+        if (!item) return res.status(404).json({ message: 'Item não encontrado' });
         res.json(item);
       } catch (error) {
         res.status(400).json({ message: error.message });

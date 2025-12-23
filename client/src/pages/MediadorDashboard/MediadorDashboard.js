@@ -9,6 +9,7 @@ const filtros = [
   { label: 'Pendentes', value: 'pendente' },
   { label: 'Em Execução', value: 'em execucao' },
   { label: 'Concluídos', value: 'concluido' },
+  { label: 'Cancelados', value: 'cancelado' },
 ];
 
 const MediadorDashboard = () => {
@@ -22,19 +23,19 @@ const MediadorDashboard = () => {
     }
   }, [status, dispatch]);
 
-    const normalize = (str) =>
+  const normalize = (str) =>
     str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
 
   const pendentes = pedidos.filter(
-    (pedido) => normalize(pedido.status.name) === 'pendente'
+    (pedido) => normalize(pedido.status?.name) === 'pendente'
   ).length;
 
   const emExecucao = pedidos.filter(
-    (pedido) => normalize(pedido.status.name) === 'em execucao'
+    (pedido) => normalize(pedido.status?.name) === 'em execucao'
   ).length;
 
   const concluidos = pedidos.filter(
-    (pedido) => normalize(pedido.status.name) === 'concluido'
+    (pedido) => normalize(pedido.status?.name) === 'concluido'
   ).length;
 
   const total = pedidos.length;
@@ -48,17 +49,15 @@ const MediadorDashboard = () => {
 
   const pedidosFiltrados =
     filtro === 'todos'
-      ? pedidos
-      : pedidos.filter((pedido) => normalize(pedido.status.name) === filtro);
+      ? pedidos.filter((pedido) => normalize(pedido.status?.name) !== 'cancelado')
+      : pedidos.filter((pedido) => normalize(pedido.status?.name) === filtro);
 
   return (
     <div className={styles.dashboard}>
-      {/* Título e subtítulo */}
       <div className={styles['top-section']}>
         <h2 className={styles['page-title']}>Pedidos Disponíveis</h2>
       </div>
 
-      {/* Estatísticas */}
       <div className={styles['stats-row']}>
         {stats.map((stat) => (
           <div className={styles['stat-box']} key={stat.label}>
@@ -68,16 +67,14 @@ const MediadorDashboard = () => {
         ))}
       </div>
 
-      {/* Filtros */}
       <div className={styles['filters-section']}>
         <div className={styles['filters-title']}>Filtrar pedidos:</div>
         <div className={styles['filters-buttons']}>
           {filtros.map((f) => (
             <button
               key={f.value}
-              className={`${styles['filter-btn']} ${
-                filtro === f.value ? styles['active'] : ''
-              }`}
+              className={`${styles['filter-btn']} ${filtro === f.value ? styles['active'] : ''
+                }`}
               onClick={() => setFiltro(f.value)}
             >
               {f.label}
@@ -86,7 +83,6 @@ const MediadorDashboard = () => {
         </div>
       </div>
 
-      {/* Lista de pedidos */}
       <div className={styles['pedidos-section']}>
         {status === 'loading' && (
           <div className={styles['loading']}>Carregando pedidos...</div>

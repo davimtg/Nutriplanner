@@ -1,12 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../services/api';
 
-// Buscar pedidos
 export const fetchPedidos = createAsyncThunk(
   'pedidos/fetchPedidos',
   async () => {
     const { data } = await api.get('/pedidos');
-    // Backend agora retorna array direto
     return data;
   }
 );
@@ -15,7 +13,7 @@ export const aceitarPedido = createAsyncThunk(
   'pedidos/aceitarPedido',
   async (id) => {
     const { data } = await api.patch(`/pedidos/${id}`, {
-      status: 'Em Execução' // Ajustado para string conforme Schema
+      status: { name: 'Em Execução' }
     });
     return data;
   }
@@ -25,7 +23,17 @@ export const concluirPedido = createAsyncThunk(
   'pedidos/concluirPedido',
   async (id) => {
     const { data } = await api.patch(`/pedidos/${id}`, {
-      status: 'Concluído' // Ajustado para string
+      status: { name: 'Concluído' }
+    });
+    return data;
+  }
+);
+
+export const cancelarPedido = createAsyncThunk(
+  'pedidos/cancelarPedido',
+  async (id) => {
+    const { data } = await api.patch(`/pedidos/${id}`, {
+      status: { name: 'Cancelado' }
     });
     return data;
   }
@@ -60,6 +68,13 @@ const pedidosSlice = createSlice({
         }
       })
       .addCase(concluirPedido.fulfilled, (state, action) => {
+        const updated = action.payload;
+        const index = state.pedidos.findIndex((p) => p.id === updated.id);
+        if (index !== -1) {
+          state.pedidos[index] = updated;
+        }
+      })
+      .addCase(cancelarPedido.fulfilled, (state, action) => {
         const updated = action.payload;
         const index = state.pedidos.findIndex((p) => p.id === updated.id);
         if (index !== -1) {

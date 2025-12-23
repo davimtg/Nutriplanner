@@ -8,9 +8,9 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://rodrigonplacido1:12312
 export async function connectDB() {
   try {
     await mongoose.connect(MONGO_URI);
-    console.log('✅ MongoDB Conectado');
+    console.log('MongoDB Conectado');
   } catch (err) {
-    console.error('❌ Erro ao conectar MongoDB:', err);
+    console.error('Erro ao conectar MongoDB:', err);
     process.exit(1);
   }
 }

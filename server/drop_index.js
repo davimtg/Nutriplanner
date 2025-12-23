@@ -6,9 +6,9 @@ async function dropIndex() {
     await connectDB();
     try {
         await User.collection.dropIndex('email_1');
-        console.log('✅ Index email_1 removido com sucesso.');
+        console.log('Index email_1 removido com sucesso.');
     } catch (error) {
-        console.log('⚠️ Index email_1 não existe ou erro:', error.message);
+        console.log('Index email_1 não existe ou erro:', error.message);
     }
     process.exit();
 }

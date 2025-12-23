@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { concluirPedido } from '../../redux/pedidosSlice';
+import { concluirPedido, aceitarPedido, cancelarPedido } from '../../redux/pedidosSlice';
+import api from '../../services/api';
 import styles from './MediadorPedidoDetalhes.module.css';
 
 const MediadorPedidoDetalhes = () => {
@@ -10,31 +11,42 @@ const MediadorPedidoDetalhes = () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
-useEffect(() => {
-  fetch("http://localhost:3001/pedidos")
-    .then(res => res.json())
-    .then(data => {
-      console.log("Dados recebidos:", data);
+  const normalize = (str) =>
+    str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
 
-    const lista = Array.isArray(data) ? data : data["lista-de-pedidos"] || [];
-
-    const pedidoEncontrado = lista.find(p => String(p.id) === String(id));
-
-      console.log("Pedido encontrado:", pedidoEncontrado);
-      setPedido(pedidoEncontrado);
-      setLoading(false);
-    })
-    .catch(erro => {
-      console.error("Erro ao buscar pedido:", erro);
-      setLoading(false);
-    });
-}, [id]);
+  useEffect(() => {
+    api.get(`/pedidos/${id}`)
+      .then(response => {
+        setPedido(response.data);
+        setLoading(false);
+      })
+      .catch(erro => {
+        console.error("Erro ao buscar pedido:", erro);
+        setLoading(false);
+      });
+  }, [id]);
 
 
   const handleConcluir = () => {
     dispatch(concluirPedido(pedido.id)).then((action) => {
       if (action.meta.requestStatus === 'fulfilled') {
-        setPedido(action.payload);
+        setPedido({ ...pedido, status: action.payload.status });
+      }
+    });
+  };
+
+  const handleAceitar = () => {
+    dispatch(aceitarPedido(pedido.id)).then((action) => {
+      if (action.meta.requestStatus === 'fulfilled') {
+        setPedido({ ...pedido, status: action.payload.status });
+      }
+    });
+  };
+
+  const handleCancelar = () => {
+    dispatch(cancelarPedido(pedido.id)).then((action) => {
+      if (action.meta.requestStatus === 'fulfilled') {
+        setPedido({ ...pedido, status: action.payload.status });
       }
     });
   };
@@ -50,25 +62,36 @@ useEffect(() => {
       <p><strong>Endereço:</strong> {pedido.endereco}</p>
       <p><strong>Status:</strong> {pedido.status?.name}</p>
 
-     <h3 className={styles.details__subtitle}>Itens:</h3>
+      <h3 className={styles.details__subtitle}>Itens:</h3>
       <ul className={styles.details__list}>
         {pedido.itens.map((item, index) => (
-        <li key={index} className={styles.details__item}>
-      <span>{item.name}</span>
-      <span>{item.quantidade} ({item.marca})</span>
-    </li>
-  ))}
-</ul>
+          <li key={index} className={styles.details__item}>
+            <span>{item.name}</span>
+            <span>{item.quantidade} ({item.marca})</span>
+          </li>
+        ))}
+      </ul>
 
-{pedido.status === "Pendente" && (
-  <button onClick={handleConcluir} className={styles.details__button}>
-    Concluir Pedido
-  </button>
-)}
+      {normalize(pedido.status?.name) === "pendente" && (
+        <button onClick={handleAceitar} className={styles.details__button}>
+          Aceitar Pedido
+        </button>
+      )}
 
-<Link to="/dashboard" className={styles.details__back}>
-  Voltar para Dashboard
-</Link>
+      {normalize(pedido.status?.name) === "em execucao" && (
+        <div className={styles.details__actions}>
+          <button onClick={handleConcluir} className={styles.details__button}>
+            Concluir Pedido
+          </button>
+          <button onClick={handleCancelar} className={`${styles.details__button} ${styles['details__button--cancel']}`}>
+            Cancelar Pedido
+          </button>
+        </div>
+      )}
+
+      <Link to="/dashboard" className={styles.details__back}>
+        Voltar para Dashboard
+      </Link>
 
     </div>
   );

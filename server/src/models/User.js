@@ -16,21 +16,21 @@ const TipoUsuarioSchema = new mongoose.Schema({
 }, { _id: false });
 
 const UserSchema = new mongoose.Schema({
-  id: { type: Number, required: true, unique: true }, // Mantendo ID numérico legado
+  id: { type: Number, required: true, unique: true },
   nome: { type: String, required: true },
-  email: { type: String, required: true }, // Removido unique global para permitir multiplos tipos
-  senha: { type: String, required: true }, // TODO: Migrar para hash posteriormente
+  email: { type: String, required: true },
+  senha: { type: String, required: true },
   telefone: String,
   endereco: EnderecoSchema,
   tipo: TipoUsuarioSchema,
   objetivo: String,
   planoId: Number,
-  nutricionistaId: Number, // Reference to the nutritionist's ID
+  nutricionistaId: Number,
   idade: Number,
   sexo: String,
   altura: Number,
   peso: Number,
-  contatosRecentes: [Number] // Array de IDs de usuários
+  contatosRecentes: [Number]
 }, {
   timestamps: true
 });
