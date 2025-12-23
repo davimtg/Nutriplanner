@@ -67,10 +67,7 @@ const PedidoSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
   userId: Number,
   data: Date,
-  itens: [{
-    id: Number, // ID do item
-    quantidade: Number
-  }],
+  itens: [mongoose.Schema.Types.Mixed], // Flexível para aceitar { nome, quantidade, valor, checked }
   status: String,
   total: Number
 });
@@ -83,6 +80,7 @@ const MensagemSchema = new mongoose.Schema({
   remetenteId: Number,
   destinatarioId: Number,
   texto: String,
+  lida: { type: Boolean, default: false }, // Status de leitura
   data: { type: Date, default: Date.now }
 });
 

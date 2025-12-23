@@ -5,17 +5,50 @@ import { User } from '../models/User.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'secret_key_change_me';
 
 export const login = async (req, res) => {
-  const { email, senha } = req.body;
+  const { email, senha, tipo } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    // Montar query de busca
+    const query = { email };
+
+    // Se o tipo for informado, filtrar também pelo tipo
+    if (tipo) {
+      // O frontend envia objeto { id, name }, mas podemos checar só o name ou id
+      // Se vier string, tratamos também
+      if (typeof tipo === 'object' && tipo.name) {
+        query['tipo.name'] = tipo.name;
+      } else if (typeof tipo === 'string') {
+        // Caso venha string (ex: 'mediador')
+        query['tipo.name'] = tipo;
+      }
+    }
+
+    let user = await User.findOne(query);
+
+    // Fallback: Se não achou usuário com o tipo selecionado (ex: Cliente),
+    // verifica se existe um usuário 'admin' com esse email.
+    // Isso é necessário porque o Admin não seleciona o tipo na tela de login (escondido).
+    if (!user && tipo && tipo.name !== 'admin') {
+      user = await User.findOne({ email, 'tipo.name': 'admin' });
+    }
 
     if (!user) {
       return res.status(401).json({ message: 'Credenciais inválidas' });
     }
 
     let isMatch = false;
-    isMatch = await bcrypt.compare(senha, user.senha);
+
+    // Tenta comparar com bcrypt
+    try {
+      isMatch = await bcrypt.compare(senha, user.senha);
+    } catch (e) {
+      isMatch = false;
+    }
+
+    // Fallback para senhas antigas em texto plano
+    if (!isMatch && senha === user.senha) {
+      isMatch = true;
+    }
 
     if (!isMatch) {
       return res.status(401).json({ message: 'Credenciais inválidas' });
@@ -72,15 +105,12 @@ export const register = async (req, res) => {
     const lastUser = await User.findOne().sort({ id: -1 });
     const newId = lastUser ? lastUser.id + 1 : 1;
 
-    // Criptografar senha
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(senha, salt);
-
+    // A senha será hashada pelo pre-save hook no Model
     const newUser = new User({
       id: newId,
       nome,
       email,
-      senha: hashedPassword,
+      senha, // Passando em texto plano para o model tratar
       tipo: tipoObj
     });
 

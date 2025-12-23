@@ -36,6 +36,9 @@ export default function Admin() {
     const [showEditPlano, setShowEditPlano] = useState(false);
     const [editingPlano, setEditingPlano] = useState(null);
 
+    // Messages State
+    const [mensagens, setMensagens] = useState([]);
+
     // Notification State (Toast)
     const [toast, setToast] = useState({ show: false, message: '', variant: 'success' });
     const showToast = (message, variant = 'success') => setToast({ show: true, message, variant });
@@ -330,6 +333,39 @@ export default function Admin() {
         } catch (err) { console.error(err); showToast('Erro ao salvar plano.', 'danger'); }
     };
 
+    // --- Messages Handlers ---
+    const deleteMensagem = (id) => {
+        openConfirmModal('Excluir Mensagem', 'Tem certeza que deseja excluir esta mensagem?', async () => {
+            try {
+                await api.delete(`/mensagens/${id}`);
+                setMensagens(mensagens.filter(m => m.id !== id));
+                showToast('Mensagem removida.', 'success');
+            } catch (err) { console.error(err); showToast('Erro ao remover mensagem.', 'danger'); }
+        });
+    };
+
+    const deleteConversa = () => {
+        // Exclui todas as mensagens exibidas na lista atual (respeitando o filtro de busca se houver)
+        // Isso permite ao admin filtrar por nomes e excluir tudo daquele contexto
+        if (mensagens.length === 0) return showToast('Nenhuma mensagem para excluir.', 'warning');
+
+        openConfirmModal('Limpar Chat Exibido', `Tem certeza que deseja excluir TODAS as ${mensagens.length} mensagens listadas?`, async () => {
+            try {
+                setLoading(true);
+                // Promise.all para deletar em paralelo (json-server n tem deleteMany nativo facil via rota padrao)
+                await Promise.all(mensagens.map(m => api.delete(`/mensagens/${m.id}`)));
+                setMensagens([]);
+                showToast('Conversa limpa com sucesso.', 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('Erro ao limpar conversa.', 'danger');
+            } finally {
+                setLoading(false);
+                fetchData();
+            }
+        });
+    };
+
     const [searchText, setSearchText] = useState('');
     const [page, setPage] = useState(1);
     const LIMIT = 100;
@@ -374,6 +410,14 @@ export default function Admin() {
             } else if (activeTab === 'planos') {
                 const res = await api.get(`/planos-alimentares${queryString}`);
                 setPlanos(res.data);
+            } else if (activeTab === 'mensagens') {
+                // Ensure users are loaded for name resolution
+                if (users.length === 0) {
+                    const usersRes = await api.get('/usuarios');
+                    setUsers(usersRes.data);
+                }
+                const res = await api.get(`/mensagens${queryString}`);
+                setMensagens(res.data);
             }
         } catch (error) {
             console.error('Erro ao buscar dados:', error);
@@ -585,6 +629,54 @@ export default function Admin() {
                         </Table>
                     )}
                 </Tab>
+
+                {/* TAB MENSAGENS */}
+                <Tab eventKey="mensagens" title="Mensagens (Chat)">
+                    {loading ? <Spinner animation="border" /> : (
+                        <>
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <p className="text-muted mb-0">Total: {mensagens.length} mensagens exibidas.</p>
+                                {mensagens.length > 0 && (
+                                    <Button variant="danger" onClick={deleteConversa}>
+                                        Limpar Chat Listado
+                                    </Button>
+                                )}
+                            </div>
+                            <Table striped bordered hover responsive>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Data</th>
+                                        <th>Remetente</th>
+                                        <th>Destinatário</th>
+                                        <th>Texto</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {mensagens.map(m => {
+                                        const remetente = users.find(u => u.id === m.remetenteId)?.nome || m.remetenteId;
+                                        const destinatario = users.find(u => u.id === m.destinatarioId)?.nome || m.destinatarioId;
+                                        return (
+                                            <tr key={m.id}>
+                                                <td>{m.id}</td>
+                                                <td>{m.data ? new Date(m.data).toLocaleString() : '-'}</td>
+                                                <td>{remetente}</td>
+                                                <td>{destinatario}</td>
+                                                <td title={m.texto}>
+                                                    {m.texto && m.texto.length > 50 ? m.texto.substring(0, 50) + '...' : m.texto}
+                                                </td>
+                                                <td>
+                                                    <Button variant="danger" size="sm" onClick={() => deleteMensagem(m.id)}>Excluir</Button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </Table>
+                        </>
+                    )}
+                </Tab>
             </Tabs>
 
             {/* Controles de Paginação */}
@@ -605,7 +697,9 @@ export default function Admin() {
                         (activeTab === 'receitas' && receitas.length < LIMIT) ||
                         (activeTab === 'alimentos' && alimentos.length < LIMIT) ||
                         (activeTab === 'pedidos' && pedidos.length < LIMIT) ||
-                        (activeTab === 'planos' && planos.length < LIMIT)
+                        (activeTab === 'pedidos' && pedidos.length < LIMIT) ||
+                        (activeTab === 'planos' && planos.length < LIMIT) ||
+                        (activeTab === 'mensagens' && mensagens.length < LIMIT)
                     }
                     onClick={() => setPage(p => p + 1)}
                 >
