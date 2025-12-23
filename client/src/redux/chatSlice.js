@@ -2,18 +2,18 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../services/api';
 
 export const fetchUserMessages = createAsyncThunk(
-  'mensagens/fetchUserMessages',
-  async ({ remetenteId, destinatarioId }) => {
-    const [enviadasRes, recebidasRes] = await Promise.all([
-      api.get(`/mensagens?remetenteId=${remetenteId}&destinatarioId=${destinatarioId}`),
-      api.get(`/mensagens?remetenteId=${destinatarioId}&destinatarioId=${remetenteId}`)
-    ]);
+    'mensagens/fetchUserMessages',
+    async ({ remetenteId, destinatarioId }) => {
+        const [enviadasRes, recebidasRes] = await Promise.all([
+            api.get(`/mensagens?remetenteId=${remetenteId}&destinatarioId=${destinatarioId}`),
+            api.get(`/mensagens?remetenteId=${destinatarioId}&destinatarioId=${remetenteId}`)
+        ]);
 
-    const enviadas = enviadasRes.data;
-    const recebidas = recebidasRes.data;
+        const enviadas = enviadasRes.data;
+        const recebidas = recebidasRes.data;
 
-    return [...enviadas, ...recebidas];
-  }
+        return [...enviadas, ...recebidas];
+    }
 );
 
 
@@ -21,7 +21,14 @@ export const enviarMensagem = createAsyncThunk(
     'mensagens/enviarMensagem',
     async (mensagemData, { rejectWithValue }) => {
         try {
-            const { data } = await api.post('/mensagens', mensagemData);
+            // No backend schema: remetenteId, destinatarioId, texto, data
+            const payload = {
+                remetenteId: mensagemData.remetenteId,
+                destinatarioId: mensagemData.destinatarioId,
+                texto: mensagemData.conteudo,
+                data: mensagemData.timestamp
+            };
+            const { data } = await api.post('/mensagens', payload);
             return data;
         } catch (error) {
             return rejectWithValue(error.message);

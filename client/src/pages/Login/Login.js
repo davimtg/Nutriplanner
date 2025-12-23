@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Toast, ToastContainer } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setUserType, setUserData } from "../../redux/userSlice";
@@ -17,18 +18,37 @@ export default function Login() {
   const [selectedType, setSelectedType] = useState(userTypes[1]);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+
+  const [toast, setToast] = useState({ show: false, message: '', variant: 'danger' });
+  const showToast = (message, variant = 'danger') => setToast({ show: true, message, variant });
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   async function entrar() {
     try {
-      const { data } = await api.post("/auth/login", { email, senha });
-      
+      const { data } = await api.post("/auth/login", { email, senha, tipo: selectedType });
+
       const { user, token } = data;
 
-      // O token já é salvo no localStorage? 
-      // O userSlice salva userData e userType no localStorage.
-      // Vamos salvar o token explicitamente aqui ou no api.js (mas api.js lê do localStorage).
+      // Validação de Tipo de Usuário (Regra de Negócio)
+      // "Se o user escolhe 'cliente', só loga se o tipo no banco for compatível. 
+      //  Exceção: se o user no banco for admin"
+
+      const dbUserType = user.tipo;
+      const selectedTypeId = selectedType.id;
+      const isAdmin = (dbUserType.id === 0 || dbUserType.name === 'admin');
+
+      // Verificação específica para "cliente" conforme pedido, 
+      // mas faz sentido aplicar para todos para consistência, exceto Admin.
+      // Se eu selecionei X, e sou Y (e Y não é admin), bloqueia.
+
+      if (!isAdmin) {
+        if (dbUserType.id !== selectedTypeId) {
+          showToast('Credenciais inválidas', 'danger');
+          return; // Bloqueia o login
+        }
+      }
+
       localStorage.setItem("token", token);
 
       // Compatibilidade com o que o Frontend já espera (userData, userType)
@@ -39,11 +59,9 @@ export default function Login() {
     } catch (error) {
       console.error("Erro no login:", error);
       const msg = error.response?.data?.message || "Erro ao tentar fazer login.";
-      alert(msg);
+      showToast(msg, "danger");
     }
   }
-
-
 
   return (
     <div className={styles["login"]}>
@@ -111,6 +129,17 @@ export default function Login() {
           Não tem uma conta? <a href="/registrar">Registre-se.</a>
         </p>
       </div>
+
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 9999 }}>
+        <Toast onClose={() => setToast({ ...toast, show: false })} show={toast.show} delay={3000} autohide bg={toast.variant}>
+          <Toast.Header>
+            <strong className="me-auto">NutriPlanner</strong>
+          </Toast.Header>
+          <Toast.Body className={toast.variant === 'danger' ? 'text-white' : ''}>
+            {toast.message}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </div>
   );
 }

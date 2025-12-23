@@ -7,7 +7,7 @@ import { authMiddleware } from '../middleware/auth.js';
 const router = express.Router();
 
 const resources = [
-    { path: '/usuarios', model: User }, // Talvez proteger mais?
+    { path: '/usuarios', model: User },
     { path: '/alimentos', model: Alimento },
     { path: '/receitas', model: Receita },
     { path: '/planos-alimentares', model: PlanoAlimentar },
@@ -18,11 +18,11 @@ const resources = [
 
 resources.forEach(resource => {
     const controller = createCRUDRoutes(resource.model);
-    
+
     // Aplicar authMiddleware em todas, ou seletivamente
     // Para simplificar a migração e segurança imediata, aplicar em métodos de escrita pelo menos.
     // Mas o usuário pediu "controle de acesso das rotas com JWT". Então aplicar em TUDO é o correto.
-    
+
     router.get(resource.path, authMiddleware, controller.getAll);
     router.get(`${resource.path}/:id`, authMiddleware, controller.getById);
     router.post(resource.path, authMiddleware, controller.create);

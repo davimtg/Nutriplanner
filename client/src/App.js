@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -24,6 +23,7 @@ import CriarEditarPlano from './pages/CriarEditarPlano/CriarEditarPlano';
 
 import MediadorDashboard from "./pages/MediadorDashboard/MediadorDashboard";
 import MediadorPedidoDetalhes from "./pages/MediadorPedidoDetalhes/MediadorPedidoDetalhes";
+import Admin from "./pages/Admin/Admin";
 
 
 
@@ -32,7 +32,7 @@ function DashboardRouter() {
   if (!userType) return <Navigate to="/" />;
 
   switch (userType.id) {
-    case 0: return null;
+    case 0: return <Admin />;
     case 1: return <ClienteDashboard />;
     case 2: return <Pacientes />;
     case 3: return <MediadorDashboard />;
@@ -52,14 +52,14 @@ function AppContext() {
 
   return (
     <>
-      {mostrarComponentesQuandoLogados && <Header tipo={userType.name}/>}
+      {mostrarComponentesQuandoLogados && userType && <Header tipo={userType.name} />}
       {mostrarComponentesQuandoLogados && <Chat />}
 
       <Routes>
         {/* Páginas para Não-Logados */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/registrar" element={<Registrar />}/>
+        <Route path="/registrar" element={<Registrar />} />
 
         {/* Páginas para Logados */}
         <Route path="/dashboard" element={<DashboardRouter />} />
@@ -67,14 +67,15 @@ function AppContext() {
         <Route path="/mediador-pedido/:id" element={<MediadorPedidoDetalhes />} />
         <Route path="/relatorio" element={<Relatorio />} />
         <Route path="/planejamento" element={<Planejamento />} />
-        <Route path="/perfil" element={<Perfil/>} />
-        <Route path="/planos" element={<Planos/>}/>
-        <Route path="/planos/criar" element={<CriarEditarPlano />}/>
-        <Route path="/planos/:id" element={<CriarEditarPlano/>}/>
-        <Route path="/esqueci-minha-senha" element={<EsqeuciMinhaSenha/>}/>
+        <Route path="/perfil" element={<Perfil />} />
+        <Route path="/planos" element={<Planos />} />
+        <Route path="/planos/criar" element={<CriarEditarPlano />} />
+        <Route path="/planos/:id" element={<CriarEditarPlano />} />
+        <Route path="/esqueci-minha-senha" element={<EsqeuciMinhaSenha />} />
         <Route path="/alimento/:id" element={<Alimentos />} />
         <Route path="/receita/:id" element={<Receitas />} />
         <Route path="/ListaCompras" element={<ListaCompras />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </>
   );

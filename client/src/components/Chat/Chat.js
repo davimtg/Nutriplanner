@@ -5,6 +5,7 @@ import styles from './Chat.module.css';
 import ChatMessages from '../ChatMessages/ChatMessages';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserMessages, enviarMensagem, abrirChat, alternarChat, limparMensagens } from '../../redux/chatSlice';
+import api from '../../services/api';
 
 export default function Chat() {
     const [show, setShow] = useState(false); // Usado para mostrar a aba de usuarios do chat
@@ -19,17 +20,16 @@ export default function Chat() {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        const fetchUsers = async () => { // Carrega todos os usuarios (temporario)
+        const fetchUsers = async () => {
             try {
-                const res = await fetch('http://localhost:3001/usuarios');
-                const data = await res.json();
-                setAllUsers(data['lista-de-usuarios'] || []);
+                const res = await api.get('/usuarios');
+                setAllUsers(res.data || []);
             } catch (error) {
                 console.error('Erro ao carregar usuários:', error);
             }
         };
-        fetchUsers();
-    }, []);
+        if (show) fetchUsers();
+    }, [show]);
 
     const handleOpenUserWindow = (user) => {
         dispatch(limparMensagens()); // Ao abrir uma conversa, limpa as mensagens antigas para forçar a atualizar o das mensagens estado
@@ -99,7 +99,7 @@ export default function Chat() {
             <button className={styles.floatingBtn} onClick={() => setShow(true)} aria-label="Abrir chat">
                 <Image className={styles.floatingIcon} src={BubbleIcon} />
             </button>
-                {/* Offcanvas de usuarios para conversar */}
+            {/* Offcanvas de usuarios para conversar */}
             <Offcanvas show={show} onHide={() => setShow(false)} placement="end">
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Chat</Offcanvas.Title>
@@ -146,7 +146,7 @@ export default function Chat() {
                     )}
                 </Offcanvas.Body>
             </Offcanvas>
-                {/* Offcanvas da conversa com um usuario */}
+            {/* Offcanvas da conversa com um usuario */}
             <Offcanvas className={styles.chatOffcanvas} show={showChatWindow} onHide={toggleChatWindow} placement="end">
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Chat com {targetUser?.nome}</Offcanvas.Title>

@@ -6,10 +6,18 @@ export const createCRUDRoutes = (Model) => {
         console.log('Incoming query:', req.query);
         let limit = 0;
 
-        // Handle _limit
+        // Handle _limit and _page
+        let skip = 0;
         if (query._limit) {
           limit = parseInt(query._limit);
           delete query._limit;
+        }
+        if (query._page) {
+          const page = parseInt(query._page);
+          if (limit > 0) {
+            skip = (page - 1) * limit;
+          }
+          delete query._page;
         }
 
         // Handle q (generic search on 'nome')
@@ -29,11 +37,12 @@ export const createCRUDRoutes = (Model) => {
 
         // Handle array of IDs (e.g. ?id=1&id=2)
         if (query.id && Array.isArray(query.id)) {
-            query.id = { $in: query.id };
+          query.id = { $in: query.id };
         }
 
         console.log('Final Mongo Query:', query);
         let queryExec = Model.find(query);
+        if (skip > 0) queryExec = queryExec.skip(skip);
         if (limit > 0) queryExec = queryExec.limit(limit);
 
         const items = await queryExec;
@@ -59,10 +68,10 @@ export const createCRUDRoutes = (Model) => {
         // O seed preservou IDs. Novos itens precisarão de ID.
         let data = req.body;
         if (!data.id) {
-            const lastItem = await Model.findOne().sort({ id: -1 });
-            data.id = lastItem ? lastItem.id + 1 : 1;
+          const lastItem = await Model.findOne().sort({ id: -1 });
+          data.id = lastItem ? lastItem.id + 1 : 1;
         }
-        
+
         const newItem = new Model(data);
         await newItem.save();
         res.status(201).json(newItem);
@@ -73,7 +82,7 @@ export const createCRUDRoutes = (Model) => {
     update: async (req, res) => {
       try {
         const item = await Model.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
-         if (!item) return res.status(404).json({ message: 'Item não encontrado' });
+        if (!item) return res.status(404).json({ message: 'Item não encontrado' });
         res.json(item);
       } catch (error) {
         res.status(400).json({ message: error.message });

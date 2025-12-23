@@ -6,11 +6,13 @@ import { setUserData, updateUserById } from '../../redux/userSlice'
 import { useSelector, useDispatch } from 'react-redux';
 import api from '../../services/api';
 
+import { useNavigate } from 'react-router-dom';
+import { clearUser } from '../../redux/userSlice';
+
 export default function Perfil() {
   const [editando, setEditando] = useState(false);
   const dispatch = useDispatch();
-  const formData = useSelector((state) => state.user.userData);
-  const loading = useSelector((state) => state.user.loading);
+  const navigate = useNavigate();
 
   const handleClick = async (e) => {
     e.preventDefault();
@@ -20,60 +22,69 @@ export default function Perfil() {
     setEditando((prev) => !prev);
   }
 
-const handleChange = (e) => {
-  const { name, value } = e.target;
+  const handleLogout = () => {
+    // Limpar localStorage
+    localStorage.removeItem("token");
+    // Limpar Redux
+    dispatch(clearUser());
+    // Redirecionar
+    navigate('/login');
+  };
 
-  // Safe access to endereco
-  const enderecoAtual = formData.endereco || {};
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-  if (name.startsWith('endereco.')) {
-    const campo = name.split('.')[1];
+    // Safe access to endereco
+    const enderecoAtual = formData.endereco || {};
 
-    if (campo === 'cep') {
-      const cepLimpo = value.replace(/[^\d]/g, ''); // remove tudo que não for número
-      if (cepLimpo.length > 8) return;
+    if (name.startsWith('endereco.')) {
+      const campo = name.split('.')[1];
 
-      const cepFormatado = cepLimpo.length > 5
-        ? cepLimpo.slice(0, 5) + '-' + cepLimpo.slice(5)
-        : cepLimpo;
+      if (campo === 'cep') {
+        const cepLimpo = value.replace(/[^\d]/g, ''); // remove tudo que não for número
+        if (cepLimpo.length > 8) return;
+
+        const cepFormatado = cepLimpo.length > 5
+          ? cepLimpo.slice(0, 5) + '-' + cepLimpo.slice(5)
+          : cepLimpo;
+
+        const enderecoAtualizado = {
+          ...enderecoAtual,
+          [campo]: cepFormatado
+        };
+
+        dispatch(setUserData({
+          ...formData,
+          endereco: enderecoAtualizado
+        }));
+        return;
+      }
+
+      if (campo === 'estado') {
+        if (/\d/.test(value)) return;
+        if (value.length > 2) return;
+      }
+
+      if (campo === 'cidade') {
+        if (/\d/.test(value)) return;
+      }
 
       const enderecoAtualizado = {
         ...enderecoAtual,
-        [campo]: cepFormatado
+        [campo]: value
       };
 
       dispatch(setUserData({
         ...formData,
         endereco: enderecoAtualizado
       }));
-      return;
+    } else {
+      dispatch(setUserData({
+        ...formData,
+        [name]: value
+      }));
     }
-
-    if (campo === 'estado') {
-      if (/\d/.test(value)) return;
-      if (value.length > 2) return;
-    }
-
-    if (campo === 'cidade') {
-      if (/\d/.test(value)) return;
-    }
-
-    const enderecoAtualizado = {
-      ...enderecoAtual,
-      [campo]: value
-    };
-
-    dispatch(setUserData({
-      ...formData,
-      endereco: enderecoAtualizado
-    }));
-  } else {
-    dispatch(setUserData({
-      ...formData,
-      [name]: value
-    }));
-  }
-};
+  };
 
 
   const handleSubmit = async () => {
@@ -101,19 +112,54 @@ const handleChange = (e) => {
   return (
     <Container className="mt-4">
       <Row className="align-items-center mb-4">
-        <Col xs={12} md={4} className="d-flex justify-content-center">
-          <Image src={profile} roundedCircle width={150} height={150} />
+        <Col xs={12} md={4} className="d-flex flex-column align-items-center">
+          <Image
+            src={formData.foto || profile}
+            roundedCircle
+            width={150}
+            height={150}
+            style={{ objectFit: 'cover', marginBottom: '10px' }}
+          />
+          {editando && (
+            <Form.Group controlId="formFile" className="mb-3">
+              <Form.Label>Alterar Foto</Form.Label>
+              <Form.Control
+                type="file"
+                size="sm"
+                accept=".jpg,.jpeg,.png"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      // Dispara atualização direta no estado local (formData)
+                      handleChange({ target: { name: 'foto', value: reader.result } });
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+            </Form.Group>
+          )}
         </Col>
         <Col xs={12} md={8} className="d-flex flex-column justify-content-center align-items-center">
           <h2 className={styles.nomeUsuario}>{formData.nome}</h2>
-          <Button
-            variant={editando ? "success" : "primary"}
-            onClick={handleClick}
-            className="mt-2"
-            disabled={loading}
-          >
-            {loading ? <Spinner animation="border" size="sm" /> : editando ? 'Salvar Configurações' : 'Alterar Configurações'}
-          </Button>
+          <div className="d-flex gap-2 mt-2">
+            <Button
+              variant={editando ? "success" : "primary"}
+              onClick={handleClick}
+              disabled={loading}
+            >
+              {loading ? <Spinner animation="border" size="sm" /> : editando ? 'Salvar Configurações' : 'Alterar Configurações'}
+            </Button>
+
+            <Button
+              variant="danger"
+              onClick={handleLogout}
+            >
+              Sair
+            </Button>
+          </div>
         </Col>
       </Row>
 
