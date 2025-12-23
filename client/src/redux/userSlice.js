@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import api from '../services/api';
 
 // Tenta carregar dados salvos no localStorage
 const savedUserType = JSON.parse(localStorage.getItem("userType"));
@@ -8,6 +9,7 @@ const initialState = {
   userType: savedUserType || null,
   userData: savedUserData || null,
   status: "idle",
+  searchResults: [],
   error: null,
   loading: false
 };
@@ -16,23 +18,34 @@ export const updateUserById = createAsyncThunk(
   "user/updateUserById",
   async (user, { rejectWithValue }) => {
     try {
-      const res = await fetch(
-        `http://localhost:3001/usuarios/lista-de-usuarios/${user.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(user), // envia os dados do usuário para o back-end
-        }
-      );
+      const res = await api.put(`/usuarios/${user.id}`, user);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
 
-      if (!res.ok) {
-        throw new Error("Erro ao atualizar usuário");
-      }
+export const fetchUserById = createAsyncThunk(
+  "user/fetchUserById",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const res = await api.get(`/usuarios/${userId}`);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
 
-      const updatedUser = await res.json();
-      return updatedUser; // payload para o slice
+export const queryUsers = createAsyncThunk(
+  "user/queryUsers",
+  async (query, { rejectWithValue }) => {
+    try {
+      const res = await api.get('/usuarios', {
+        params: { q: query }
+      });
+      return res.data;
     } catch (err) {
       return rejectWithValue(err.message);
     }
@@ -57,6 +70,9 @@ const userSlice = createSlice({
       localStorage.removeItem("userType");
       localStorage.removeItem("userData");
     },
+    clearSearchResults(state) {
+      state.searchResults = [];
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -70,13 +86,20 @@ const userSlice = createSlice({
         state.loading = false
         localStorage.setItem("userData", JSON.stringify(action.payload));
       })
+      .addCase(fetchUserById.fulfilled, (state, action) => {
+        state.userData = action.payload;
+        localStorage.setItem("userData", JSON.stringify(action.payload));
+      })
       .addCase(updateUserById.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
         state.loading = false;
       })
+      .addCase(queryUsers.fulfilled, (state, action) => {
+        state.searchResults = action.payload;
+      });
   },
 });
 
-export const { setUserType, setUserData, clearUser } = userSlice.actions;
+export const { setUserType, setUserData, clearUser, clearSearchResults } = userSlice.actions;
 export default userSlice.reducer;

@@ -4,32 +4,29 @@ import BubbleIcon from '../../assets/img/chat-bubble-icon.png';
 import styles from './Chat.module.css';
 import ChatMessages from '../ChatMessages/ChatMessages';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUserMessages, enviarMensagem, abrirChat, alternarChat, limparMensagens } from '../../redux/chatSlice';
-import api from '../../services/api';
+import { fetchUserMessages, enviarMensagem, abrirChat, alternarChat, limparMensagens, fetchRecentContacts } from '../../redux/chatSlice';
+import { updateUserById, queryUsers, clearSearchResults } from '../../redux/userSlice';
 
 export default function Chat() {
     const [show, setShow] = useState(false); // Usado para mostrar a aba de usuarios do chat
     const [search, setSearch] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
     const [mensagem, setMensagem] = useState('');
-    const [allUsers, setAllUsers] = useState([]);
+
+    // Redux Selectors
     const targetUser = useSelector(state => state.chat.targetUser);
-    const showChatWindow = useSelector(state => state.chat.showChatWindow); // Usado para mostrar um chat com um usuario 
+    const showChatWindow = useSelector(state => state.chat.showChatWindow);
     const currentUser = useSelector(state => state.user.userData);
+    const recentContacts = useSelector(state => state.chat.recentContacts);
+    const searchResults = useSelector(state => state.user.searchResults);
 
     const dispatch = useDispatch();
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const res = await api.get('/usuarios');
-                setAllUsers(res.data || []);
-            } catch (error) {
-                console.error('Erro ao carregar usuários:', error);
-            }
-        };
-        if (show) fetchUsers();
-    }, [show]);
+        if (show) {
+            const contatos = currentUser?.contatosRecentes || [];
+            dispatch(fetchRecentContacts(contatos));
+        }
+    }, [show, currentUser?.contatosRecentes, dispatch]);
 
     const handleOpenUserWindow = (user) => {
         dispatch(limparMensagens()); // Ao abrir uma conversa, limpa as mensagens antigas para forçar a atualizar o das mensagens estado
@@ -38,6 +35,17 @@ export default function Chat() {
             remetenteId: currentUser.id,
             destinatarioId: user.id // targetUser.id
         }));
+
+        // Adicionar aos contatos recentes se não estiver lá
+        const contatosAtuais = currentUser.contatosRecentes || [];
+        if (!contatosAtuais.includes(user.id)) {
+            const novosContatos = [...contatosAtuais, user.id];
+            const usuarioAtualizado = {
+                ...currentUser,
+                contatosRecentes: novosContatos
+            };
+            dispatch(updateUserById(usuarioAtualizado));
+        }
     };
 
     const toggleChatWindow = () => {
@@ -62,22 +70,19 @@ export default function Chat() {
     const handleSearch = (e) => {
         const value = e.target.value;
         setSearch(value);
+
         if (value.trim() === '') {
-            setSearchResults([]);
+            dispatch(clearSearchResults());
             return;
         }
-        const results = allUsers.filter(user =>
-            user.nome.toLowerCase().includes(value.toLowerCase())
-        );
-        setSearchResults(results);
+
+        dispatch(queryUsers(value));
     };
 
     function RecentContactList({ onOpen }) { // Renderiza lista de contatos recentes
-        const contatos = currentUser?.contatosRecentes || [];
-        const users = allUsers.filter(user => contatos.includes(user.id));
         return (
             <>
-                {users.map(user => (
+                {recentContacts.map(user => (
                     <Card key={user.id} className="mb-3">
                         <Card.Body>
                             <Card.Title>{user.nome}</Card.Title>

@@ -36,6 +36,21 @@ export const enviarMensagem = createAsyncThunk(
     }
 );
 
+export const fetchRecentContacts = createAsyncThunk(
+    'chat/fetchRecentContacts',
+    async (contactIds, { rejectWithValue }) => {
+        if (!contactIds || contactIds.length === 0) return [];
+        try {
+            const params = new URLSearchParams();
+            contactIds.forEach(id => params.append('id', id));
+            const { data } = await api.get('/usuarios', { params });
+            return data;
+        } catch (error) {
+            return rejectWithValue(error.message);
+        }
+    }
+);
+
 const chatSlice = createSlice({
     name: 'chat',
     initialState: {
@@ -43,7 +58,8 @@ const chatSlice = createSlice({
         status: 'idle',
         error: null,
         targetUser: null,
-        showChatWindow: false
+        showChatWindow: false,
+        recentContacts: []
     },
     reducers: {
         abrirChat(state, action) {
@@ -70,16 +86,7 @@ const chatSlice = createSlice({
                 state.status = 'loading';
             })
             .addCase(fetchUserMessages.fulfilled, (state, action) => {
-                const { remetenteId, destinatarioId } = action.meta.arg;
-                const chave = `mensagens_${remetenteId}_${destinatarioId}`;
-
-                if (action.payload && action.payload.length > 0) {
-                    state.lista = action.payload;
-                    localStorage.setItem(chave, JSON.stringify(action.payload));
-                } else {
-                    const mensagensLocais = JSON.parse(localStorage.getItem(chave)) || [];
-                    state.lista = mensagensLocais;
-                }
+                state.lista = action.payload || [];
                 state.status = 'succeeded';
             })
             .addCase(fetchUserMessages.rejected, (state, action) => {
@@ -88,11 +95,9 @@ const chatSlice = createSlice({
             })
             .addCase(enviarMensagem.fulfilled, (state, action) => {
                 state.lista.push(action.payload);
-
-                const chave = `mensagens_${action.payload.remetenteId}_${action.payload.destinatarioId}`;
-                const mensagensSalvas = JSON.parse(localStorage.getItem(chave)) || [];
-                mensagensSalvas.push(action.payload);
-                localStorage.setItem(chave, JSON.stringify(mensagensSalvas));
+            })
+            .addCase(fetchRecentContacts.fulfilled, (state, action) => {
+                state.recentContacts = action.payload;
             });
 
     }

@@ -1,3 +1,5 @@
+import bcrypt from 'bcryptjs';
+
 export const createCRUDRoutes = (Model) => {
   return {
     getAll: async (req, res) => {
@@ -81,6 +83,12 @@ export const createCRUDRoutes = (Model) => {
     },
     update: async (req, res) => {
       try {
+        // Hashing de senha se estiver presente no body
+        if (req.body.senha) {
+          const salt = await bcrypt.genSalt(10);
+          req.body.senha = await bcrypt.hash(req.body.senha, salt);
+        }
+
         const item = await Model.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
         if (!item) return res.status(404).json({ message: 'Item não encontrado' });
         res.json(item);

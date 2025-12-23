@@ -1,18 +1,25 @@
 import profile from '../../assets/img/profilePic/testPng.png';
 import styles from './Perfil.module.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Form, Container, Row, Col, Image, Tab, Tabs, Spinner } from 'react-bootstrap';
-import { setUserData, updateUserById } from '../../redux/userSlice'
+import { setUserData, updateUserById, fetchUserById } from '../../redux/userSlice'
 import { useSelector, useDispatch } from 'react-redux';
-import api from '../../services/api';
-
 import { useNavigate } from 'react-router-dom';
 import { clearUser } from '../../redux/userSlice';
 
 export default function Perfil() {
   const [editando, setEditando] = useState(false);
+  const [novaSenha, setNovaSenha] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const formData = useSelector((state) => state.user.userData);
+  const loading = useSelector((state) => state.user.loading);
+
+  useEffect(() => {
+    if (formData?.id) {
+      dispatch(fetchUserById(formData.id));
+    }
+  }, [dispatch, formData?.id]);
 
   const handleClick = async (e) => {
     e.preventDefault();
@@ -88,19 +95,20 @@ export default function Perfil() {
 
 
   const handleSubmit = async () => {
-    setLoading(true);
     try {
-      // Use API service
-      const res = await api.put(`/usuarios/${formData.id}`, formData);
+      const payload = { ...formData };
+      delete payload.senha; // Remove senha antiga/hash
 
-      const updatedUser = res.data;
-      dispatch(setUserData(updatedUser));
+      if (novaSenha && novaSenha.trim() !== '') {
+        payload.senha = novaSenha;
+      }
+
+      await dispatch(updateUserById(payload)).unwrap();
       alert('Informações atualizadas com sucesso!');
+      setNovaSenha(''); // Limpa o campo após salvar
     } catch (err) {
       console.error(err);
       alert('Falha ao atualizar usuário.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -180,7 +188,7 @@ export default function Perfil() {
             <Row className="mt-3">
               <Form.Group as={Col} md={6} controlId="senha">
                 <Form.Label>Senha</Form.Label>
-                <Form.Control type="password" name="senha" value={formData.senha || ''} onChange={handleChange} disabled={!editando} />
+                <Form.Control type="password" name="senha" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} disabled={!editando} placeholder={editando ? "Digite nova senha para alterar" : ""} />
               </Form.Group>
               <Form.Group as={Col} md={3} controlId="idade">
                 <Form.Label>Idade</Form.Label>
