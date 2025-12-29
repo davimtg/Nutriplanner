@@ -31,7 +31,8 @@ export const Receita = mongoose.model('Receita', ReceitaSchema);
 
 const ItemRefeicaoSchema = new mongoose.Schema({
   id: Number,
-  gramas: Number
+  gramas: Number,
+  kind: String // 'alimento' or 'receita'
 }, { _id: false });
 
 const RefeicoesDiaSchema = new mongoose.Schema({
@@ -104,10 +105,10 @@ const DiarioAlimentarSchema = new mongoose.Schema({
   usuarioId: { type: Number, required: true },
   data: Date,
   refeicoes: {
-    cafe_da_manha: [{ id: Number, gramas: Number }],
-    almoco: [{ id: Number, gramas: Number }],
-    lanches: [{ id: Number, gramas: Number }],
-    jantar: [{ id: Number, gramas: Number }]
+    cafe_da_manha: [ItemRefeicaoSchema],
+    almoco: [ItemRefeicaoSchema],
+    lanches: [ItemRefeicaoSchema],
+    jantar: [ItemRefeicaoSchema]
   }
 });
 

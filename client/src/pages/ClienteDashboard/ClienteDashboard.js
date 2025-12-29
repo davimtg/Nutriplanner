@@ -88,8 +88,8 @@ export default function ClienteDashboard() {
 
         // busca alimentos, receitas, diario
         const [foodsRes, recipesRes, diaryRes] = await Promise.all([
-          api.get("/alimentos?_limit=1000"),
-          api.get("/receitas?_limit=1000"),
+          api.get("/alimentos"),
+          api.get("/receitas"),
           api.get(`/diario-alimentar?usuarioId=${parsedUser.id}`)
         ]);
 
@@ -137,12 +137,23 @@ export default function ClienteDashboard() {
             // p mvp, procura em alimentos primeiro. se n achar, receitas. 
             // se colidir, erro.
 
-            let found = allFoods.find(f => f.id === item.id);
-            let kind = "alimento";
+            let kind = item.kind || "alimento"; // default legacy
+            let found = null;
 
-            if (!found) {
-              found = allRecipes.find(r => r.id === item.id);
-              kind = "receita";
+            if (item.kind === 'receita') {
+                found = allRecipes.find(r => r.id === item.id);
+                kind = 'receita';
+            } else if (item.kind === 'alimento') {
+                found = allFoods.find(f => f.id === item.id);
+                kind = 'alimento';
+            } else {
+                // Legacy fallback: try foods, then recipes
+                found = allFoods.find(f => f.id === item.id);
+                kind = "alimento";
+                if (!found) {
+                  found = allRecipes.find(r => r.id === item.id);
+                  kind = "receita";
+                }
             }
 
             if (!found) return null; // Item não existe mais no DB
@@ -195,6 +206,7 @@ export default function ClienteDashboard() {
       const backendKey = mapMealKeyToBackend(key);
       refeicoesBackend[backendKey] = newDayMeals[key].map(it => ({
         id: it.id, // id do alimento/receita
+        kind: it.kind, // PERSISTE O TIPO PARA EVITAR COLISAO
         gramas: it.kind === 'alimento'
           ? it.quantidade_g
           : (it.porcoes * it.gramasPorPorcao) // calcula total gramas p receita
