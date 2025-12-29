@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { concluirPedido, aceitarPedido, cancelarPedido } from '../../redux/pedidosSlice';
+import { concluirPedido, aceitarPedido, deletarPedido } from '../../redux/pedidosSlice';
 import api from '../../services/api';
 import styles from './MediadorPedidoDetalhes.module.css';
 import { Badge, Button, Table, Form } from 'react-bootstrap';
@@ -22,6 +22,8 @@ const MediadorPedidoDetalhes = () => {
   const [prices, setPrices] = useState({});
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const normalize = (str) =>
     str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
 
@@ -58,12 +60,15 @@ const MediadorPedidoDetalhes = () => {
     });
   };
 
-  const handleCancelar = () => {
-    dispatch(cancelarPedido(pedido.id)).then((action) => {
-      if (action.meta.requestStatus === 'fulfilled') {
-        setPedido({ ...pedido, status: action.payload.status });
-      }
-    });
+  const handleCancelarPedido = () => {
+    if (window.confirm('Deseja realmente cancelar e excluir este pedido?')) {
+      dispatch(deletarPedido(pedido)).then((action) => {
+        if (action.meta.requestStatus === 'fulfilled') {
+          alert('Pedido excluído com sucesso.');
+          navigate('/dashboard');
+        }
+      });
+    }
   };
 
   const handleCheckboxChange = (index) => {
@@ -89,13 +94,19 @@ const MediadorPedidoDetalhes = () => {
   const updateStatus = async (novoStatus) => {
     if (!pedido) return;
     try {
-      // reutiliza a logica de concluirPedido se for pra concluir, ou update direto
-      // se for via redux thunk 'concluirPedido', ele talvez sete fixo como 'Concluído'?
-      // vamo faze update direto via API p flexibilidade, e update local.
+      // Se for conclusão, mudar para "Aguardando Confirmação" ao invés de concluir diretamente
+      let statusToSend = novoStatus;
 
-      // pra simplificar: chamada direta
-      const res = await api.put(`/pedidos/${pedido.id}`, { ...pedido, status: novoStatus });
+      if (novoStatus === 'Concluído') {
+        statusToSend = 'Aguardando Confirmação';
+      }
+
+      const res = await api.patch(`/pedidos/${pedido.id}`, { status: statusToSend });
       setPedido(res.data);
+
+      if (novoStatus === 'Concluído') {
+        alert('Pedido marcado como aguardando confirmação do cliente. O cliente receberá uma notificação para confirmar o recebimento.');
+      }
 
     } catch (err) {
       console.error("Erro ao atualizar status:", err);
@@ -125,6 +136,7 @@ const MediadorPedidoDetalhes = () => {
     const status = typeof s === 'string' ? s : s?.name;
     if (status === 'Pendente') return 'warning';
     if (status === 'Em Andamento') return 'primary';
+    if (status === 'Aguardando Confirmação') return 'info';
     if (status === 'Concluído') return 'success';
     return 'secondary';
   };
@@ -210,9 +222,14 @@ const MediadorPedidoDetalhes = () => {
         )}
 
         {statusStr === "Em Andamento" && (
-          <Button variant="success" size="lg" onClick={() => updateStatus("Concluído")}>
-            Concluir Pedido
-          </Button>
+          <div className="d-flex gap-2">
+            <Button variant="danger" size="lg" onClick={handleCancelarPedido}>
+              Cancelar Pedido
+            </Button>
+            <Button variant="success" size="lg" onClick={() => updateStatus("Concluído")}>
+              Concluir Pedido
+            </Button>
+          </div>
         )}
       </div>
     </div >

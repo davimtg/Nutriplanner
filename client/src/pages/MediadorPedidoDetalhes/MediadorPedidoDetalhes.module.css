@@ -75,14 +75,6 @@
   background-color: #1b5e20;
 }
 
-.details__button--cancel {
-  background-color: #c62828;
-}
-
-.details__button--cancel:hover {
-  background-color: #b71c1c;
-}
-
 .details__back {
   display: block; /* Center logic */
   text-align: center;

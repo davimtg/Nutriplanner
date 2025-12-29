@@ -65,6 +65,7 @@ const PedidoItemSchema = new mongoose.Schema({
   id: Number,
   "alimento-id": Number,
   name: String,
+  nome: String,
   quantidade: mongoose.Schema.Types.Mixed,
   marca: String
 }, { _id: false });
