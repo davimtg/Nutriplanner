@@ -7,9 +7,8 @@ import { fetchPedidos } from '../../redux/pedidosSlice';
 const filtros = [
   { label: 'Todos', value: 'todos' },
   { label: 'Pendentes', value: 'pendente' },
-  { label: 'Em Execução', value: 'em execucao' },
+  { label: 'Em Andamento', value: 'em andamento' },
   { label: 'Concluídos', value: 'concluido' },
-  { label: 'Cancelados', value: 'cancelado' },
 ];
 
 const MediadorDashboard = () => {
@@ -36,7 +35,7 @@ const MediadorDashboard = () => {
   ).length;
 
   const emExecucao = pedidos.filter(
-    (pedido) => normalize(pedido.status?.name) === 'em execucao'
+    (pedido) => normalize(pedido.status?.name) === 'em andamento'
   ).length;
 
   const concluidos = pedidos.filter(
@@ -47,14 +46,14 @@ const MediadorDashboard = () => {
 
   const stats = [
     { label: 'Pedidos Pendentes', value: pendentes },
-    { label: 'Em Execução', value: emExecucao },
+    { label: 'Em Andamento', value: emExecucao },
     { label: 'Pedidos Concluídos', value: concluidos },
     { label: 'Pedidos Totais', value: total },
   ];
 
   const pedidosFiltrados =
     filtro === 'todos'
-      ? pedidos.filter((pedido) => normalize(pedido.status?.name) !== 'cancelado')
+      ? pedidos
       : pedidos.filter((pedido) => normalize(pedido.status?.name) === filtro);
   return (
     <div className={styles.dashboard}>

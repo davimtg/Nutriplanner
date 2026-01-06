@@ -29,13 +29,26 @@ export const concluirPedido = createAsyncThunk(
   }
 );
 
-export const cancelarPedido = createAsyncThunk(
-  'pedidos/cancelarPedido',
-  async (id) => {
-    const { data } = await api.patch(`/pedidos/${id}`, {
-      status: { name: 'Cancelado' }
-    });
-    return data;
+export const deletarPedido = createAsyncThunk(
+  'pedidos/deletarPedido',
+  async (pedido) => {
+    // 1. Deletar o pedido
+    await api.delete(`/pedidos/${pedido.id}`);
+
+    // 2. Criar mensagem de notificação para o cliente
+    const mensagem = {
+      remetenteId: 0, // Sistema/Mediador
+      destinatarioId: pedido.userId || pedido['user-id'],
+      texto: `Seu pedido #${pedido.id} foi cancelado pelo mediador. Para mais informações entre em contato.`,
+      tipo: 'pedido_cancelado',
+      pedidoId: pedido.id,
+      lida: false,
+      data: new Date()
+    };
+
+    await api.post('/mensagens', mensagem);
+
+    return pedido.id;
   }
 );
 
@@ -74,12 +87,9 @@ const pedidosSlice = createSlice({
           state.pedidos[index] = updated;
         }
       })
-      .addCase(cancelarPedido.fulfilled, (state, action) => {
-        const updated = action.payload;
-        const index = state.pedidos.findIndex((p) => p.id === updated.id);
-        if (index !== -1) {
-          state.pedidos[index] = updated;
-        }
+      .addCase(deletarPedido.fulfilled, (state, action) => {
+        const deletedId = action.payload;
+        state.pedidos = state.pedidos.filter((p) => p.id !== deletedId);
       });
   }
 });

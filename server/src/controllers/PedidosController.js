@@ -44,9 +44,11 @@ const populatePedido = async (pedido) => {
 
         p.itens = p.itens.map(item => {
             const alim = alimentoMap.get(item.id);
+            const itemName = alim ? alim.nome : item.name || item.nome || 'Item não encontrado';
             return {
                 ...item,
-                name: alim ? alim.nome : item.name || 'Item não encontrado',
+                name: itemName,
+                nome: itemName
             };
         });
     }
@@ -90,9 +92,11 @@ export const getAll = async (req, res) => {
             if (p.itens && Array.isArray(p.itens)) {
                 p.itens = p.itens.map(item => {
                     const alim = alimentoMap.get(item.id);
+                    const itemName = alim ? alim.nome : item.name || item.nome || 'Item não encontrado';
                     return {
                         ...item,
-                        name: alim ? alim.nome : item.name || 'Item não encontrado'
+                        name: itemName,
+                        nome: itemName
                     };
                 });
             }
@@ -117,11 +121,85 @@ export const getById = async (req, res) => {
     }
 };
 
-export const create = genericController.create;
+export const create = async (req, res) => {
+    try {
+        // Pre-processamento / Normalizacao
+        const data = req.body;
+
+        if (!data.status) {
+            data.status = { id: 1, name: 'Pendente' };
+        } else if (typeof data.status === 'string') {
+            data.status = { id: 1, name: data.status };
+        }
+
+        if (data.clienteNome && !data.cliente) {
+            data.cliente = data.clienteNome;
+        }
+
+        if (data.clienteEndereco && !data.endereco) {
+            if (typeof data.clienteEndereco === 'object') {
+                const e = data.clienteEndereco;
+                const parts = [e.rua, e.numero, e.bairro, e.cidade].filter(Boolean);
+                data.endereco = parts.join(', ');
+            } else {
+                data.endereco = String(data.clienteEndereco);
+            }
+        }
+
+        // Normalizar itens: garantir que name e nome estejam sincronizados
+        if (data.itens && Array.isArray(data.itens)) {
+            data.itens = data.itens.map(item => {
+                const itemName = item.nome || item.name || '';
+                return {
+                    ...item,
+                    name: itemName,
+                    nome: itemName
+                };
+            });
+        }
+
+        return genericController.create(req, res);
+
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
 
 export const update = async (req, res) => {
     try {
-        const item = await Pedido.findOneAndUpdate({ id: req.params.id }, req.body, { new: true }).lean();
+        let updateData = { ...req.body };
+
+        // Normalização de status se vier como string do frontend
+        if (typeof updateData.status === 'string') {
+            const statusName = updateData.status;
+            let statusId = 0;
+            let finalName = statusName;
+
+            switch (statusName) {
+                case 'Pendente':
+                    statusId = 1;
+                    finalName = 'Pendente';
+                    break;
+                case 'Em Andamento':
+                case 'Em Execução':
+                    statusId = 2;
+                    finalName = 'Em Andamento';
+                    break;
+                case 'Concluído':
+                    statusId = 3;
+                    finalName = 'Concluído';
+                    break;
+                case 'Aguardando Confirmação':
+                    statusId = 5;
+                    finalName = 'Aguardando Confirmação';
+                    break;
+                default:
+                    statusId = 0;
+            }
+            updateData.status = { id: statusId, name: finalName };
+        }
+
+        const item = await Pedido.findOneAndUpdate({ id: req.params.id }, updateData, { new: true }).lean();
         if (!item) return res.status(404).json({ message: 'Item não encontrado' });
 
         const populated = await populatePedido(item);

@@ -3,6 +3,7 @@ import api from "../../services/api";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import s from "./ClienteDashboard.module.css";
+import PedidoConfirmacaoModal from "../../components/PedidoConfirmacaoModal/PedidoConfirmacaoModal";
 
 // dashboard cliente - visual e calc de macros
 // migrei estilos pro css module
@@ -141,19 +142,19 @@ export default function ClienteDashboard() {
             let found = null;
 
             if (item.kind === 'receita') {
-                found = allRecipes.find(r => r.id === item.id);
-                kind = 'receita';
+              found = allRecipes.find(r => r.id === item.id);
+              kind = 'receita';
             } else if (item.kind === 'alimento') {
-                found = allFoods.find(f => f.id === item.id);
-                kind = 'alimento';
+              found = allFoods.find(f => f.id === item.id);
+              kind = 'alimento';
             } else {
-                // Legacy fallback: try foods, then recipes
-                found = allFoods.find(f => f.id === item.id);
-                kind = "alimento";
-                if (!found) {
-                  found = allRecipes.find(r => r.id === item.id);
-                  kind = "receita";
-                }
+              // Legacy fallback: try foods, then recipes
+              found = allFoods.find(f => f.id === item.id);
+              kind = "alimento";
+              if (!found) {
+                found = allRecipes.find(r => r.id === item.id);
+                kind = "receita";
+              }
             }
 
             if (!found) return null; // Item não existe mais no DB
@@ -410,6 +411,7 @@ export default function ClienteDashboard() {
   // ===== ui =====
   return (
     <div className="min-vh-100 bg-light text-dark p-3 p-md-4">
+      <PedidoConfirmacaoModal />
       <div className={`container ${s.container}`}>
         {/* NAV SEMANAL — título + pills */}
         <div className={s.weekHeader}>

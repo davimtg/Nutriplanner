@@ -263,16 +263,21 @@ export default function ListaCompras() {
       return;
     }
 
+    // formata endereco p string simples (schema espera String)
+    const enderecoString = enderecoFinal
+      ? `${enderecoFinal.rua}, ${enderecoFinal.numero || 'S/N'}${enderecoFinal.bairro ? ` - ${enderecoFinal.bairro}` : ''}${enderecoFinal.cidade ? `, ${enderecoFinal.cidade}` : ''}`
+      : 'Endereço não informado';
+
     const pedidoPayload = {
       userId: user.id,
-      // snapshot dados user p pedido
-      clienteNome: user.nome,
-      clienteEndereco: enderecoFinal, // envia obj completo
+      cliente: user.nome, // schema: cliente
+      telefone: user.telefone || '',
+      endereco: enderecoString, // schema: endereco (String)
       data: new Date(),
-      status: 'Pendente',
+      status: { id: 1, name: 'Pendente' }, // schema: status object
       total: subtotalTotal,
       itens: listaDeCompras.map(item => ({
-        nome: item.nome, // campo 'nome'
+        nome: item.nome,
         quantidade: item.quantidades,
         valor: item.valor,
         checked: item.checked
