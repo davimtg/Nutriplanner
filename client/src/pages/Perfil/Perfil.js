@@ -282,7 +282,7 @@ export default function Perfil() {
           <div className="p-3">
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5>Meus Endereços</h5>
-              <Button variant="outline-primary" size="sm" onClick={handleOpenAddModal}>+ Adicionar Endereço</Button>
+              <Button variant="outline-primary" size="sm" onClick={handleOpenAddModal} disabled={!editando}>+ Adicionar Endereço</Button>
             </div>
 
             {enderecosList.length === 0 && !temEnderecoUnico && (
@@ -359,7 +359,7 @@ export default function Perfil() {
                 </Form.Group>
               </Col>
               <Col md={4}>
-                <Button variant="primary" onClick={handleSaveNutri} className="mt-2" disabled={loading}>
+                <Button variant="primary" onClick={handleSaveNutri} className="mt-2" disabled={loading || !editando}>
                   {loading ? <Spinner animation="border" size="sm" /> : 'Atualizar Nutricionista'}
                 </Button>
               </Col>
